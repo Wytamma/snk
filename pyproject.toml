@@ -31,6 +31,9 @@ Documentation = "https://github.com/wytamma/snk#readme"
 Issues = "https://github.com/wytamma/snk/issues"
 Source = "https://github.com/wytamma/snk"
 
+[project.scripts]
+snk = "snk.main:app"
+
 [tool.hatch.version]
 path = "snk/__about__.py"
 
@@ -38,6 +41,10 @@ path = "snk/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "typer[all]",
+  "GitPython",
+  "snakemake",
+  "art"
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=snk --cov=tests"
