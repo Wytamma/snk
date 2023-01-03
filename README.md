@@ -8,7 +8,7 @@
 **Table of Contents**
 
 - [Installation](#installation)
-- [About][#about]
+- [About](#about)
 - [License](#license)
 
 ## Installation
