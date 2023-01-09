@@ -44,7 +44,8 @@ dependencies = [
   "typer[all]",
   "GitPython",
   "snakemake",
-  "art"
+  "art",
+  "makefun",
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=snk --cov=tests"

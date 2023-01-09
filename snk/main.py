@@ -8,23 +8,24 @@ from .nest import Nest
 app = typer.Typer()
 
 
-@app.callback()
+@app.callback(context_settings={"help_option_names": ["-h", "--help"]})
 def callback():
+    """\b
+        _            _             _        
+       / /\         /\ \     _    /\_\      
+      / /  \       /  \ \   /\_\ / / /  _   
+     / / /\ \__   / /\ \ \_/ / // / /  /\_\ 
+    / / /\ \___\ / / /\ \___/ // / /__/ / / 
+    \ \ \ \/___// / /  \/____// /\_____/ /  
+     \ \ \     / / /    / / // /\_______/   
+ _    \ \ \   / / /    / / // / /\ \ \      
+/_/\__/ / /  / / /    / / // / /  \ \ \     
+\ \/___/ /  / / /    / / // / /    \ \ \    
+ \_____\/   \/_/     \/_/ \/_/      \_\_\   
+ \b
+ \n
+ Snakemake pipeline management system
     """
-    SNK
-    """
-
-@app.command()
-def list():
-    """
-    List the installed pipelines
-    """
-    nest = Nest()
-    try:
-        pipelines = os.listdir(nest.pipelines_dir)
-    except FileNotFoundError:
-        pipelines = []
-    pprint(pipelines)
 
 
 @app.command()
@@ -35,7 +36,7 @@ def install(
         bin_dir: Optional[Path] = typer.Option(None, dir_okay=True, file_okay=False, exists=True, help="Overrides location of pipeline installations. Path to folder in PATH where pipeline are symlinked."),
     ):
     """
-    Install a pipeline
+    Install a pipeline.
     """
     nest = Nest(snk_home=snk_home, bin_dir=bin_dir)
     pipeline = nest.install(repo_url=url, name=name)
@@ -48,11 +49,12 @@ def uninstall(
         bin_dir: Optional[Path] = typer.Option(None, dir_okay=True, file_okay=False, exists=True, help="Overrides location of pipeline installations. Path to folder in PATH where pipeline are symlinked."),
     ):
     """
-    snk ❯ snk uninstall micromamba
-    ==> Uninstalling Pipeline micromamba
-    ==> Unlinking Binary '/opt/homebrew/bin/micromamba'
-    ==> Purging files for version 1.1.0,0 of Cask micromamba
+    Uninstall a pipeline.
     """
+    # snk ❯ snk uninstall micromamba
+    # ==> Uninstalling Pipeline micromamba
+    # ==> Unlinking Binary '/opt/homebrew/bin/micromamba'
+    # ==> Purging files for version 1.1.0,0 of Cask micromamba
     nest = Nest(snk_home=snk_home, bin_dir=bin_dir)
     nest.uninstall(name)
     typer.secho(f"Successfully uninstalled {name}!")
@@ -61,9 +63,22 @@ def uninstall(
 @app.command()
 def update():
     """
-    Update a pipeline
+    Update a pipeline.
     """
-    pass
+    raise NotImplementedError
+
+
+@app.command()
+def list():
+    """
+    List the installed pipelines.
+    """
+    nest = Nest()
+    try:
+        pipelines = os.listdir(nest.pipelines_dir)
+    except FileNotFoundError:
+        pipelines = []
+    pprint(pipelines)
 
 
 @app.command()
@@ -71,4 +86,10 @@ def run():
     """
     Run the pipeline in a temporary environment.
     """
-    pass
+    raise NotImplementedError
+
+def annotations():
+    """gen annotations defaults from config file"""
+
+def create():
+    """create a default project that can be installed with snk"""
