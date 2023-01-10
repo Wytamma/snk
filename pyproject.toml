@@ -23,7 +23,13 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "typer[all]",
+  "GitPython",
+  "snakemake",
+  "art",
+  "makefun",
+]
 dynamic = ["version"]
 
 [project.urls]
@@ -41,11 +47,6 @@ path = "snk/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
-  "typer[all]",
-  "GitPython",
-  "snakemake",
-  "art",
-  "makefun",
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=snk --cov=tests"
