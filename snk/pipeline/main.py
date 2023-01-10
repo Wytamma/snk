@@ -202,8 +202,14 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
         info_dict['name'] = pipeline_dir_path.name
         info_dict['version'] = None
         info_dict['pipeline_dir_path'] = str(pipeline_dir_path)
-    
         typer.echo(json.dumps(info_dict, indent=2))
+    
+    @app.command(help="Access the pipeline conda environments.")
+    def env(
+        activate: str = typer.Option(None, help="Activate a given environment"),
+    ):
+        raise NotImplementedError
+    
             
     return app
  
