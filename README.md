@@ -49,7 +49,7 @@ rna-seq-star-deseq2 run
 
 ### Configure 
 
-Snk will dynamically generate config options for the CLI. For example if your config.yaml file has the option `fata: null` you can set this option with `--fasta`.
+Snk will dynamically generate config options for the CLI. For example if your config.yaml file has the option `fasta: null` you can set this option with `--fasta`.
 
 ```
 rna-seq-star-deseq2 run --fasta example.fa
