@@ -21,8 +21,6 @@ pip install snk
 
 Snk is a SnakeMake pipeline management system. Snk allows you to install SnakeMake pipelines as Command Line Interfaces (CLIs). Using a pipeline as a CLI increases it's interoperability and allows complex pipelines to be used as modular components in a larger system.
 
-https://excalidraw.com/#room=4cb5ad1ed651d8a96369,xM0iaXAGVFNiNJOuILncPg
-
 ## Basic Use
 
 ### Install a pipeline as a CLI
