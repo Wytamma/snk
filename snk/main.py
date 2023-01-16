@@ -33,7 +33,7 @@ def install(
         pipeline: str = typer.Argument(..., help="URL or Github name (user/repo) of the pipeline to install."),
         name: Optional[str] = typer.Option(None, help="Rename the pipeline (this name will be used to call the CLI.)"),
         home: Optional[Path] = typer.Option(None, envvar="SNK_HOME", dir_okay=True, file_okay=False, exists=True, help="Overrides default snk location. Path to directory where all pipelines will be installed."),
-        bin: Optional[Path] = typer.Option(None, envvar="SNK_BIN", dir_okay=True, file_okay=False, exists=True, help="Overrides location of pipeline installations. Path to folder in PATH where pipeline are symlinked."),
+        bin: Optional[Path] = typer.Option(None, envvar="SNK_BIN", dir_okay=True, file_okay=False, exists=True, help="Overrides location of pipeline installations. Path to folder in PATH where pipelines are symlinked."),
     ):
     """
     Install a pipeline.
@@ -48,18 +48,15 @@ def install(
 @app.command()
 def uninstall(
         name: str = typer.Argument(..., help="Name of the pipeline to uninstall."),
-        snk_home: Optional[Path] = typer.Option(None, dir_okay=True, file_okay=False, exists=True, help="Overrides default snk location. Path to directory where all pipelines will be installed."),
-        bin_dir: Optional[Path] = typer.Option(None, dir_okay=True, file_okay=False, exists=True, help="Overrides location of pipeline installations. Path to folder in PATH where pipeline are symlinked."),
+        force: Optional[bool] = typer.Option(False, '--force', '-f', help="Force uninstall without asking."),
+        home: Optional[Path] = typer.Option(None,  envvar="SNK_HOME", dir_okay=True, file_okay=False, exists=True, help="Overrides default snk location. Path to directory where pipeline is installed."),
+        bin: Optional[Path] = typer.Option(None, envvar="SNK_BIN", dir_okay=True, file_okay=False, exists=True, help="Overrides location of pipeline installations. Path to folder in PATH where pipelines are symlinked."),
     ):
     """
     Uninstall a pipeline.
     """
-    # snk ❯ snk uninstall micromamba
-    # ==> Uninstalling Pipeline micromamba
-    # ==> Unlinking Binary '/opt/homebrew/bin/micromamba'
-    # ==> Purging files for version 1.1.0,0 of Cask micromamba
-    nest = Nest(snk_home=snk_home, bin_dir=bin_dir)
-    uninstalled = nest.uninstall(name)
+    nest = Nest(snk_home=home, bin_dir=bin)
+    uninstalled = nest.uninstall(name, force=force)
     if uninstalled:
         typer.secho(f"Successfully uninstalled {name}!")
         
