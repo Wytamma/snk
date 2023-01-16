@@ -67,6 +67,8 @@ class Nest:
         pipeline_dir = self.pipelines_dir / name
         if pipeline_dir.exists() and pipeline_dir.is_dir():
             to_remove.append(pipeline_dir)
+        else:
+            raise FileNotFoundError(f'Could not find pipeline: {name}')
 
         # remove link
         pipeline_bin_executable = self.bin_dir / name
@@ -80,7 +82,6 @@ class Nest:
             print(f"Uninstalling {name}")
             print("  Would remove:")
             for p in to_remove:
-
                 print(f"    {p}{'/*' if p.is_dir() else ''}")
             ans = input("Proceed (Y/n)? ")
             proceed = ans.lower() in ['y', 'yes']
