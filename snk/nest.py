@@ -21,7 +21,9 @@ class Nest:
         
         if not snk_home:
             # put it next to bin
-            snk_home = self.python_interpreter_path.parent.parent / 'snk'
+            snk_home = self.python_interpreter_path.parent.parent
+        
+        snk_home = snk_home / 'snk'
         
         if not bin_dir:
             bin_dir = self.python_interpreter_path.parent
@@ -55,25 +57,42 @@ class Nest:
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps 
-            self.uninstall(name)
+            self.uninstall(name, force=True)
             raise e
         return Pipeline(repo_path)
 
-    def uninstall(self, name: str):
+    def uninstall(self, name: str, force: bool = False) -> bool:
+        to_remove = []
         # remove repo 
         pipeline_dir = self.pipelines_dir / name
         if pipeline_dir.exists() and pipeline_dir.is_dir():
-            import shutil
-            shutil.rmtree(pipeline_dir)
+            to_remove.append(pipeline_dir)
 
         # remove link
         pipeline_bin_executable = self.bin_dir / name
-        
         if pipeline_bin_executable.is_symlink():
             if name in str(pipeline_bin_executable.readlink()):
                 # should check that the symlink points to the pipeline_executable
-                pipeline_bin_executable.unlink()
+                to_remove.append(pipeline_bin_executable)
+        if force:
+            proceed = True
+        else:
+            print(f"Uninstalling {name}")
+            print("  Would remove:")
+            for p in to_remove:
 
+                print(f"    {p}{'/*' if p.is_dir() else ''}")
+            ans = input("Proceed (Y/n)? ")
+            proceed = ans.lower() in ['y', 'yes']
+        if not proceed:
+            return False
+        for p in to_remove:
+            if p.is_dir():
+                import shutil
+                shutil.rmtree(p)
+            elif p.is_symlink():
+                p.unlink()
+        return True 
 
     def _confirm_installation(self, name: str):
         pipeline_dir = self.pipelines_dir / name
