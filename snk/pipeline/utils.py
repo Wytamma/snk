@@ -6,9 +6,11 @@ import typer
 
 types = {
     'int': int,
+    'integer': int,
     'str': str,
+    'string': str,
     'path': Path,
-    'bool': bool
+    'bool': bool,
 }
 
 def create_cli_parameter(option):
@@ -16,7 +18,7 @@ def create_cli_parameter(option):
         option['name'], 
         kind=Parameter.POSITIONAL_OR_KEYWORD, 
         default=typer.Option(option['default'], help=f"[CONFIG] {option['help']}"), 
-        annotation=types[option['type']])
+        annotation=types[option['type'].lower()])
 
 def add_dynamic_options(options: List[dict]):
     def inner(func: Callable):
