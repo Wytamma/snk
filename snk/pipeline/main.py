@@ -49,7 +49,9 @@ def parse_config_args(args: List[str], options):
                 samkemake_format_config = convert_key_to_samkemake_format(op['original_key'], arg)
                 name = list(samkemake_format_config.keys())[0]
                 arg = samkemake_format_config[name]
-            config.append(f"{name}={arg}")
+            if arg != 'None':
+                # skip null args
+                config.append(f"{name}={arg}")
             flag=None
             continue
         if arg.startswith('-') and arg.lstrip('-') in names:
