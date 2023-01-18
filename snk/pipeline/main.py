@@ -97,7 +97,7 @@ def load_options(pipeline_dir_path: Path):
         type = snk_annotations.get(f"{op}:type")
         options.append(
             {
-                'name':name,
+                'name':name.replace('-', '_'),
                 'original_key': op,
                 'default': str(flat_config[op]),
                 'help': help if help else "",

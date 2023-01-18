@@ -24,7 +24,7 @@ def add_dynamic_options(options: List[dict]):
     def inner(func: Callable):
         func_sig = signature(func)
         params = list(func_sig.parameters.values())
-        for op in options:
+        for op in options[::-1]:
             params.insert(1, create_cli_parameter(op))
         new_sig = func_sig.replace(parameters=params)
         @wraps(func, new_sig=new_sig)
