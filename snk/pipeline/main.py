@@ -77,17 +77,19 @@ def flatten(d, parent_key='', sep=':'):
     return dict(items)
 
 def load_options(pipeline_dir_path: Path):
-    config_path = get_config_from_pipeline_dir(pipeline_dir_path)
-    config = snakemake.load_configfile(config_path)
+    pipeline_config_path = get_config_from_pipeline_dir(pipeline_dir_path)
+    if not pipeline_config_path.exists():
+        return []
+    config = snakemake.load_configfile(pipeline_config_path)
     flat_config = flatten(config)
     options = []
-    catalog_config_path = pipeline_dir_path / '.snakemake-workflow-catalog.yml'
-    catalog_config = snakemake.load_configfile(catalog_config_path)
-    snk_annotations = {}
-    if 'snk' in catalog_config:
-        snk_config = catalog_config['snk']
-        if 'annotations' in snk_config:
-            snk_annotations = flatten(snk_config['annotations'])
+    if (pipeline_dir_path / '.snk').exists():
+        snk_config = snakemake.load_configfile(pipeline_dir_path / '.snk')
+    else:
+        catalog_config_path = pipeline_dir_path / '.snakemake-workflow-catalog.yml'
+        catalog_config = snakemake.load_configfile(catalog_config_path)
+        snk_config = flatten(catalog_config.get('snk', {}))
+    snk_annotations = snk_config.get('annotations', {})
     for op in flat_config:
         name = op.replace(':', '_')
         help = snk_annotations.get(f"{op}:help")
@@ -114,7 +116,7 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
 
     def _print_pipline_path(value: bool):
         if value:
-            print(pipeline_dir_path)
+            typer.echo(pipeline_dir_path)
             raise typer.Exit()
 
     @app.callback(invoke_without_command=True, context_settings={"help_option_names": ["-h", "--help"]})
@@ -128,17 +130,17 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
     # dynamically create the logo
     callback.__doc__ = f"{create_logo(pipeline_dir_path.name)}"
 
-    @app.command(help="Run the pipeline.", context_settings={"allow_extra_args": True, "ignore_unknown_options": True, "help_option_names": ["-h", "--help"]})
+    @app.command(help="Run the pipeline. All unrecognized arguments are parsed onto Snakemake to be used by the pipeline.", context_settings={"allow_extra_args": True, "ignore_unknown_options": True, "help_option_names": ["-h", "--help"]})
     @add_dynamic_options(options)
     def run(
             ctx: typer.Context,
             target: str = typer.Argument(None, help="File to generate. If None will run the pipeline 'all' rule."),
             configfile: Path = typer.Option(None, help="Path to config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
             cores:  int = typer.Option(None, help="Set the number of cores to use. If None will use all cores."),
+            verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Run pipeline in verbose mode.",),
             help_snakemake: Optional[bool] = typer.Option(
-                False, help="Print the snakemake help", is_eager=True, callback=_print_snakemake_help
+                False, "--help-snakemake", "-hs", help="Print the snakemake help and exit.", is_eager=True, callback=_print_snakemake_help, show_default=False
             ),
-            verbose: Optional[bool] = typer.Option(False, "--verbose"),
         ):
         args = []
         conda_prefix_dir = pipeline_dir_path / '.conda'
