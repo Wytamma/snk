@@ -4,7 +4,7 @@ import os
 from typing import Optional
 from rich.pretty import pprint
 from .nest import Nest
-from .errors import PipelineExistsError
+from .errors import PipelineExistsError, PipelineNotFoundError
 
 app = typer.Typer()
 
@@ -61,6 +61,10 @@ def install(
             None, 
             help="Rename the pipeline (this name will be used to call the CLI.)"
         ),
+        version: Optional[str] = typer.Option(
+            None, 
+            help="Version of the pipeline to install. Can specify commit branch name, or tag. If None the latest commit will be installed."
+        ),
     ):
     """
     Install a pipeline.
@@ -69,14 +73,17 @@ def install(
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
     if not pipeline.startswith('http'):
         pipeline = f"https://github.com/{pipeline}.git"
-        # typer.echo(f'Installing Pipeline from Github: {pipeline}')
     try:
-        cli = nest.install(repo_url=pipeline, name=name)
+        installl_pipeline = nest.install(repo_url=pipeline, name=name, version=version)
     except PipelineExistsError as e:
         typer.secho(e, fg='red')
-        typer.secho(f"Use `--name` to change the pipeline name.")
         raise typer.Exit()
-    typer.secho(f"Successfully installed {cli.name}!")
+    except PipelineNotFoundError as e:
+        typer.secho(e, fg='red')
+        raise typer.Exit()
+    v = installl_pipeline.version
+    v = v if v else 'latest'
+    typer.secho(f"Successfully installed {installl_pipeline.name} ({v})!")
 
 
 @app.command()
@@ -88,7 +95,11 @@ def uninstall(
     Uninstall a pipeline.
     """
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
-    uninstalled = nest.uninstall(name, force=force)
+    try:
+        uninstalled = nest.uninstall(name, force=force)
+    except PipelineNotFoundError as e:
+        typer.secho(e, fg='red')
+        raise typer.Exit(1)
     if uninstalled:
         typer.secho(f"Successfully uninstalled {name}!", fg='green')
         

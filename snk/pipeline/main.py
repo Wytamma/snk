@@ -15,6 +15,7 @@ from art import text2art
 import subprocess
 
 from .utils import add_dynamic_options
+from snk.nest import Pipeline
 
 def _print_snakemake_help(value: bool):
     if value:
@@ -108,15 +109,15 @@ def load_options(pipeline_dir_path: Path):
 def pipeline_cli_factory(pipeline_dir_path: Path):
     app = typer.Typer()
     options = load_options(pipeline_dir_path)
-
+    pipeline = Pipeline(path=pipeline_dir_path)
     def _print_pipline_version(value: bool):
         if value:
-            typer.echo(None)
+            typer.echo(pipeline.version)
             raise typer.Exit()
 
     def _print_pipline_path(value: bool):
         if value:
-            typer.echo(pipeline_dir_path)
+            typer.echo(pipeline.path)
             raise typer.Exit()
 
     @app.callback(invoke_without_command=True, context_settings={"help_option_names": ["-h", "--help"]})
@@ -204,7 +205,7 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
         import json
         info_dict = {}
         info_dict['name'] = pipeline_dir_path.name
-        info_dict['version'] = None
+        info_dict['version'] = pipeline.version
         info_dict['pipeline_dir_path'] = str(pipeline_dir_path)
         typer.echo(json.dumps(info_dict, indent=2))
     

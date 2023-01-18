@@ -11,8 +11,25 @@ from .errors import PipelineExistsError, PipelineNotFoundError
 class Pipeline:
     def __init__(self, path:Path) -> None:
         self.path = path
-        self.Repo = Repo(path)
-        self.name = path.name
+        self.repo = Repo(path)
+        self.name = self.path.name
+    
+    @property
+    def version(self):
+        try:
+            version = self.repo.git.describe(['--tags','--exact-match'])
+        except GitCommandError:
+            version = None
+        return version
+
+    @property
+    def executable(self):
+        pipeline_bin_dir = self.path / 'bin'
+        name = self.name
+        if sys.platform.startswith('win'):
+            name += '.exe'
+        return pipeline_bin_dir / name
+        
 
 
 class Nest:
@@ -45,26 +62,23 @@ class Nest:
         if not repo.endswith('.git'):
             raise ValueError('Repo url must end in .git')
 
-    def install(self, repo_url: str, name=None) -> Pipeline:
+    def install(self, repo_url: str, name=None, version=None) -> Pipeline:
         """
         Install a Snakemake pipeline as a CLI. 
         They must be standards compliant, public, Snakemake workflows.
         https://snakemake.github.io/snakemake-workflow-catalog/
         """
-        
         self._check_repo_url_format(repo_url)
         if not name:
             name = self._get_name_from_git_url(repo_url)
+        if name in os.listdir(self.pipelines_dir):
+            raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}")
+        if name in os.listdir(self.bin_dir):
+            raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.bin_dir}")
+        repo = self.download(repo_url, name, tag_name=version)
         try:
-            repo_path = self.download(repo_url, name)
-        except GitCommandError as e:
-            if "destination path" in e.stderr:
-                raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}.")
-            elif "not found" in e.stderr:
-                raise PipelineNotFoundError(f"Pipeline repository '{repo_url}' not found")
-            raise e
-        try:
-            pipeline_executable = self.create_package(repo_path)
+            pipeline = Pipeline(path=Path(repo.git_dir).parent)
+            pipeline_executable = self.create_package(pipeline.path)
             self.link_pipeline_executable_to_bin(pipeline_executable)
             self._confirm_installation(name)
         except Exception as e:
@@ -72,7 +86,7 @@ class Nest:
             to_remove = self.get_paths_to_delete(name)
             self.delete_paths(to_remove)
             raise e
-        return Pipeline(repo_path)
+        return pipeline
 
     def get_paths_to_delete(self, pipeline_name: str) -> List[Path]:
         to_delete = []
@@ -135,11 +149,24 @@ class Nest:
     def pipelines(self):
         return [Pipeline(pipeline_dir.resolve()) for pipeline_dir in self.pipelines_dir.glob('*') if pipeline_dir.is_dir()]
 
-    def download(self, repo_url: str, name: str) -> Path:
+    def download(self, repo_url: str, name: str, tag_name: str | None = None) -> Repo:
         """Pull the repo"""
         location  = self.pipelines_dir / name
-        Repo.clone_from(repo_url, location, multi_options=['--depth 1', '--single-branch'])
-        return location
+        options = ['--depth 1', '--single-branch']
+        if tag_name:
+            options.append(f'--branch {tag_name}')
+        try:
+            repo = Repo.clone_from(repo_url, location, multi_options=options)
+            repo.git.checkout(tag_name)
+        except GitCommandError as e:
+            if "destination path" in e.stderr:
+                raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}")
+            elif f"Remote branch {tag_name}" in e.stderr:
+                raise PipelineNotFoundError(f"Pipeline tag '{tag_name}' not found")
+            elif "not found" in e.stderr:
+                raise PipelineNotFoundError(f"Pipeline repository '{repo_url}' not found")
+            raise e
+        return repo
 
     def create_package(self, pipeline_dir: Path) -> Path:
         """Convert a SnakeMake pipeline repo into a snk CLI"""
