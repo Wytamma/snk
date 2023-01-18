@@ -23,9 +23,7 @@ class Nest:
         
         if not snk_home:
             # put it next to bin
-            snk_home = self.python_interpreter_path.parent.parent
-        
-        snk_home = snk_home / 'snk'
+            snk_home = self.python_interpreter_path.parent.parent / 'snk'
         
         if not bin_dir:
             bin_dir = self.python_interpreter_path.parent
@@ -136,7 +134,7 @@ class Nest:
     def download(self, repo_url: str, name: str) -> Path:
         """Pull the repo"""
         location  = self.pipelines_dir / name
-        Repo.clone_from(repo_url, location)
+        Repo.clone_from(repo_url, location, multi_options=['--depth 1', '--single-branch'])
         return location
 
     def create_package(self, pipeline_dir: Path) -> Path:
