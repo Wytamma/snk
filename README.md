@@ -34,6 +34,7 @@ snk install snakemake-workflows/rna-seq-star-deseq2
 ```
 rna-seq-star-deseq2 --help
 ```
+<img width="754" alt="image" src="https://user-images.githubusercontent.com/13726005/213120291-c9441e4b-fdb4-43de-9dee-f607b5799af5.png">
 
 ### View the dag  
 
