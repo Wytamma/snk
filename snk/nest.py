@@ -1,10 +1,12 @@
 from pathlib import Path
-from git import Repo
+from git import Repo, GitCommandError
 import sys
 import stat
 import inspect
 import os
+from typing import List
 
+from .errors import PipelineExistsError, PipelineNotFoundError
 
 class Pipeline:
     def __init__(self, path:Path) -> None:
@@ -49,33 +51,61 @@ class Nest:
         """
         
         self._check_repo_url_format(repo_url)
-        name = self._get_name_from_git_url(repo_url)
-        repo_path = self.download(repo_url)
+        if not name:
+            name = self._get_name_from_git_url(repo_url)
+        try:
+            repo_path = self.download(repo_url, name)
+        except GitCommandError as e:
+            if "destination path" in e.stderr:
+                raise PipelineExistsError(f"Pipeline '{name}' already exists. Use `--name` to change the pipeline name.")
+            elif "not found" in e.stderr:
+                raise PipelineNotFoundError(f"Pipeline repository '{repo_url}' not found")
+            raise e
         try:
             pipeline_executable = self.create_package(repo_path)
             self.link_pipeline_executable_to_bin(pipeline_executable)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps 
-            self.uninstall(name, force=True)
+            to_remove = self.get_paths_to_delete(name)
+            self.delete_paths(to_remove)
             raise e
         return Pipeline(repo_path)
 
-    def uninstall(self, name: str, force: bool = False) -> bool:
-        to_remove = []
+    def get_paths_to_delete(self, pipeline_name: str) -> List[Path]:
+        to_delete = []
+        
         # remove repo 
-        pipeline_dir = self.pipelines_dir / name
+        pipeline_dir = self.pipelines_dir / pipeline_name
         if pipeline_dir.exists() and pipeline_dir.is_dir():
-            to_remove.append(pipeline_dir)
+            to_delete.append(pipeline_dir)
         else:
-            raise FileNotFoundError(f'Could not find pipeline: {name}')
+            raise PipelineNotFoundError(f'Could not find pipeline: {pipeline_name}')
 
         # remove link
-        pipeline_bin_executable = self.bin_dir / name
-        if pipeline_bin_executable.is_symlink():
-            if name in str(pipeline_bin_executable.readlink()):
-                # should check that the symlink points to the pipeline_executable
-                to_remove.append(pipeline_bin_executable)
+        pipeline_bin_executable = self.bin_dir / pipeline_name
+        if pipeline_bin_executable.exists() and pipeline_bin_executable.is_symlink():
+            if str(pipeline_dir) in str(pipeline_bin_executable.readlink()):
+                to_delete.append(pipeline_bin_executable)
+        
+        return to_delete
+
+    def delete_paths(self, files: List[Path]):
+        # check that the files are in self.pipelines_dir
+        # i.e. if it is a symlink read the link and check
+        for path in files:
+            if path.is_dir():
+                assert str(self.snk_home) in str(path), "Cannot delete folders outside of SNK_HOME"
+                import shutil
+                shutil.rmtree(path)
+            elif path.is_symlink():
+                assert str(self.snk_home) in str(path.readlink()), "Cannot delete files outside of SNK_HOME"
+                path.unlink()
+            else:
+                raise TypeError("Invalid file type")
+
+    def uninstall(self, name: str, force: bool = False) -> bool:
+        to_remove = self.get_paths_to_delete(name)
         if force:
             proceed = True
         else:
@@ -87,12 +117,7 @@ class Nest:
             proceed = ans.lower() in ['y', 'yes']
         if not proceed:
             return False
-        for p in to_remove:
-            if p.is_dir():
-                import shutil
-                shutil.rmtree(p)
-            elif p.is_symlink():
-                p.unlink()
+        self.delete_paths(to_remove)
         return True 
 
     def _confirm_installation(self, name: str):
@@ -108,9 +133,8 @@ class Nest:
     def pipelines(self):
         return [Pipeline(pipeline_dir.resolve()) for pipeline_dir in self.pipelines_dir.glob('*') if pipeline_dir.is_dir()]
 
-    def download(self, repo_url: str) -> Path:
+    def download(self, repo_url: str, name: str) -> Path:
         """Pull the repo"""
-        name = self._get_name_from_git_url(repo_url)
         location  = self.pipelines_dir / name
         Repo.clone_from(repo_url, location)
         return location
