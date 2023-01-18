@@ -26,7 +26,7 @@ Snk is a SnakeMake pipeline management system. Snk allows you to install SnakeMa
 ### Install a pipeline as a CLI
 
 ```
-snk install https://github.com/snakemake-workflows/rna-seq-star-deseq2
+snk install snakemake-workflows/rna-seq-star-deseq2
 ```
 
 ### Inspect the CLI   
