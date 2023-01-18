@@ -4,6 +4,7 @@ import os
 from typing import Optional
 from rich.pretty import pprint
 from .nest import Nest
+from .errors import PipelineExistsError
 
 app = typer.Typer()
 
@@ -68,8 +69,13 @@ def install(
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
     if not pipeline.startswith('http'):
         pipeline = f"https://github.com/{pipeline}.git"
-        typer.echo(f'Installing Pipeline from Github: {pipeline}')
-    cli = nest.install(repo_url=pipeline, name=name)
+        # typer.echo(f'Installing Pipeline from Github: {pipeline}')
+    try:
+        cli = nest.install(repo_url=pipeline, name=name)
+    except PipelineExistsError as e:
+        typer.secho(e, fg='red')
+        typer.secho(f"Use `--name` to change the pipeline name.")
+        raise typer.Exit()
     typer.secho(f"Successfully installed {cli.name}!")
 
 
@@ -84,7 +90,7 @@ def uninstall(
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
     uninstalled = nest.uninstall(name, force=force)
     if uninstalled:
-        typer.secho(f"Successfully uninstalled {name}!")
+        typer.secho(f"Successfully uninstalled {name}!", fg='green')
         
 
 @app.command()

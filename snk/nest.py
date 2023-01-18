@@ -59,7 +59,7 @@ class Nest:
             repo_path = self.download(repo_url, name)
         except GitCommandError as e:
             if "destination path" in e.stderr:
-                raise PipelineExistsError(f"Pipeline '{name}' already exists. Use `--name` to change the pipeline name.")
+                raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}.")
             elif "not found" in e.stderr:
                 raise PipelineNotFoundError(f"Pipeline repository '{repo_url}' not found")
             raise e
