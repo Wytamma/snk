@@ -22,11 +22,15 @@ class Nest:
         self.python_interpreter_path = Path(sys.executable) # needs to be the same python that has snk
         
         if not snk_home:
-            # put it next to bin
             snk_home = self.python_interpreter_path.parent.parent / 'snk'
-        
+            if not os.access(snk_home, os.W_OK):
+                user_home_path = Path('~').expanduser()
+                snk_home = user_home_path / ".local" / 'snk'
         if not bin_dir:
             bin_dir = self.python_interpreter_path.parent
+            if not os.access(bin_dir, os.W_OK):
+                user_home_path = Path('~').expanduser()
+                bin_dir = user_home_path / ".local" / 'bin'
 
         self.snk_home = Path(snk_home).absolute()
         self.pipelines_dir = self.snk_home / "pipelines"
