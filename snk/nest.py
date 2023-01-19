@@ -156,7 +156,7 @@ class Nest:
     def pipelines(self):
         return [Pipeline(pipeline_dir.resolve()) for pipeline_dir in self.pipelines_dir.glob('*') if pipeline_dir.is_dir()]
 
-    def download(self, repo_url: str, name: str, tag_name: str | None = None) -> Repo:
+    def download(self, repo_url: str, name: str, tag_name: str = None) -> Repo:
         """Pull the repo"""
         location  = self.pipelines_dir / name
         options = ['--depth 1', '--single-branch']
