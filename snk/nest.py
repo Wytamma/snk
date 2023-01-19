@@ -40,10 +40,13 @@ class Nest:
         self.python_interpreter_path = Path(sys.executable) # needs to be the same python that has snk
         
         if not snk_home:
-            snk_home = self.python_interpreter_path.parent.parent / 'snk'
-            if not os.access(snk_home, os.W_OK):
+            home_path = self.python_interpreter_path.parent.parent
+            if not os.access(home_path, os.W_OK):
                 user_home_path = Path('~').expanduser()
                 snk_home = user_home_path / ".local" / 'snk'
+            else:
+                snk_home = home_path / 'snk'
+
         if not bin_dir:
             bin_dir = self.python_interpreter_path.parent
             if not os.access(bin_dir, os.W_OK):
