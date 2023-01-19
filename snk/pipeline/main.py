@@ -84,12 +84,15 @@ def load_options(pipeline_dir_path: Path):
     config = snakemake.load_configfile(pipeline_config_path)
     flat_config = flatten(config)
     options = []
-    if (pipeline_dir_path / '.snk').exists():
-        snk_config = snakemake.load_configfile(pipeline_dir_path / '.snk')
-    else:
-        catalog_config_path = pipeline_dir_path / '.snakemake-workflow-catalog.yml'
+    catalog_config_path = pipeline_dir_path / '.snakemake-workflow-catalog.yml'
+    snk_config_path = pipeline_dir_path / '.snk'
+    if snk_config_path.exists():
+        snk_config = snakemake.load_configfile(snk_config_path)
+    elif catalog_config_path.exists():
         catalog_config = snakemake.load_configfile(catalog_config_path)
         snk_config = flatten(catalog_config.get('snk', {}))
+    else:
+        snk_config = {}
     snk_annotations = snk_config.get('annotations', {})
     for op in flat_config:
         name = op.replace(':', '_')

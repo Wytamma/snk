@@ -65,6 +65,10 @@ def install(
             None, 
             help="Version of the pipeline to install. Can specify commit branch name, or tag. If None the latest commit will be installed."
         ),
+        config: Optional[Path] = typer.Option(
+            None, 
+            help="Specify a non-standard config location."
+        ),
     ):
     """
     Install a pipeline.
@@ -74,7 +78,7 @@ def install(
     if not pipeline.startswith('http'):
         pipeline = f"https://github.com/{pipeline}.git"
     try:
-        installl_pipeline = nest.install(repo_url=pipeline, name=name, version=version)
+        installl_pipeline = nest.install(repo_url=pipeline, name=name, version=version, config=config)
     except PipelineExistsError as e:
         typer.secho(e, fg='red')
         raise typer.Exit()

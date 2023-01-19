@@ -5,6 +5,7 @@ import stat
 import inspect
 import os
 from typing import List
+import shutil
 
 from .errors import PipelineExistsError, PipelineNotFoundError
 
@@ -62,7 +63,7 @@ class Nest:
         if not repo.endswith('.git'):
             raise ValueError('Repo url must end in .git')
 
-    def install(self, repo_url: str, name=None, version=None) -> Pipeline:
+    def install(self, repo_url: str, name=None, version=None, config=None) -> Pipeline:
         """
         Install a Snakemake pipeline as a CLI. 
         They must be standards compliant, public, Snakemake workflows.
@@ -80,6 +81,8 @@ class Nest:
             pipeline = Pipeline(path=Path(repo.git_dir).parent)
             pipeline_executable = self.create_package(pipeline.path)
             self.link_pipeline_executable_to_bin(pipeline_executable)
+            if config:
+                self.copy_nonstandard_config(pipeline.path, config)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps 
@@ -87,6 +90,11 @@ class Nest:
             self.delete_paths(to_remove)
             raise e
         return pipeline
+
+    def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):
+        config_dir = pipeline_dir / 'config'
+        config_dir.mkdir()
+        shutil.copyfile(pipeline_dir / config_path, config_dir / 'config.yaml')
 
     def get_paths_to_delete(self, pipeline_name: str) -> List[Path]:
         to_delete = []
@@ -112,7 +120,6 @@ class Nest:
         for path in files:
             if path.is_dir():
                 assert str(self.snk_home) in str(path), "Cannot delete folders outside of SNK_HOME"
-                import shutil
                 shutil.rmtree(path)
             elif path.is_symlink():
                 assert str(self.snk_home) in str(path.readlink()), "Cannot delete files outside of SNK_HOME"
