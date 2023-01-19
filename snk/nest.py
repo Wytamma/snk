@@ -109,7 +109,7 @@ class Nest:
         # remove link
         pipeline_bin_executable = self.bin_dir / pipeline_name
         if pipeline_bin_executable.exists() and pipeline_bin_executable.is_symlink():
-            if str(pipeline_dir) in str(pipeline_bin_executable.readlink()):
+            if str(pipeline_dir) in str(os.readlink(pipeline_bin_executable)):
                 to_delete.append(pipeline_bin_executable)
         
         return to_delete
@@ -122,7 +122,7 @@ class Nest:
                 assert str(self.snk_home) in str(path), "Cannot delete folders outside of SNK_HOME"
                 shutil.rmtree(path)
             elif path.is_symlink():
-                assert str(self.snk_home) in str(path.readlink()), "Cannot delete files outside of SNK_HOME"
+                assert str(self.snk_home) in str(os.readlink(path)), "Cannot delete files outside of SNK_HOME"
                 path.unlink()
             else:
                 raise TypeError("Invalid file type")
