@@ -63,15 +63,20 @@ def parse_config_args(args: List[str], options):
     return parsed
 
 def get_config_from_pipeline_dir(pipeline_dir_path: Path):
-    """"""
-    config_path = pipeline_dir_path / 'config' / 'config.yaml'
-    return config_path 
+    """Search possible config locations"""
+    for path in [Path('config') / 'config.yaml', Path('config') / 'config.yml', 'config.yaml', 'config.yml']:
+        if (pipeline_dir_path / path).exists():
+            return pipeline_dir_path / path 
+    return None
 
 def flatten(d, parent_key='', sep=':'):
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, MutableMapping):
+        if isinstance(v, list):
+            for l in v:
+                items.extend(flatten(l, new_key, sep=sep).items())
+        elif isinstance(v, MutableMapping):
             items.extend(flatten(v, new_key, sep=sep).items())
         else:
             items.append((new_key, v))
@@ -90,23 +95,26 @@ def load_options(pipeline_dir_path: Path):
         snk_config = snakemake.load_configfile(snk_config_path)
     elif catalog_config_path.exists():
         catalog_config = snakemake.load_configfile(catalog_config_path)
-        snk_config = flatten(catalog_config.get('snk', {}))
+        snk_config = catalog_config.get('snk', {})
     else:
         snk_config = {}
-    snk_annotations = snk_config.get('annotations', {})
+    snk_annotations = flatten(snk_config.get('annotations', {}))
     for op in flat_config:
-        name = op.replace(':', '_')
-        help = snk_annotations.get(f"{op}:help")
-        type = snk_annotations.get(f"{op}:type")
+        name = snk_annotations.get(f"{op}:name", op.replace(':', '_'))
+        help = snk_annotations.get(f"{op}:help", "")
+        type = snk_annotations.get(f"{op}:type", "str")
+        required = snk_annotations.get(f"{op}:required", False)
         options.append(
             {
                 'name':name.replace('-', '_'),
                 'original_key': op,
-                'default': str(flat_config[op]),
-                'help': help if help else "",
-                'type': type if type else "str"
+                'default': flat_config[op],
+                'help': help,
+                'type': type,
+                'required': required
             }
         )
+    # TODO: find annotations missing from config and add them to options
     return options
 
 def pipeline_cli_factory(pipeline_dir_path: Path):
@@ -139,7 +147,7 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
     def run(
             ctx: typer.Context,
             target: str = typer.Argument(None, help="File to generate. If None will run the pipeline 'all' rule."),
-            configfile: Path = typer.Option(None, help="Path to config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
+            configfile: Path = typer.Option(None, help="Path to snakemake config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
             cores:  int = typer.Option(None, help="Set the number of cores to use. If None will use all cores."),
             verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Run pipeline in verbose mode.",),
             help_snakemake: Optional[bool] = typer.Option(
@@ -163,7 +171,8 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
         
         if not configfile:
             configfile = get_config_from_pipeline_dir(pipeline_dir_path)
-        args.append(f"--configfile={configfile}")
+        if configfile:
+            args.append(f"--configfile={configfile}")
 
         
         # Set up conda frontend
@@ -214,7 +223,13 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
     
     @app.command(help="Access the pipeline conda environments.")
     def env(
-        activate: str = typer.Option(None, help="Activate a given environment"),
+        name: Optional[str] = typer.Argument(None)
+    ):
+        raise NotImplementedError
+
+    @app.command(help="Access the pipeline scripts.")
+    def script(
+        name: Optional[str] = typer.Argument(None)
     ):
         raise NotImplementedError
     

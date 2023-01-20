@@ -11,14 +11,16 @@ types = {
     'string': str,
     'path': Path,
     'bool': bool,
+    'boolean': bool
 }
 
 def create_cli_parameter(option):
+
     return Parameter(
         option['name'], 
         kind=Parameter.POSITIONAL_OR_KEYWORD, 
-        default=typer.Option(option['default'], help=f"[CONFIG] {option['help']}"), 
-        annotation=types[option['type'].lower()])
+        default=typer.Option(... if option['required'] else option['default'], help=f"[CONFIG] {option['help']}"), 
+        annotation=types.get(option['type'].lower(), str))
 
 def add_dynamic_options(options: List[dict]):
     def inner(func: Callable):
