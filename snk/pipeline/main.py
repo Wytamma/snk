@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, List
 import sys
 import json
+import logging
 from datetime import datetime
 import collections
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
@@ -70,16 +71,17 @@ def parse_config_args(args: List[str], options):
                 samkemake_format_config = convert_key_to_samkemake_format(op['original_key'], arg)
                 name = list(samkemake_format_config.keys())[0]
                 arg = samkemake_format_config[name]
-            config.append(f"{name}={serialise(arg)}")
+            # config.append(f'{name}={serialise(arg)}')
+            config.append({name:serialise(arg)})
             flag=None
             continue
         if arg.startswith('-') and arg.lstrip('-') in names:
             flag = arg
             continue
         parsed.append(arg)
-    if config:
-        parsed.extend(["--config", *config])
-    return parsed
+    # if config:
+    #     parsed.extend(["--config", *config])
+    return parsed, config
 
 def get_config_from_pipeline_dir(pipeline_dir_path: Path):
     """Search possible config locations"""
@@ -140,6 +142,9 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
     app = typer.Typer()
     options = load_options(pipeline_dir_path)
     pipeline = Pipeline(path=pipeline_dir_path)
+    snakefile = pipeline_dir_path / 'workflow' / 'Snakefile'
+    conda_prefix_dir = pipeline_dir_path / '.conda'
+
     def _print_pipline_version(value: bool):
         if value:
             typer.echo(pipeline.version)
@@ -169,12 +174,12 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
             configfile: Path = typer.Option(None, help="Path to snakemake config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
             cores:  int = typer.Option(None, help="Set the number of cores to use. If None will use all cores."),
             verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Run pipeline in verbose mode.",),
+            web_gui: Optional[bool] = typer.Option(False, "--gui", "-g", help="Lunch pipeline gui"),
             help_snakemake: Optional[bool] = typer.Option(
                 False, "--help-snakemake", "-hs", help="Print the snakemake help and exit.", is_eager=True, callback=_print_snakemake_help, show_default=False
             ),
         ):
         args = []
-        conda_prefix_dir = pipeline_dir_path / '.conda'
         if not cores:
             cores = 'all'
         args.extend([
@@ -182,7 +187,6 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
             f"--conda-prefix={conda_prefix_dir}",
             f"--cores={cores}",
         ])
-        snakefile = pipeline_dir_path / 'workflow' / 'Snakefile'
         if not snakefile.exists():
             raise ValueError('Could not find Snakefile')
         else:
@@ -211,11 +215,22 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
 
         if target:
             args.append(target)
-        args.extend(parse_config_args(ctx.args, options=options))
+        targets_and_or_snakemake, config_dict_list = parse_config_args(ctx.args, options=options)
+
+        args.extend(targets_and_or_snakemake)
+        args.extend(["--config", *[f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list]])
 
         if verbose:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
-        snakemake.main(args)
+        if web_gui:
+            launch_gui(
+                snakefile,
+                conda_prefix_dir,
+                pipeline_dir_path,
+                config={k: v for dct in config_dict_list for k, v in dct.items()}
+            )
+        else:
+            snakemake.main(args)
     
     @app.command(help="Access the pipeline configuration.")
     def config():
@@ -251,7 +266,76 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
     ):
         raise NotImplementedError
     
-            
     return app
- 
+
+
+def launch_gui(
+        snakefile,
+        conda_prefix_dir,
+        pipeline_dir_path,
+        config,
+        host: Optional[str] = "127.0.0.1",
+        port: Optional[int] = 8000,
+        cluster: Optional[str] = None,
+    ):
+    try:
+        import snakemake.gui as gui
+        from functools import partial
+        import webbrowser
+        from threading import Timer
+    except ImportError:
+        typer.secho(
+            "Error: GUI needs Flask to be installed. Install "
+            "with easy_install or contact your administrator.",
+            err=True)
+        raise typer.Exit(1)
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)
+    _snakemake = partial(snakemake.snakemake, snakefile)
+
+    gui.app.extensions["run_snakemake"] = _snakemake
+    gui.app.extensions["args"] = dict(
+        cluster=cluster,
+        configfiles=[get_config_from_pipeline_dir(pipeline_dir_path)],
+        targets=[],
+        use_conda=True,
+        conda_frontend="mamba",
+        conda_prefix=conda_prefix_dir,
+        config=config
+    )
+    gui.app.extensions["snakefilepath"] = snakefile
+    target_rules = []
+    def log_handler(msg):
+        if msg["level"] == "rule_info":
+            target_rules.append(msg["name"])
+    gui.run_snakemake(list_target_rules=True, log_handler=[log_handler], config=config)
+    gui.app.extensions["targets"] = target_rules
+
+    resources = []
+    def log_handler(msg):
+        if msg["level"] == "info":
+            resources.append(msg["msg"])
+
+    gui.app.extensions["resources"] = resources
+    gui.run_snakemake(list_resources=True, log_handler=[log_handler], config=config)
+    url = "http://{}:{}".format(host, port)
+    print("Listening on {}.".format(url), file=sys.stderr)
+
+    def open_browser():
+        try:
+            webbrowser.open(url)
+        except:
+            pass
+
+    print("Open this address in your browser to access the GUI.", file=sys.stderr)
+    Timer(0.5, open_browser).start()
+    success = True
+
+    try:
+        gui.app.run(debug=False, threaded=True, port=int(port), host=host)
+
+    except (KeyboardInterrupt, SystemExit):
+        # silently close
+        pass
+
+
 
