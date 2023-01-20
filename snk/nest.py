@@ -66,7 +66,7 @@ class Nest:
         if not repo.endswith('.git'):
             raise ValueError('Repo url must end in .git')
 
-    def install(self, repo_url: str, name=None, version=None, config=None) -> Pipeline:
+    def install(self, repo_url: str, name=None, tag=None, config=None, force=False) -> Pipeline:
         """
         Install a Snakemake pipeline as a CLI. 
         They must be standards compliant, public, Snakemake workflows.
@@ -79,7 +79,7 @@ class Nest:
             raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}")
         if name in os.listdir(self.bin_dir):
             raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.bin_dir}")
-        repo = self.download(repo_url, name, tag_name=version)
+        repo = self.download(repo_url, name, tag_name=tag)
         try:
             pipeline = Pipeline(path=Path(repo.git_dir).parent)
             pipeline_executable = self.create_package(pipeline.path)

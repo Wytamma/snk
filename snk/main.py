@@ -61,9 +61,11 @@ def install(
             None, 
             help="Rename the pipeline (this name will be used to call the CLI.)"
         ),
-        version: Optional[str] = typer.Option(
-            None, 
-            help="Version of the pipeline to install. Can specify commit branch name, or tag. If None the latest commit will be installed."
+        tag: Optional[str] = typer.Option(
+            None,
+            "--tag",
+            "-t",
+            help="Tag (version) of the pipeline to install. Can specify a branch name, or tag. If None the latest commit will be installed."
         ),
         config: Optional[Path] = typer.Option(
             None, 
@@ -78,7 +80,7 @@ def install(
     if not pipeline.startswith('http'):
         pipeline = f"https://github.com/{pipeline}.git"
     try:
-        installl_pipeline = nest.install(repo_url=pipeline, name=name, version=version, config=config)
+        installl_pipeline = nest.install(repo_url=pipeline, name=name, tag=tag, config=config)
     except PipelineExistsError as e:
         typer.secho(e, fg='red')
         raise typer.Exit()
@@ -87,7 +89,7 @@ def install(
         raise typer.Exit()
     v = installl_pipeline.version
     v = v if v else 'latest'
-    typer.secho(f"Successfully installed {installl_pipeline.name} ({v})!")
+    typer.secho(f"Successfully installed {installl_pipeline.name} ({v})!", fg='green')
 
 
 @app.command()
@@ -130,14 +132,22 @@ def list():
 
 
 @app.command()
-def run():
+def run(        
+        pipeline: str = typer.Argument(
+            ..., help="URL or Github name (user/repo) of the pipeline to install."
+        ),
+    ):
     """
     Run the pipeline in a temporary environment.
     """
     raise NotImplementedError
 
-def annotations():
-    """gen annotations defaults from config file"""
+@app.command()
+def annotations(config: Path):
+    """Generate annotations defaults from config file"""
+    raise NotImplementedError
 
-def create():
-    """create a default project that can be installed with snk"""
+@app.command()
+def create(name: str):
+    """Create a default project that can be installed with snk"""
+    raise NotImplementedError
