@@ -2,6 +2,8 @@ import typer
 from pathlib import Path
 from typing import Optional, List
 import sys
+import json
+from datetime import datetime
 import collections
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     from collections.abc import MutableMapping
@@ -37,6 +39,20 @@ def convert_key_to_samkemake_format(key, value):
     d[parts[-1]] = value
     return resultDict
 
+def serialise(d):
+    if isinstance(d, Path) or isinstance(d, datetime):
+        return str(d)
+
+    if isinstance(d, list):  # For those db functions which return list
+        return [serialise(x) for x in d]
+
+    if isinstance(d, dict):
+        for k, v in d.items():
+            d.update({k: serialise(v)})
+
+    # return anything else, like a string or number
+    return d
+
 def parse_config_args(args: List[str], options):
     names = [op['name'] for op in options]
     config = []
@@ -46,20 +62,23 @@ def parse_config_args(args: List[str], options):
         if flag:
             name = flag.lstrip('-')
             op = next(op for op in options if op['name'] == name)
+            if op['default'] == serialise(arg):
+                # skip args that don't change
+                flag=None
+                continue
             if ":" in op['original_key']:
                 samkemake_format_config = convert_key_to_samkemake_format(op['original_key'], arg)
                 name = list(samkemake_format_config.keys())[0]
                 arg = samkemake_format_config[name]
-            if arg != 'None':
-                # skip null args
-                config.append(f"{name}={arg}")
+            config.append(f"{name}={serialise(arg)}")
             flag=None
             continue
         if arg.startswith('-') and arg.lstrip('-') in names:
             flag = arg
             continue
         parsed.append(arg)
-    parsed.extend(["--config", *config])
+    if config:
+        parsed.extend(["--config", *config])
     return parsed
 
 def get_config_from_pipeline_dir(pipeline_dir_path: Path):
@@ -102,7 +121,7 @@ def load_options(pipeline_dir_path: Path):
     for op in flat_config:
         name = snk_annotations.get(f"{op}:name", op.replace(':', '_'))
         help = snk_annotations.get(f"{op}:help", "")
-        type = snk_annotations.get(f"{op}:type", "str")
+        param_type = snk_annotations.get(f"{op}:type", f"{type(flat_config[op]).__name__}")
         required = snk_annotations.get(f"{op}:required", False)
         options.append(
             {
@@ -110,7 +129,7 @@ def load_options(pipeline_dir_path: Path):
                 'original_key': op,
                 'default': flat_config[op],
                 'help': help,
-                'type': type,
+                'type': param_type,
                 'required': required
             }
         )
@@ -196,7 +215,6 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
 
         if verbose:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
-
         snakemake.main(args)
     
     @app.command(help="Access the pipeline configuration.")
