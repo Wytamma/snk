@@ -3,7 +3,12 @@ from inspect import signature, Parameter
 from makefun import wraps
 from pathlib import Path
 import typer
-
+import sys
+import collections  # MutableMapping import hack
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    from collections.abc import MutableMapping
+else:
+    from collections import MutableMapping
 
 
 types = {
@@ -13,7 +18,8 @@ types = {
     'string': str,
     'path': Path,
     'bool': bool,
-    'boolean': bool
+    'boolean': bool,
+    'list': List[str]
 }
 
 def create_cli_parameter(option):
@@ -43,3 +49,14 @@ def add_dynamic_options(options: List[dict]):
             return func(*args, **kwargs)
         return func_wrapper
     return inner
+
+
+def flatten(d, parent_key='', sep=':'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
