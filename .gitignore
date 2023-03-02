@@ -4,3 +4,4 @@
 *.pyc
 .snakemake
 reads
+Note.md

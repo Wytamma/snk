@@ -1,6 +1,7 @@
 from snk import Nest
 from pathlib import Path
 import subprocess
+from .utils import CLIRunner
 
 def test_init(bin_dir, snk_home):
     nest = Nest(snk_home, bin_dir=bin_dir)
@@ -25,13 +26,9 @@ def test_link_pipeline_executable_to_bin(nest: Nest):
     executable_path = nest.link_pipeline_executable_to_bin(pipeline_executable_path)
     assert executable_path.exists() == True and executable_path.is_symlink() == True
 
-def test_install(nest: Nest):
-    deseq2 = nest.install('https://github.com/snakemake-workflows/rna-seq-star-deseq2.git')
-    expected = nest.pipelines_dir / 'rna-seq-star-deseq2'
-    assert expected.exists()
-    print(deseq2.executable)
-    res = subprocess.run([deseq2.executable, '--help'], stdout=subprocess.PIPE , stderr=subprocess.PIPE)
-    assert 'Usage: rna-seq-star-deseq2' in res.stdout.decode('utf-8')
+def test_install(deseq2_runner):
+    res = deseq2_runner(['--help'])
+    assert 'Usage: rna-seq-star-deseq2' in res.stdout
 
 def test_uninstall(nest:Nest):
     pass
