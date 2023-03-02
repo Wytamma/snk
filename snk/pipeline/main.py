@@ -5,11 +5,6 @@ import sys
 import json
 import logging
 from datetime import datetime
-import collections
-if sys.version_info.major == 3 and sys.version_info.minor >= 10:
-    from collections.abc import MutableMapping
-else:
-    from collections import MutableMapping
 
 import snakemake
 from rich.console import Console
@@ -17,7 +12,7 @@ from rich.syntax import Syntax
 from art import text2art
 import subprocess
 
-from .utils import add_dynamic_options
+from .utils import add_dynamic_options, flatten
 from snk.nest import Pipeline
 
 def _print_snakemake_help(value: bool):
@@ -30,6 +25,9 @@ def create_logo(name):
     return doc
 
 def convert_key_to_samkemake_format(key, value):
+    """
+    Covert key to a format that can be passed over the cli to snakemake
+    """
     resultDict = dict()
     parts = key.split(":")
     d = resultDict
@@ -44,7 +42,7 @@ def serialise(d):
     if isinstance(d, Path) or isinstance(d, datetime):
         return str(d)
 
-    if isinstance(d, list):  # For those db functions which return list
+    if isinstance(d, list):
         return [serialise(x) for x in d]
 
     if isinstance(d, dict):
@@ -72,15 +70,13 @@ def parse_config_args(args: List[str], options):
                 name = list(samkemake_format_config.keys())[0]
                 arg = samkemake_format_config[name]
             # config.append(f'{name}={serialise(arg)}')
-            config.append({name:serialise(arg)})
+            config.append({name: serialise(arg)})
             flag=None
             continue
         if arg.startswith('-') and arg.lstrip('-') in names:
             flag = arg
             continue
         parsed.append(arg)
-    # if config:
-    #     parsed.extend(["--config", *config])
     return parsed, config
 
 def get_config_from_pipeline_dir(pipeline_dir_path: Path):
@@ -90,18 +86,6 @@ def get_config_from_pipeline_dir(pipeline_dir_path: Path):
             return pipeline_dir_path / path 
     return None
 
-def flatten(d, parent_key='', sep=':'):
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, list):
-            for l in v:
-                items.extend(flatten(l, new_key, sep=sep).items())
-        elif isinstance(v, MutableMapping):
-            items.extend(flatten(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
 
 def load_options(pipeline_dir_path: Path):
     pipeline_config_path = get_config_from_pipeline_dir(pipeline_dir_path)
@@ -123,7 +107,10 @@ def load_options(pipeline_dir_path: Path):
     for op in flat_config:
         name = snk_annotations.get(f"{op}:name", op.replace(':', '_'))
         help = snk_annotations.get(f"{op}:help", "")
-        param_type = snk_annotations.get(f"{op}:type", f"{type(flat_config[op]).__name__}")
+        # TODO be smarter here 
+        # look up the List type e.g. if type == list then check the frist index type 
+        # also can probably just pass the type around instead of the string?
+        param_type = snk_annotations.get(f"{op}:type", f"{type(flat_config[op]).__name__}")  # TODO refactor 
         required = snk_annotations.get(f"{op}:required", False)
         options.append(
             {
@@ -138,7 +125,7 @@ def load_options(pipeline_dir_path: Path):
     # TODO: find annotations missing from config and add them to options
     return options
 
-def pipeline_cli_factory(pipeline_dir_path: Path):
+def snk_cli(pipeline_dir_path: Path):
     app = typer.Typer()
     options = load_options(pipeline_dir_path)
     pipeline = Pipeline(path=pipeline_dir_path)
@@ -166,7 +153,13 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
     # dynamically create the logo
     callback.__doc__ = f"{create_logo(pipeline_dir_path.name)}"
 
-    @app.command(help="Run the pipeline. All unrecognized arguments are parsed onto Snakemake to be used by the pipeline.", context_settings={"allow_extra_args": True, "ignore_unknown_options": True, "help_option_names": ["-h", "--help"]})
+    @app.command(
+            help="Run the pipeline. All unrecognized arguments are parsed onto Snakemake to be used by the pipeline.", 
+            context_settings={
+                "allow_extra_args": True, 
+                "ignore_unknown_options": True, 
+                "help_option_names": ["-h", "--help"]
+            })
     @add_dynamic_options(options)
     def run(
             ctx: typer.Context,
@@ -203,6 +196,7 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
         try:
             subprocess.run(["mamba", "--version"], capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
+            typer.secho("Mamba not found! Install for speed up.")
             mamba_found = False
         if not mamba_found:
             args.append("--conda-frontend=conda")
@@ -218,6 +212,7 @@ def pipeline_cli_factory(pipeline_dir_path: Path):
         targets_and_or_snakemake, config_dict_list = parse_config_args(ctx.args, options=options)
 
         args.extend(targets_and_or_snakemake)
+
         args.extend(["--config", *[f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list]])
 
         if verbose:

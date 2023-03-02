@@ -1,8 +1,8 @@
 from pathlib import Path
-from .main import pipeline_cli_factory
+from .main import snk_cli
 
 def cli(p):
     pipeline_dir_path = Path(p)
-    app = pipeline_cli_factory(pipeline_dir_path)
+    app = snk_cli(pipeline_dir_path)
     app()
 
