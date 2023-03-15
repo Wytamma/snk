@@ -18,7 +18,8 @@ class Pipeline:
     @property
     def version(self):
         try:
-            version = self.repo.git.describe(['--tags','--exact-match'])
+            # TODO: default to commit
+            version = self.repo.git.describe(['--tags','--exact-match']) 
         except GitCommandError:
             version = None
         return version
@@ -191,10 +192,10 @@ class Nest:
             # -*- coding: utf-8 -*-
             import re
             import sys
-            from snk.pipeline import cli
+            from snk import create_cli
             if __name__ == "__main__":
                 sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
-                sys.exit(cli("{pipeline_dir}"))
+                sys.exit(create_cli("{pipeline_dir}"))
                 
         """)
 

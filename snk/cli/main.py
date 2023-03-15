@@ -1,6 +1,6 @@
 import typer
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Callable
 import sys
 import json
 import logging
@@ -12,19 +12,12 @@ from rich.syntax import Syntax
 from art import text2art
 import subprocess
 
-from snk.pipeline.config import load_pipeline_snakemake_config, load_snk_config
+from snk.cli.config import get_config_from_pipeline_dir, load_pipeline_snakemake_config, load_snk_config
 
 from .utils import add_dynamic_options, flatten
+from .gui import launch_gui
 from snk.nest import Pipeline
 
-def _print_snakemake_help(value: bool):
-    if value:
-        snakemake.main("-h")
-
-def create_logo(name):
-    logo = text2art(name, font="small")        
-    doc  = f"""\b{logo}\bA Snakemake pipeline CLI generated with snk"""
-    return doc
 
 def convert_key_to_samkemake_format(key, value):
     """
@@ -107,45 +100,75 @@ def build_dynamic_cli_options(snakemake_config, snk_config):
     # TODO: find annotations missing from config and add them to options
     return options
 
-def snk_cli(pipeline_dir_path: Path):
-    app = typer.Typer()
-    snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
-    snk_config = load_snk_config(pipeline_dir_path)
-    options = build_dynamic_cli_options(snakemake_config, snk_config)
-    pipeline = Pipeline(path=pipeline_dir_path)
-    snakefile = pipeline_dir_path / 'workflow' / 'Snakefile'
-    conda_prefix_dir = pipeline_dir_path / '.conda'
 
-    def _print_pipline_version(value: bool):
-        if value:
-            typer.echo(pipeline.version)
-            raise typer.Exit()
+class CLI:
+    def __init__(self, pipeline_dir_path: Path) -> None:
+        self.pipeline_dir_path = pipeline_dir_path
+        self.app = typer.Typer()
+        self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
+        self.snk_config = load_snk_config(pipeline_dir_path)
+        self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
+        self.pipeline = Pipeline(path=pipeline_dir_path)
+        self.snakefile = pipeline_dir_path / 'workflow' / 'Snakefile'
+        self.conda_prefix_dir = pipeline_dir_path / '.conda'
+        self.name = self.pipeline_dir_path.name
+            
+        def _print_pipline_version(ctx: typer.Context, value: bool):
+            if value:
+                typer.echo(self.pipeline.version)
+                raise typer.Exit()
 
-    def _print_pipline_path(value: bool):
-        if value:
-            typer.echo(pipeline.path)
-            raise typer.Exit()
-
-    @app.callback(invoke_without_command=True, context_settings={"help_option_names": ["-h", "--help"]})
-    def callback(
+        def _print_pipline_path(ctx: typer.Context, value: bool):
+            if value:
+                typer.echo(self.pipeline.path)
+                raise typer.Exit()
+            
+        def callback(
             ctx: typer.Context, 
             version: Optional[bool] = typer.Option(None, '-v', '--version', help="Show the pipeline version.", is_eager=True, callback=_print_pipline_version, show_default=False),
             path: Optional[bool] = typer.Option(None, '-p', '--path', help="Show the pipeline path.", is_eager=True, callback=_print_pipline_path, show_default=False)
         ):
-        if ctx.invoked_subcommand is None:
-            typer.echo(f'{ctx.get_help()}')
-    # dynamically create the logo
-    callback.__doc__ = f"{create_logo(pipeline_dir_path.name)}"
+            if ctx.invoked_subcommand is None:
+                typer.echo(f'{ctx.get_help()}')
+        # dynamically create the logo
+        callback.__doc__ = f"{self.create_logo()}"
 
-    @app.command(
+        # registration 
+        self.register_callback(callback, invoke_without_command=True, context_settings={"help_option_names": ["-h", "--help"]})
+        self.register_command(self.info, help="Display information about current pipeline install.")
+        self.register_command(self.config, help="Access the pipeline configuration.")
+        self.register_command(self.env, help="Access the pipeline conda environments.")
+        self.register_command(self.script, help="Access the pipeline scripts.")
+        self.register_command(
+            add_dynamic_options(self.options)(self.run), 
             help="Run the pipeline. All unrecognized arguments are parsed onto Snakemake to be used by the pipeline.", 
             context_settings={
                 "allow_extra_args": True, 
                 "ignore_unknown_options": True, 
                 "help_option_names": ["-h", "--help"]
-            })
-    @add_dynamic_options(options)
+            }
+        )
+
+    def __call__(self):
+        self.app()
+
+    def register_command(self, command: Callable, **command_kwargs) -> None:
+        self.app.command(**command_kwargs)(command)
+
+    def register_callback(self, command: Callable, **command_kwargs) -> None:
+        self.app.callback(**command_kwargs)(command)
+
+    def create_logo(self, font="small"):
+        logo = text2art(self.name, font=font)        
+        doc  = f"""\b{logo}\bA Snakemake pipeline CLI generated with snk"""
+        return doc
+
+    def _print_snakemake_help(value: bool):
+        if value:
+            snakemake.main("-h")
+
     def run(
+            self,
             ctx: typer.Context,
             target: str = typer.Argument(None, help="File to generate. If None will run the pipeline 'all' rule."),
             configfile: Path = typer.Option(None, help="Path to snakemake config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
@@ -161,16 +184,16 @@ def snk_cli(pipeline_dir_path: Path):
             cores = 'all'
         args.extend([
             "--use-conda",
-            f"--conda-prefix={conda_prefix_dir}",
+            f"--conda-prefix={self.conda_prefix_dir}",
             f"--cores={cores}",
         ])
-        if not snakefile.exists():
+        if not self.snakefile.exists():
             raise ValueError('Could not find Snakefile')
         else:
-            args.append(f"--snakefile={snakefile}")
+            args.append(f"--snakefile={self.snakefile}")
         
         if not configfile:
-            configfile = get_config_from_pipeline_dir(pipeline_dir_path)
+            configfile = get_config_from_pipeline_dir(self.pipeline_dir_path)
         if configfile:
             args.append(f"--configfile={configfile}")
 
@@ -185,7 +208,7 @@ def snk_cli(pipeline_dir_path: Path):
         if not mamba_found:
             args.append("--conda-frontend=conda")
         
-        typer.echo(create_logo(pipeline_dir_path.name))
+        typer.echo(self.create_logo())
         typer.echo()
 
         if verbose:
@@ -193,7 +216,7 @@ def snk_cli(pipeline_dir_path: Path):
 
         if target:
             args.append(target)
-        targets_and_or_snakemake, config_dict_list = parse_config_args(ctx.args, options=options)
+        targets_and_or_snakemake, config_dict_list = parse_config_args(ctx.args, options=self.options)
 
         args.extend(targets_and_or_snakemake)
 
@@ -203,18 +226,25 @@ def snk_cli(pipeline_dir_path: Path):
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
         if web_gui:
             launch_gui(
-                snakefile,
-                conda_prefix_dir,
-                pipeline_dir_path,
+                self.snakefile,
+                self.conda_prefix_dir,
+                self.pipeline_dir_path,
                 config={k: v for dct in config_dict_list for k, v in dct.items()}
             )
         else:
             snakemake.main(args)
-    
-    @app.command(help="Access the pipeline configuration.")
-    def config():
-        config_path = pipeline_dir_path / 'config' / 'config.yaml'
-        if not config_path.exists():
+
+    def info(self):
+        import json
+        info_dict = {}
+        info_dict['name'] = self.pipeline_dir_path.name
+        info_dict['version'] = self.pipeline.version
+        info_dict['pipeline_dir_path'] = str(self.pipeline_dir_path)
+        typer.echo(json.dumps(info_dict, indent=2))
+
+    def config(self):
+        config_path = get_config_from_pipeline_dir(self.pipeline_dir_path)
+        if not config_path:
             typer.secho("Could not find config...", fg='red')
             raise typer.Exit(1)
         with open(config_path) as f:
@@ -223,27 +253,12 @@ def snk_cli(pipeline_dir_path: Path):
             console = Console()
             console.print(syntax)
     
-    
-    @app.command(help="Display information about current pipeline install.")
-    def info():
-        import json
-        info_dict = {}
-        info_dict['name'] = pipeline_dir_path.name
-        info_dict['version'] = pipeline.version
-        info_dict['pipeline_dir_path'] = str(pipeline_dir_path)
-        typer.echo(json.dumps(info_dict, indent=2))
-    
-    @app.command(help="Access the pipeline conda environments.")
     def env(
         name: Optional[str] = typer.Argument(None)
     ):
         raise NotImplementedError
 
-    @app.command(help="Access the pipeline scripts.")
     def script(
         name: Optional[str] = typer.Argument(None)
     ):
         raise NotImplementedError
-    
-    return app
-

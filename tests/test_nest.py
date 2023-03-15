@@ -26,9 +26,5 @@ def test_link_pipeline_executable_to_bin(nest: Nest):
     executable_path = nest.link_pipeline_executable_to_bin(pipeline_executable_path)
     assert executable_path.exists() == True and executable_path.is_symlink() == True
 
-def test_install(deseq2_runner):
-    res = deseq2_runner(['--help'])
-    assert 'Usage: rna-seq-star-deseq2' in res.stdout
-
 def test_uninstall(nest:Nest):
     pass

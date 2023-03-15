@@ -5,7 +5,7 @@ import logging
 
 import snakemake
 
-from snk.pipeline.config import get_config_from_pipeline_dir
+from snk.cli.config import get_config_from_pipeline_dir
 
 def launch_gui(
         snakefile,
