@@ -87,13 +87,12 @@ def get_config_from_pipeline_dir(pipeline_dir_path: Path):
     return None
 
 
-def load_options(pipeline_dir_path: Path):
-    pipeline_config_path = get_config_from_pipeline_dir(pipeline_dir_path)
-    if not pipeline_config_path.exists():
-        return []
-    config = snakemake.load_configfile(pipeline_config_path)
-    flat_config = flatten(config)
-    options = []
+def load_snk_config(pipeline_dir_path: Path):
+    """
+    Load SNK config from .snk or snakemake-workflow-catalog.yml.
+    SNK config holds dynamic cli config and option annotations.
+    returns empty dict if none is found 
+    """
     catalog_config_path = pipeline_dir_path / '.snakemake-workflow-catalog.yml'
     snk_config_path = pipeline_dir_path / '.snk'
     if snk_config_path.exists():
@@ -103,6 +102,20 @@ def load_options(pipeline_dir_path: Path):
         snk_config = catalog_config.get('snk', {})
     else:
         snk_config = {}
+    return snk_config
+
+def load_pipeline_snakemake_config(pipeline_dir_path: Path):
+    """
+    Load snakemake config.
+    """
+    pipeline_config_path = get_config_from_pipeline_dir(pipeline_dir_path)
+    if not pipeline_config_path.exists():
+        return []
+    return snakemake.load_configfile(pipeline_config_path)
+
+def build_dynamic_cli_options(snakemake_config, snk_config):
+    flat_config = flatten(snakemake_config)
+    options = []
     snk_annotations = flatten(snk_config.get('annotations', {}))
     for op in flat_config:
         name = snk_annotations.get(f"{op}:name", op.replace(':', '_'))
@@ -127,7 +140,9 @@ def load_options(pipeline_dir_path: Path):
 
 def snk_cli(pipeline_dir_path: Path):
     app = typer.Typer()
-    options = load_options(pipeline_dir_path)
+    snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
+    snk_config = load_snk_config(pipeline_dir_path)
+    options = build_dynamic_cli_options(snakemake_config, snk_config)
     pipeline = Pipeline(path=pipeline_dir_path)
     snakefile = pipeline_dir_path / 'workflow' / 'Snakefile'
     conda_prefix_dir = pipeline_dir_path / '.conda'

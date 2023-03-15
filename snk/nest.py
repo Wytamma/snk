@@ -66,10 +66,10 @@ class Nest:
         if not repo.endswith('.git'):
             raise ValueError('Repo url must end in .git')
 
-    def install(self, repo_url: str, name=None, tag=None, config=None, force=False) -> Pipeline:
+    def install(self, repo_url: str, name = None, tag = None, config: Path = None, force = False, resources=[]) -> Pipeline:
         """
         Install a Snakemake pipeline as a CLI. 
-        They must be standards compliant, public, Snakemake workflows.
+        They must be standards compliant*, public, Snakemake workflows.
         https://snakemake.github.io/snakemake-workflow-catalog/
         """
         self._check_repo_url_format(repo_url)
@@ -86,6 +86,8 @@ class Nest:
             self.link_pipeline_executable_to_bin(pipeline_executable)
             if config:
                 self.copy_nonstandard_config(pipeline.path, config)
+            if resources:
+                self.copy_additional_resources(pipeline.path, config)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps 
