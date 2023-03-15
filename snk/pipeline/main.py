@@ -12,6 +12,8 @@ from rich.syntax import Syntax
 from art import text2art
 import subprocess
 
+from snk.pipeline.config import load_pipeline_snakemake_config, load_snk_config
+
 from .utils import add_dynamic_options, flatten
 from snk.nest import Pipeline
 
@@ -79,39 +81,6 @@ def parse_config_args(args: List[str], options):
         parsed.append(arg)
     return parsed, config
 
-def get_config_from_pipeline_dir(pipeline_dir_path: Path):
-    """Search possible config locations"""
-    for path in [Path('config') / 'config.yaml', Path('config') / 'config.yml', 'config.yaml', 'config.yml']:
-        if (pipeline_dir_path / path).exists():
-            return pipeline_dir_path / path 
-    return None
-
-
-def load_snk_config(pipeline_dir_path: Path):
-    """
-    Load SNK config from .snk or snakemake-workflow-catalog.yml.
-    SNK config holds dynamic cli config and option annotations.
-    returns empty dict if none is found 
-    """
-    catalog_config_path = pipeline_dir_path / '.snakemake-workflow-catalog.yml'
-    snk_config_path = pipeline_dir_path / '.snk'
-    if snk_config_path.exists():
-        snk_config = snakemake.load_configfile(snk_config_path)
-    elif catalog_config_path.exists():
-        catalog_config = snakemake.load_configfile(catalog_config_path)
-        snk_config = catalog_config.get('snk', {})
-    else:
-        snk_config = {}
-    return snk_config
-
-def load_pipeline_snakemake_config(pipeline_dir_path: Path):
-    """
-    Load snakemake config.
-    """
-    pipeline_config_path = get_config_from_pipeline_dir(pipeline_dir_path)
-    if not pipeline_config_path.exists():
-        return []
-    return snakemake.load_configfile(pipeline_config_path)
 
 def build_dynamic_cli_options(snakemake_config, snk_config):
     flat_config = flatten(snakemake_config)
@@ -277,75 +246,4 @@ def snk_cli(pipeline_dir_path: Path):
         raise NotImplementedError
     
     return app
-
-
-def launch_gui(
-        snakefile,
-        conda_prefix_dir,
-        pipeline_dir_path,
-        config,
-        host: Optional[str] = "127.0.0.1",
-        port: Optional[int] = 8000,
-        cluster: Optional[str] = None,
-    ):
-    try:
-        import snakemake.gui as gui
-        from functools import partial
-        import webbrowser
-        from threading import Timer
-    except ImportError:
-        typer.secho(
-            "Error: GUI needs Flask to be installed. Install "
-            "with easy_install or contact your administrator.",
-            err=True)
-        raise typer.Exit(1)
-    logging.getLogger("werkzeug").setLevel(logging.ERROR)
-    _snakemake = partial(snakemake.snakemake, snakefile)
-
-    gui.app.extensions["run_snakemake"] = _snakemake
-    gui.app.extensions["args"] = dict(
-        cluster=cluster,
-        configfiles=[get_config_from_pipeline_dir(pipeline_dir_path)],
-        targets=[],
-        use_conda=True,
-        conda_frontend="mamba",
-        conda_prefix=conda_prefix_dir,
-        config=config
-    )
-    gui.app.extensions["snakefilepath"] = snakefile
-    target_rules = []
-    def log_handler(msg):
-        if msg["level"] == "rule_info":
-            target_rules.append(msg["name"])
-    gui.run_snakemake(list_target_rules=True, log_handler=[log_handler], config=config)
-    gui.app.extensions["targets"] = target_rules
-
-    resources = []
-    def log_handler(msg):
-        if msg["level"] == "info":
-            resources.append(msg["msg"])
-
-    gui.app.extensions["resources"] = resources
-    gui.run_snakemake(list_resources=True, log_handler=[log_handler], config=config)
-    url = "http://{}:{}".format(host, port)
-    print("Listening on {}.".format(url), file=sys.stderr)
-
-    def open_browser():
-        try:
-            webbrowser.open(url)
-        except:
-            pass
-
-    print("Open this address in your browser to access the GUI.", file=sys.stderr)
-    Timer(0.5, open_browser).start()
-    success = True
-
-    try:
-        gui.app.run(debug=False, threaded=True, port=int(port), host=host)
-
-    except (KeyboardInterrupt, SystemExit):
-        # silently close
-        pass
-
-
 
