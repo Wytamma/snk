@@ -88,7 +88,7 @@ class Nest:
             if config:
                 self.copy_nonstandard_config(pipeline.path, config)
             if resources:
-                self.copy_additional_resources(pipeline.path, config)
+                self.copy_additional_resources(pipeline.path, resources)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps 

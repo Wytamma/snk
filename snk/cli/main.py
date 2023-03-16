@@ -1,9 +1,6 @@
 import typer
 from pathlib import Path
 from typing import Optional, List, Callable
-import sys
-import json
-import logging
 from datetime import datetime
 
 import snakemake
@@ -12,8 +9,7 @@ from rich.syntax import Syntax
 from art import text2art
 import subprocess
 
-from snk.cli.config import get_config_from_pipeline_dir, load_pipeline_snakemake_config, load_snk_config
-
+from .config import get_config_from_pipeline_dir, load_pipeline_snakemake_config, load_snk_config
 from .utils import add_dynamic_options, flatten
 from .gui import launch_gui
 from snk.nest import Pipeline
@@ -103,15 +99,14 @@ def build_dynamic_cli_options(snakemake_config, snk_config):
 
 class CLI:
     def __init__(self, pipeline_dir_path: Path) -> None:
-        self.pipeline_dir_path = pipeline_dir_path
+        self.pipeline = Pipeline(path=pipeline_dir_path)
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
         self.snk_config = load_snk_config(pipeline_dir_path)
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
-        self.pipeline = Pipeline(path=pipeline_dir_path)
-        self.snakefile = pipeline_dir_path / 'workflow' / 'Snakefile'
+        self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / '.conda'
-        self.name = self.pipeline_dir_path.name
+        self.name = self.pipeline.name
             
         def _print_pipline_version(ctx: typer.Context, value: bool):
             if value:
@@ -122,7 +117,7 @@ class CLI:
             if value:
                 typer.echo(self.pipeline.path)
                 raise typer.Exit()
-            
+
         def callback(
             ctx: typer.Context, 
             version: Optional[bool] = typer.Option(None, '-v', '--version', help="Show the pipeline version.", is_eager=True, callback=_print_pipline_version, show_default=False),
@@ -166,7 +161,14 @@ class CLI:
     def _print_snakemake_help(value: bool):
         if value:
             snakemake.main("-h")
-
+    
+    def _find_snakefile(self):
+            """Search possible snakefile locations"""
+            for path in snakemake.SNAKEFILE_CHOICES:
+                if (self.pipeline.path / path).exists():
+                    return self.pipeline.path / path 
+            raise FileNotFoundError("Snakefile not found!")
+    
     def run(
             self,
             ctx: typer.Context,
@@ -193,7 +195,7 @@ class CLI:
             args.append(f"--snakefile={self.snakefile}")
         
         if not configfile:
-            configfile = get_config_from_pipeline_dir(self.pipeline_dir_path)
+            configfile = get_config_from_pipeline_dir(self.pipeline.path)
         if configfile:
             args.append(f"--configfile={configfile}")
 
@@ -228,7 +230,7 @@ class CLI:
             launch_gui(
                 self.snakefile,
                 self.conda_prefix_dir,
-                self.pipeline_dir_path,
+                self.pipeline.path,
                 config={k: v for dct in config_dict_list for k, v in dct.items()}
             )
         else:
@@ -237,13 +239,13 @@ class CLI:
     def info(self):
         import json
         info_dict = {}
-        info_dict['name'] = self.pipeline_dir_path.name
+        info_dict['name'] = self.pipeline.path.name
         info_dict['version'] = self.pipeline.version
-        info_dict['pipeline_dir_path'] = str(self.pipeline_dir_path)
+        info_dict['pipeline_dir_path'] = str(self.pipeline.path)
         typer.echo(json.dumps(info_dict, indent=2))
 
     def config(self):
-        config_path = get_config_from_pipeline_dir(self.pipeline_dir_path)
+        config_path = get_config_from_pipeline_dir(self.pipeline.path)
         if not config_path:
             typer.secho("Could not find config...", fg='red')
             raise typer.Exit(1)
