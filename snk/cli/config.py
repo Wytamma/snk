@@ -14,13 +14,9 @@ def load_snk_config(pipeline_dir_path: Path):
     SNK config holds dynamic cli config and option annotations.
     returns empty dict if none is found 
     """
-    catalog_config_path = pipeline_dir_path / '.snakemake-workflow-catalog.yml'
     snk_config_path = pipeline_dir_path / '.snk'
     if snk_config_path.exists():
         snk_config = snakemake.load_configfile(snk_config_path)
-    elif catalog_config_path.exists():
-        catalog_config = snakemake.load_configfile(catalog_config_path)
-        snk_config = catalog_config.get('snk', {})
     else:
         snk_config = {}
     return snk_config
