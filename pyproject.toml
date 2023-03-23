@@ -48,12 +48,18 @@ dependencies = [
   "pytest",
   "pytest-cov",
 ]
+
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=snk --cov=tests"
-no-cov = "cov --no-cov"
+test = "cov --no-cov"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["37", "38", "39", "310", "311"]
+
+# requires hatch-containers
+[tool.hatch.envs.docker]
+type = "container"
+image = "conda/miniconda3-centos7"
 
 [tool.coverage.run]
 branch = true

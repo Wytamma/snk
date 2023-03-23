@@ -13,7 +13,12 @@ def test_install(deseq2_runner):
 
 def test_info(deseq2_runner):
     res = deseq2_runner(['info'])
-    assert 'rna-seq-star-deseq2' in res.stdout
+    assert 'rna-seq-star-deseq2' in res.stdout, res.stderr
     assert 'version' in res.stdout
     assert 'pipeline_dir_path' in res.stdout
 
+# def test_run(deseq2_runner):
+#     res = deseq2_runner(['info'])
+#     assert 'rna-seq-star-deseq2' in res.stdout, res.stderr
+#     assert 'version' in res.stdout
+#     assert 'pipeline_dir_path' in res.stdout

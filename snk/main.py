@@ -1,7 +1,7 @@
 import typer
 from pathlib import Path
 import os
-from typing import Optional
+from typing import Optional, List
 from rich.pretty import pprint
 from .nest import Nest
 from .errors import PipelineExistsError, PipelineNotFoundError
@@ -71,6 +71,10 @@ def install(
             None, 
             help="Specify a non-standard config location."
         ),
+        resource: Optional[List[Path]] = typer.Option(
+            [], 
+            help="Specify a resource required to run the pipeline (copied to working dir at runtime)."
+        ),
     ):
     """
     Install a pipeline.
@@ -80,7 +84,7 @@ def install(
     if not pipeline.startswith('http'):
         pipeline = f"https://github.com/{pipeline}.git"
     try:
-        installl_pipeline = nest.install(repo_url=pipeline, name=name, tag=tag, config=config)
+        installl_pipeline = nest.install(repo_url=pipeline, name=name, tag=tag, config=config, resources=resource)
     except PipelineExistsError as e:
         typer.secho(e, fg='red')
         raise typer.Exit()

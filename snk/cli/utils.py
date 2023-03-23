@@ -23,7 +23,6 @@ types = {
 }
 
 def create_cli_parameter(option):
-
     return Parameter(
         option['name'], 
         kind=Parameter.POSITIONAL_OR_KEYWORD, 

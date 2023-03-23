@@ -2,17 +2,22 @@ import typer
 from pathlib import Path
 from typing import Optional, List, Callable
 from datetime import datetime
+import subprocess
+import shutil
+import os
+from contextlib import contextmanager
 
 import snakemake
 from rich.console import Console
 from rich.syntax import Syntax
 from art import text2art
-import subprocess
 
-from .config import get_config_from_pipeline_dir, load_pipeline_snakemake_config, load_snk_config
+
+
+from .config import SnkConfig, get_config_from_pipeline_dir, load_pipeline_snakemake_config
 from .utils import add_dynamic_options, flatten
 from .gui import launch_gui
-from snk.nest import Pipeline
+from .pipeline import Pipeline
 
 
 def convert_key_to_samkemake_format(key, value):
@@ -71,18 +76,18 @@ def parse_config_args(args: List[str], options):
     return parsed, config
 
 
-def build_dynamic_cli_options(snakemake_config, snk_config):
+def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
     flat_config = flatten(snakemake_config)
     options = []
-    snk_annotations = flatten(snk_config.get('annotations', {}))
+    flat_snk_annotations = flatten(snk_config.annotations)
     for op in flat_config:
-        name = snk_annotations.get(f"{op}:name", op.replace(':', '_'))
-        help = snk_annotations.get(f"{op}:help", "")
+        name = flat_snk_annotations.get(f"{op}:name", op.replace(':', '_'))
+        help = flat_snk_annotations.get(f"{op}:help", "")
         # TODO be smarter here 
         # look up the List type e.g. if type == list then check the frist index type 
         # also can probably just pass the type around instead of the string?
-        param_type = snk_annotations.get(f"{op}:type", f"{type(flat_config[op]).__name__}")  # TODO refactor 
-        required = snk_annotations.get(f"{op}:required", False)
+        param_type = flat_snk_annotations.get(f"{op}:type", f"{type(flat_config[op]).__name__}")  # TODO refactor 
+        required = flat_snk_annotations.get(f"{op}:required", False)
         options.append(
             {
                 'name':name.replace('-', '_'),
@@ -102,12 +107,11 @@ class CLI:
         self.pipeline = Pipeline(path=pipeline_dir_path)
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
-        self.snk_config = load_snk_config(pipeline_dir_path)
+        self.snk_config: SnkConfig = SnkConfig.from_path(pipeline_dir_path / '.snk')
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / '.conda'
         self.name = self.pipeline.name
-            
         def _print_pipline_version(ctx: typer.Context, value: bool):
             if value:
                 typer.echo(self.pipeline.version)
@@ -169,14 +173,65 @@ class CLI:
                     return self.pipeline.path / path 
             raise FileNotFoundError("Snakefile not found!")
     
+    @contextmanager
+    def copy_resources(self, resources: List[Path], cleanup: bool):
+        """
+        It copies the resources to the current working directory, and then removes them when the
+        function exits
+        
+        :param resources: A list of paths to the resources you want to copy
+        :type resources: List[Path]
+        :param cleanup_resources: If True, the resources will be removed after the test
+        :type cleanup_resources: bool
+        :return: A generator object.
+        """
+        copied_resources = []
+
+        def copy_resource(src, dst):
+            if src.is_dir():
+                shutil.copytree(src, dst)
+            else:
+                shutil.copy(src, dst)
+
+        def remove_resource(resource):
+            if resource.is_dir():
+                shutil.rmtree(resource)
+            else:
+                os.remove(resource)
+
+        try:
+            for resource in resources:
+                abs_path = self.pipeline.path / resource
+                destination = Path('.') / resource.name
+                if not destination.exists(): 
+                    # make sure you don't delete files that are already there...
+                    copy_resource(abs_path, destination)
+                    copied_resources.append(destination)
+                else:
+                    typer.secho(
+                        f"Resource {resource.name} already exists... Skipping!", 
+                        fg=typer.colors.YELLOW
+                    )
+
+            yield
+        finally:
+            if not cleanup:
+                return 
+            for copied_resource in copied_resources:
+                if copied_resource.exists():
+                    remove_resource(copied_resource)
+
     def run(
             self,
             ctx: typer.Context,
             target: str = typer.Argument(None, help="File to generate. If None will run the pipeline 'all' rule."),
             configfile: Path = typer.Option(None, help="Path to snakemake config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
+            resource: List[Path] = typer.Option([], help="Additional resources to copy to workdir at run time."),
+            cleanup_resources: Optional[bool] = typer.Option(True, help="Delete resources once the pipeline sucessfully completes."),
+            cleanup_snakemake: Optional[bool] = typer.Option(True, help="Delete .snakemake folder once the pipeline sucessfully completes."),
             cores:  int = typer.Option(None, help="Set the number of cores to use. If None will use all cores."),
             verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Run pipeline in verbose mode.",),
-            web_gui: Optional[bool] = typer.Option(False, "--gui", "-g", help="Lunch pipeline gui"),
+            web_gui: Optional[bool] = typer.Option(False, "--gui", "-g", help="Lunch pipeline gui."),
             help_snakemake: Optional[bool] = typer.Option(
                 False, "--help-snakemake", "-hs", help="Print the snakemake help and exit.", is_eager=True, callback=_print_snakemake_help, show_default=False
             ),
@@ -186,11 +241,12 @@ class CLI:
             cores = 'all'
         args.extend([
             "--use-conda",
+            "--use-singularity",
             f"--conda-prefix={self.conda_prefix_dir}",
             f"--cores={cores}",
         ])
         if not self.snakefile.exists():
-            raise ValueError('Could not find Snakefile')
+            raise ValueError('Could not find Snakefile') # this should occur at install
         else:
             args.append(f"--snakefile={self.snakefile}")
         
@@ -223,18 +279,22 @@ class CLI:
         args.extend(targets_and_or_snakemake)
 
         args.extend(["--config", *[f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list]])
-
         if verbose:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
-        if web_gui:
-            launch_gui(
-                self.snakefile,
-                self.conda_prefix_dir,
-                self.pipeline.path,
-                config={k: v for dct in config_dict_list for k, v in dct.items()}
-            )
-        else:
-            snakemake.main(args)
+        
+        self.snk_config.add_resources(resource, self.pipeline.path)
+        with self.copy_resources(self.snk_config.resources, cleanup=cleanup_resources):
+            if web_gui:
+                launch_gui(
+                    self.snakefile,
+                    self.conda_prefix_dir,
+                    self.pipeline.path,
+                    config={k: v for dct in config_dict_list for k, v in dct.items()}
+                )
+            else:
+                snakemake.main(args)
+        if cleanup_snakemake:
+            shutil.rmtree(".snakemake")
 
     def info(self):
         import json

@@ -6,32 +6,11 @@ import inspect
 import os
 from typing import List
 import shutil
+import yaml
 
 from .errors import PipelineExistsError, PipelineNotFoundError
-
-class Pipeline:
-    def __init__(self, path:Path) -> None:
-        self.path = path
-        self.repo = Repo(path)
-        self.name = self.path.name
-    
-    @property
-    def version(self):
-        try:
-            # TODO: default to commit
-            version = self.repo.git.describe(['--tags','--exact-match']) 
-        except GitCommandError:
-            version = None
-        return version
-
-    @property
-    def executable(self):
-        pipeline_bin_dir = self.path / 'bin'
-        name = self.name
-        if sys.platform.startswith('win'):
-            name += '.exe'
-        return pipeline_bin_dir / name
-        
+from .cli.config import SnkConfig
+from .cli.pipeline import Pipeline
 
 
 class Nest:
@@ -88,7 +67,7 @@ class Nest:
             if config:
                 self.copy_nonstandard_config(pipeline.path, config)
             if resources:
-                self.copy_additional_resources(pipeline.path, resources)
+                self.additional_resources(pipeline.path, resources)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps 
@@ -96,6 +75,13 @@ class Nest:
             self.delete_paths(to_remove)
             raise e
         return pipeline
+    
+    def additional_resources(self, pipeline_dir: Path, resources: List[Path]):
+        """Modify the .snk file so that resources will be copied at runtime."""
+        # validate_resources(resources)
+        snk_config = SnkConfig.from_path(pipeline_dir / '.snk')
+        snk_config.resources += [r for r in resources if r not in snk_config.resources]
+        snk_config.to_yaml(pipeline_dir / '.snk')
 
     def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):
         config_dir = pipeline_dir / 'config'
