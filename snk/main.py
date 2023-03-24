@@ -55,7 +55,7 @@ def callback(
 @app.command()
 def install(
         pipeline: str = typer.Argument(
-            ..., help="URL or Github name (user/repo) of the pipeline to install."
+            ..., help="Path, URL or Github name (user/repo) of the pipeline to install."
         ),
         name: Optional[str] = typer.Option(
             None, 
