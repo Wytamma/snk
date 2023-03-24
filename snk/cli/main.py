@@ -16,7 +16,6 @@ from art import text2art
 
 from .config import SnkConfig, get_config_from_pipeline_dir, load_pipeline_snakemake_config
 from .utils import add_dynamic_options, flatten
-from .gui import launch_gui
 from .pipeline import Pipeline
 
 
@@ -231,7 +230,6 @@ class CLI:
             cleanup_snakemake: Optional[bool] = typer.Option(True, help="Delete .snakemake folder once the pipeline sucessfully completes."),
             cores:  int = typer.Option(None, help="Set the number of cores to use. If None will use all cores."),
             verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Run pipeline in verbose mode.",),
-            web_gui: Optional[bool] = typer.Option(False, "--gui", "-g", help="Lunch pipeline gui."),
             help_snakemake: Optional[bool] = typer.Option(
                 False, "--help-snakemake", "-hs", help="Print the snakemake help and exit.", is_eager=True, callback=_print_snakemake_help, show_default=False
             ),
@@ -241,7 +239,6 @@ class CLI:
             cores = 'all'
         args.extend([
             "--use-conda",
-            "--use-singularity",
             f"--conda-prefix={self.conda_prefix_dir}",
             f"--cores={cores}",
         ])
@@ -261,7 +258,7 @@ class CLI:
         try:
             subprocess.run(["mamba", "--version"], capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            typer.secho("Mamba not found! Install for speed up.")
+            typer.secho("Mamba not found! Install for speed up.", fg=typer.colors.YELLOW)
             mamba_found = False
         if not mamba_found:
             args.append("--conda-frontend=conda")
@@ -284,14 +281,6 @@ class CLI:
         
         self.snk_config.add_resources(resource, self.pipeline.path)
         with self.copy_resources(self.snk_config.resources, cleanup=cleanup_resources):
-            if web_gui:
-                launch_gui(
-                    self.snakefile,
-                    self.conda_prefix_dir,
-                    self.pipeline.path,
-                    config={k: v for dct in config_dict_list for k, v in dct.items()}
-                )
-            else:
                 snakemake.main(args)
         if cleanup_snakemake:
             shutil.rmtree(".snakemake")

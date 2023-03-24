@@ -59,7 +59,7 @@ python = ["37", "38", "39", "310", "311"]
 # requires hatch-containers
 [tool.hatch.envs.docker]
 type = "container"
-image = "conda/miniconda3-centos7"
+image = "wytamma/snk"
 
 [tool.coverage.run]
 branch = true

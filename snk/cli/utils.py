@@ -19,7 +19,9 @@ types = {
     'path': Path,
     'bool': bool,
     'boolean': bool,
-    'list': List[str]
+    'list': List[str],
+    'list[path]': List[Path],
+    'list[int]': List[int],
 }
 
 def create_cli_parameter(option):

@@ -1,0 +1,11 @@
+#!/bin/sh
+'''exec' ".../snk/bin/python" "$0" "$@"
+' '''
+# -*- coding: utf-8 -*-
+import re
+import sys
+from snk import create_cli
+if __name__ == "__main__":
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(create_cli(".../snk/snk/pipelines/snk-basic-pipeline"))
+    

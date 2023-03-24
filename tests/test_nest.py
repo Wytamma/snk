@@ -10,7 +10,7 @@ def test_init(bin_dir, snk_home):
         assert path.exists()
 
 def test_download(nest: Nest):
-    repo = nest.download('https://github.com/snakemake-workflows/rna-seq-star-deseq2.git', 'rna-seq-star-deseq2')
+    repo = nest.download('https://github.com/Wytamma/snk-basic-pipeline.git', 'rna-seq-star-deseq2')
     expected_location = nest.pipelines_dir / 'rna-seq-star-deseq2'
     assert (expected_location).exists()
     assert Path(repo.git_dir).parent == expected_location
@@ -22,7 +22,7 @@ def test_create_package(nest: Nest):
     assert path == test_pipeline_path / 'bin' / 'pipeline-name'
 
 def test_link_pipeline_executable_to_bin(nest: Nest):
-    pipeline_executable_path = Path('tests/data/snk/pipelines/rna-seq-star-deseq2/bin/rna-seq-star-deseq2')
+    pipeline_executable_path = Path('tests/data/bin/snk-basic-pipeline')
     executable_path = nest.link_pipeline_executable_to_bin(pipeline_executable_path)
     assert executable_path.exists() == True and executable_path.is_symlink() == True
 

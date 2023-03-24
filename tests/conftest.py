@@ -4,12 +4,12 @@ from snk import Nest
 from .utils import CLIRunner
 
 @pytest.fixture()
-def bin_dir(tmpdir: Path):
-    return Path(tmpdir) / 'bin'
+def bin_dir(tmp_path_factory: Path):
+    return tmp_path_factory.mktemp("bin")
 
 @pytest.fixture()
-def snk_home(tmpdir: Path):
-    return Path(tmpdir) / 'snk'
+def snk_home(tmp_path_factory: Path):
+    return tmp_path_factory.mktemp("snk")
 
 @pytest.fixture()
 def nest(snk_home, bin_dir):
@@ -19,11 +19,13 @@ def nest(snk_home, bin_dir):
 def example_config():
     return Path("tests/data/config.yaml")
 
-@pytest.fixture()
-def deseq2_runner(nest: Nest):
-    deseq2 = nest.install('https://github.com/snakemake-workflows/rna-seq-star-deseq2.git')
-    expected = nest.pipelines_dir / 'rna-seq-star-deseq2'
+
+@pytest.fixture(scope='session')
+def basic_runner(tmp_path_factory):
+    nest = Nest(tmp_path_factory.mktemp("snk"), tmp_path_factory.mktemp("bin"))
+    basic_pipeline = nest.install('https://github.com/Wytamma/snk-basic-pipeline.git')
+    expected = nest.pipelines_dir / 'snk-basic-pipeline'
     assert expected.exists()
-    print(deseq2.executable)
-    runner = CLIRunner([deseq2.executable])
+    print(basic_pipeline.executable)
+    runner = CLIRunner([basic_pipeline.executable])
     return runner
