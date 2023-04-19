@@ -4,12 +4,6 @@ from git import Repo, GitCommandError
 
 class Pipeline:
     def __init__(self, path:Path) -> None:
-        """
-        This function takes a path and returns a repository object
-        
-        :param path: The path to the repository
-        :type path: Path
-        """
         self.path = path
         self.repo = Repo(path)
         self.name = self.path.name

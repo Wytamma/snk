@@ -1,5 +1,5 @@
 from pathlib import Path
-from git import Repo, GitCommandError
+from git import InvalidGitRepositoryError, Repo, GitCommandError
 import sys
 import stat
 import inspect
@@ -8,7 +8,7 @@ from typing import List
 import shutil
 import yaml
 
-from .errors import PipelineExistsError, PipelineNotFoundError
+from .errors import PipelineExistsError, PipelineNotFoundError, InvalidPipelineRepositoryError
 from .cli.config import SnkConfig
 from .cli.pipeline import Pipeline
 
@@ -42,24 +42,34 @@ class Nest:
         self.pipelines_dir.mkdir(parents=True, exist_ok=True)
         self.bin_dir.mkdir(parents=True, exist_ok=True)
 
-    def _check_repo_url_format(self, repo):
+    def _check_repo_url_format(self, repo: str):
+        if not repo.startswith('http'):
+            raise InvalidPipelineRepositoryError('Repo url must start with http')
         if not repo.endswith('.git'):
-            raise ValueError('Repo url must end in .git')
+            raise InvalidPipelineRepositoryError('Repo url must end in .git')
 
-    def install(self, repo_url: str, name = None, tag = None, config: Path = None, force = False, resources=[]) -> Pipeline:
+    def install(self, pipeline: str, editable = False, name = None, tag = None, config: Path = None, force = False, resources=[]) -> Pipeline:
         """
         Install a Snakemake pipeline as a CLI. 
         They must be standards compliant*, public, Snakemake workflows.
         https://snakemake.github.io/snakemake-workflow-catalog/
         """
-        self._check_repo_url_format(repo_url)
-        if not name:
-            name = self._get_name_from_git_url(repo_url)
-        if name in os.listdir(self.pipelines_dir):
-            raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}")
-        if name in os.listdir(self.bin_dir):
-            raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.bin_dir}")
-        repo = self.download(repo_url, name, tag_name=tag)
+        try:
+            self._check_repo_url_format(pipeline)
+            if not name:
+                name = self._get_name_from_git_url(pipeline)
+            if name in os.listdir(self.pipelines_dir):
+                raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}")
+            if name in os.listdir(self.bin_dir):
+                raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.bin_dir}")
+            repo = self.download(pipeline, name, tag_name=tag)
+        except InvalidPipelineRepositoryError:
+            pipeline = Path(pipeline)
+            if pipeline.suffix == '.snk':
+                pipeline = pipeline.parent
+            if not name:
+                name = pipeline.name
+            repo = self.local(pipeline, name, editable)
         try:
             pipeline = Pipeline(path=Path(repo.git_dir).parent)
             pipeline_executable = self.create_package(pipeline.path)
@@ -166,6 +176,19 @@ class Nest:
                 raise PipelineNotFoundError(f"Pipeline repository '{repo_url}' not found")
             raise e
         return repo
+    
+    def local(self, path: Path, name: str, editable=False):
+        location  = self.pipelines_dir / name
+        if editable:
+            os.symlink(path, location)
+        else:
+            shutil.copytree(path, location)
+        try:
+            return Repo(location)
+        except InvalidGitRepositoryError:
+            return Repo.init(location, mkdir=False)
+        
+
 
     def create_package(self, pipeline_dir: Path) -> Path:
         """Convert a SnakeMake pipeline repo into a snk CLI"""

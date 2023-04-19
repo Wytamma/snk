@@ -79,21 +79,20 @@ def install(
     """
     Install a pipeline.
     """
-    
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
-    if not pipeline.startswith('http'):
+    if not Path(pipeline).exists() and not pipeline.startswith('http'):
         pipeline = f"https://github.com/{pipeline}.git"
     try:
-        installl_pipeline = nest.install(repo_url=pipeline, name=name, tag=tag, config=config, resources=resource)
+        installed_pipeline = nest.install(pipeline, name=name, tag=tag, config=config, resources=resource)
     except PipelineExistsError as e:
         typer.secho(e, fg='red')
         raise typer.Exit()
     except PipelineNotFoundError as e:
         typer.secho(e, fg='red')
         raise typer.Exit()
-    v = installl_pipeline.version
+    v = installed_pipeline.version
     v = v if v else 'latest'
-    typer.secho(f"Successfully installed {installl_pipeline.name} ({v})!", fg='green')
+    typer.secho(f"Successfully installed {installed_pipeline.name} ({v})!", fg='green')
 
 
 @app.command()
