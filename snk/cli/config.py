@@ -27,6 +27,15 @@ class SnkConfig:
         return cls()
     
     def validate_resources(self, resources):
+        """
+    Validate resources.
+    Args:
+      resources (List[Path]): List of resources to validate.
+    Raises:
+      FileNotFoundError: If a resource is not found.
+    Notes:
+      This function does not modify the resources list.
+    """
         for resource in resources:
             assert resource.exists(), FileNotFoundError(f"Could not find resource: {resource}")
 
@@ -48,6 +57,15 @@ class SnkConfig:
         self.resources.extend(processed)
 
     def to_yaml(self, path: Path) -> None:
+        """
+        Write SNK config to YAML file.
+        Args:
+            path (Path): Path to write the YAML file to.
+        Returns:
+            None
+        Side Effects:
+            Writes the SNK config to the specified path.
+        """
         with open(path, 'w') as f:
             yaml.dump(vars(self), f)
                              

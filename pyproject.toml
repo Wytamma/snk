@@ -47,6 +47,8 @@ path = "snk/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "write-the",
+  "openai"
 ]
 
 [tool.hatch.envs.default.scripts]

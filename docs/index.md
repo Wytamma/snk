@@ -1,3 +1,6 @@
+---
+title: Home
+---
 # snk
 
 [![PyPI - Version](https://img.shields.io/pypi/v/snk.svg)](https://pypi.org/project/snk)
