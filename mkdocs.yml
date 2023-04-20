@@ -1,10 +1,10 @@
 
 site_name: snk
-# repo_url: https://github.com/wytamma/write-the
+repo_url: https://github.com/Wytamma/snk
 
 theme:
   name: "material"
-  # homepage: https://write-the.wytamma.com
+  homepage: https://snk.wytamma.com
   # logo: assets/logo.png
   # favicon: images/favicon.png
   palette: 
