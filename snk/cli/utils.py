@@ -2,6 +2,7 @@ from typing import List, Callable
 from inspect import signature, Parameter
 from makefun import wraps
 from pathlib import Path
+from .config import SnkConfig
 import typer
 import sys
 import collections  # MutableMapping import hack
@@ -58,14 +59,8 @@ def add_dynamic_options(options: List[dict]):
     """
     def inner(func: Callable):
         """
-    Wraps a function with dynamic options.
-    Args:
-      func (Callable): The function to wrap.
-    Returns:
-      Callable: A wrapped function with the dynamic options added.
-    Notes:
-      This function is used as an inner function in the `add_dynamic_options` decorator.
-    """
+        Wraps a function with dynamic options.
+        """
         func_sig = signature(func)
         params = list(func_sig.parameters.values())
         for op in options[::-1]:
@@ -117,3 +112,118 @@ def flatten(d, parent_key='', sep=':'):
         else:
             items.append((new_key, v))
     return dict(items)
+
+
+def convert_key_to_snakemake_format(key, value):
+    """
+    Convert key to a format that can be passed over the cli to snakemake
+    """
+    result_dict = {}
+    parts = key.split(":")
+    current_dict = result_dict
+
+    for part in parts[:-1]:
+        current_dict = current_dict.setdefault(part, {})
+
+    current_dict[parts[-1]] = value
+
+    return result_dict
+
+def serialise(d):
+    """
+    Serialises a data structure into a string.
+    Args:
+      d (any): The data structure to serialise.
+    Returns:
+      any: The serialised data structure.
+    Examples:
+      >>> serialise({'a': 1, 'b': 2})
+      {'a': '1', 'b': '2'}
+    """
+    if isinstance(d, Path) or isinstance(d, datetime):
+        return str(d)
+
+    if isinstance(d, list):
+        return [serialise(x) for x in d]
+
+    if isinstance(d, dict):
+        for k, v in d.items():
+            d.update({k: serialise(v)})
+
+    # return anything else, like a string or number
+    return d
+
+def parse_config_args(args: List[str], options):
+    """
+    Parses a list of arguments and a list of options.
+    Args:
+      args (List[str]): A list of arguments.
+      options (List[dict]): A list of options.
+    Returns:
+      (List[str], List[dict]): A tuple of parsed arguments and config.
+    Examples:
+      >>> parse_config_args(['-name', 'John', '-age', '20'], [{'name': 'name', 'default': '', 'help': '', 'type': 'str', 'required': True}, {'name': 'age', 'default': '', 'help': '', 'type': 'int', 'required': True}])
+      (['John', '20'], [{'name': 'name', 'John'}, {'age': 20}])
+    """
+    names = [op['name'] for op in options]
+    config = []
+    parsed = []
+    flag=None
+    for arg in args:
+        if flag:
+            name = flag.lstrip('-')
+            op = next(op for op in options if op['name'] == name)
+            if op['default'] == serialise(arg):
+                # skip args that don't change
+                flag=None
+                continue
+            if ":" in op['original_key']:
+                samkemake_format_config = convert_key_to_snakemake_format(op['original_key'], arg)
+                name = list(samkemake_format_config.keys())[0]
+                arg = samkemake_format_config[name]
+            # config.append(f'{name}={serialise(arg)}')
+            config.append({name: serialise(arg)})
+            flag=None
+            continue
+        if arg.startswith('-') and arg.lstrip('-') in names:
+            flag = arg
+            continue
+        parsed.append(arg)
+    return parsed, config
+
+
+def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
+    """
+    Builds a list of options from a snakemake config and a snk config.
+    Args:
+      snakemake_config (dict): A snakemake config.
+      snk_config (SnkConfig): A snk config.
+    Returns:
+      List[dict]: A list of options.
+    Examples:
+      >>> build_dynamic_cli_options({'name': 'John', 'age': 20}, {'annotations': {'name:name': 'name', 'name:help': '', 'name:type': 'str', 'name:required': True, 'age:name': 'age', 'age:help': '', 'age:type': 'int', 'age:required': True}})
+      [{'name': 'name', 'original_key': 'name', 'default': 'John', 'help': '', 'type': 'str', 'required': True}, {'name': 'age', 'original_key': 'age', 'default': 20, 'help': '', 'type': 'int', 'required': True}]
+    """
+    flat_config = flatten(snakemake_config)
+    options = []
+    flat_snk_annotations = flatten(snk_config.annotations)
+    for op in flat_config:
+        name = flat_snk_annotations.get(f"{op}:name", op.replace(':', '_'))
+        help = flat_snk_annotations.get(f"{op}:help", "")
+        # TODO be smarter here 
+        # look up the List type e.g. if type == list then check the frist index type 
+        # also can probably just pass the type around instead of the string?
+        param_type = flat_snk_annotations.get(f"{op}:type", f"{type(flat_config[op]).__name__}")  # TODO refactor 
+        required = flat_snk_annotations.get(f"{op}:required", False)
+        options.append(
+            {
+                'name':name.replace('-', '_'),
+                'original_key': op,
+                'default': flat_config[op],
+                'help': help,
+                'type': param_type,
+                'required': required
+            }
+        )
+    # TODO: find annotations missing from config and add them to options
+    return options
