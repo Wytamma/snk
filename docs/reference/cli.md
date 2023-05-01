@@ -2,9 +2,9 @@
 
 ::: snk.cli.config
 
+::: snk.cli.cli
+
 ::: snk.cli.utils
 
 ::: snk.cli.pipeline
-
-::: snk.cli.main
 
