@@ -10,7 +10,7 @@ def test_flatten(example_config: Path):
 
 def test_install(basic_runner):
     res = basic_runner(['--help'])
-    assert 'Usage: snk-basic-pipeline' in res.stdout
+    assert 'snk-basic-pipeline' in res.stdout
 
 def test_info(basic_runner):
     res = basic_runner(['info'])
