@@ -5,3 +5,5 @@
 .snakemake
 reads
 Note.md
+tests/data/pipeline/bin/pipeline
+hello.txt

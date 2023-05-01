@@ -28,26 +28,18 @@ class SnkConfig:
     
     def validate_resources(self, resources):
         """
-    Validate resources.
-    Args:
-      resources (List[Path]): List of resources to validate.
-    Raises:
-      FileNotFoundError: If a resource is not found.
-    Notes:
-      This function does not modify the resources list.
-    """
+        Validate resources.
+        Args:
+            resources (List[Path]): List of resources to validate.
+        Raises:
+            FileNotFoundError: If a resource is not found.
+        Notes:
+            This function does not modify the resources list.
+        """
         for resource in resources:
             assert resource.exists(), FileNotFoundError(f"Could not find resource: {resource}")
 
     def add_resources(self, resources: List[Path], pipeline_dir_path: Path = None):
-        """
-        Add and validate resources. 
-        It takes a list of resources, and if the resource is not absolute, it appends the
-        pipeline_dir_path to the resource
-        
-        :param resources: List[Path]
-        :param pipeline_dir_path: The path to the directory containing the pipeline
-        """
         processed = []
         for resource in resources:
             if pipeline_dir_path and not resource.is_absolute():

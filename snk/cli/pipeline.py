@@ -1,6 +1,6 @@
 from pathlib import Path
 import sys
-from git import Repo, GitCommandError
+from git import Repo, GitCommandError, InvalidGitRepositoryError
 
 class Pipeline:
     """
@@ -21,7 +21,10 @@ class Pipeline:
             Initializes the `repo` and `name` attributes.
         """
         self.path = path
-        self.repo = Repo(path)
+        if path.is_symlink(): # editable mode 
+            self.repo = None
+        else:
+            self.repo = Repo(path)
         self.name = self.path.name
     
     @property
@@ -34,7 +37,7 @@ class Pipeline:
         try:
             # TODO: default to commit
             version = self.repo.git.describe(['--tags','--exact-match']) 
-        except GitCommandError:
+        except Exception:
             version = None
         return version
 
@@ -50,4 +53,18 @@ class Pipeline:
         if sys.platform.startswith('win'):
             name += '.exe'
         return pipeline_bin_dir / name
+        
+    @property
+    def profiles(self):
+        pipeline_profile_dir = self.path / 'profiles'
+        if not pipeline_profile_dir.exists():
+            return []
+        return [p for p in pipeline_profile_dir.glob("*") if p.is_dir()]
+        
+    @property
+    def environments(self):
+        pipeline_environments_dir = self.path / 'envs'
+        if not pipeline_environments_dir.exists():
+            return []
+        return [e for e in pipeline_environments_dir.glob("*.ya?ml")]
         

@@ -1,5 +1,5 @@
 from pathlib import Path
-from .main import CLI
+from .cli import CLI
 
 def create_cli(p):
     """

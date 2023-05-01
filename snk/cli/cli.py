@@ -1,3 +1,4 @@
+import sys
 import typer
 from pathlib import Path
 from typing import Optional, List, Callable
@@ -15,7 +16,7 @@ from art import text2art
 
 
 from .config import SnkConfig, get_config_from_pipeline_dir, load_pipeline_snakemake_config
-from .utils import add_dynamic_options, build_dynamic_cli_options
+from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_args
 from .pipeline import Pipeline
 
 
@@ -63,10 +64,11 @@ class CLI:
         self.register_command(self.info, help="Display information about current pipeline install.")
         self.register_command(self.config, help="Access the pipeline configuration.")
         self.register_command(self.env, help="Access the pipeline conda environments.")
+        self.register_command(self.profile, help="Access the pipeline profiles.")
         self.register_command(self.script, help="Access the pipeline scripts.")
         self.register_command(
             add_dynamic_options(self.options)(self.run), 
-            help="Run the pipeline. All unrecognized arguments are parsed onto Snakemake to be used by the pipeline.", 
+            help="Run the dynamic generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.", 
             context_settings={
                 "allow_extra_args": True, 
                 "ignore_unknown_options": True, 
@@ -204,10 +206,13 @@ class CLI:
             ctx: typer.Context,
             target: str = typer.Argument(None, help="File to generate. If None will run the pipeline 'all' rule."),
             configfile: Path = typer.Option(None, help="Path to snakemake config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
-            resource: List[Path] = typer.Option([], help="Additional resources to copy to workdir at run time."),
-            cleanup_resources: Optional[bool] = typer.Option(True, help="Delete resources once the pipeline sucessfully completes."),
-            cleanup_snakemake: Optional[bool] = typer.Option(True, help="Delete .snakemake folder once the pipeline sucessfully completes."),
-            cores:  int = typer.Option(None, help="Set the number of cores to use. If None will use all cores."),
+            resource: List[Path] = typer.Option([], "--resource", "-r", help="Additional resources to copy to workdir at run time."),
+            profile: Optional[str] = typer.Option(None, "--profile", "-p", help=f"Name of profile to use for configuring Snakemake.",),
+            force: bool = typer.Option(False, "--force", "-f", help="Force the execution of the selected target or the first rule regardless of already created output."),
+            lock: bool = typer.Option(False, "--lock", "-l", help="Lock the working directory."),
+            keep_resources: bool = typer.Option(False, "--keep-resources", "-R", help="Keep resources after pipeline completes."),
+            keep_snakemake: bool = typer.Option(False, "--keep-snakemake", "-S", help="Keep .snakemake folder after pipeline completes."),
+            cores: int = typer.Option(None, "--cores", "-c", help="Set the number of cores to use. If None will use all cores."),
             verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Run pipeline in verbose mode.",),
             help_snakemake: Optional[bool] = typer.Option(
                 False, "--help-snakemake", "-hs", help="Print the snakemake help and exit.", is_eager=True, callback=_print_snakemake_help, show_default=False
@@ -219,8 +224,8 @@ class CLI:
           target (str): File to generate. If None will run the pipeline 'all' rule.
           configfile (Path): Path to snakemake config file. Overrides existing config and defaults.
           resource (List[Path]): Additional resources to copy to workdir at run time.
-          cleanup_resources (bool): Delete resources once the pipeline sucessfully completes.
-          cleanup_snakemake (bool): Delete .snakemake folder once the pipeline sucessfully completes.
+          keep_resources (bool): Keep resources.
+          cleanup_snakemake (bool): Keep .snakemake folder.
           cores (int): Set the number of cores to use. If None will use all cores.
           verbose (bool): Run pipeline in verbose mode.
           help_snakemake (bool): Print the snakemake help and exit.
@@ -244,9 +249,13 @@ class CLI:
         
         if not configfile:
             configfile = get_config_from_pipeline_dir(self.pipeline.path)
-        if configfile:
-            args.append(f"--configfile={configfile}")
+        args.append(f"--configfile={configfile}")
 
+        if profile:
+          found_profile = [p for p in self.pipeline.profiles if profile==p.name]
+          if found_profile:
+              profile = found_profile[0]
+          args.append(f"--profile={profile}")
         
         # Set up conda frontend
         mamba_found = True
@@ -264,21 +273,37 @@ class CLI:
         if verbose:
             args.insert(0, "--verbose")
 
+        if force:
+            args.append("--force")
+
+        if not lock:
+            args.append("--nolock")
+            
         if target:
             args.append(target)
         targets_and_or_snakemake, config_dict_list = parse_config_args(ctx.args, options=self.options)
 
         args.extend(targets_and_or_snakemake)
 
-        args.extend(["--config", *[f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list]])
+        configs = [f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list]
+        if configs:
+            args.extend(["--config", *configs])
         if verbose:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
         
         self.snk_config.add_resources(resource, self.pipeline.path)
-        with self.copy_resources(self.snk_config.resources, cleanup=cleanup_resources):
-                snakemake.main(args)
-        if cleanup_snakemake:
+        
+        with self.copy_resources(self.snk_config.resources, cleanup=not keep_resources):
+            try:
+              status = 0
+              snakemake.main(args)
+            except SystemExit as e:
+                status = e
+        if not keep_snakemake and Path(".snakemake").exists():
+            if verbose:
+              typer.secho("Deleting .snakemake folder", fg="yellow")
             shutil.rmtree(".snakemake")
+        sys.exit(status)
 
     def info(self):
         """
@@ -313,8 +338,10 @@ class CLI:
             console = Console()
             console.print(syntax)
     
+
     def env(
-        name: Optional[str] = typer.Argument(None)
+        self,
+        name: str = typer.Argument(None, help="The name of the environment."),
     ):
         """
         Access the pipeline conda environments.
@@ -323,16 +350,29 @@ class CLI:
         Examples:
           >>> CLI.env(name='my_env')
         """
-        raise NotImplementedError
-
-    def script(
-        name: Optional[str] = typer.Argument(None)
+        environments_dir_yellow = typer.style(self.pipeline.path / 'envs', fg=typer.colors.YELLOW)
+        typer.echo(f"Found {len(self.pipeline.environments)} environments in {environments_dir_yellow}")
+        for env in self.pipeline.environments:
+            typer.echo(f"- {env}")
+    
+    def profile(
+        self,
+        name: str = typer.Argument(None, help="The name of the profile."),
     ):
-        """
-        Access the pipeline scripts.
-        Args:
-          name (str): The name of the script.
-        Examples:
-          >>> CLI.script(name='my_script')
-        """
-        raise NotImplementedError
+        profiles_dir_yellow = typer.style(self.pipeline.path / 'profiles', fg=typer.colors.YELLOW)
+        typer.echo(f"Found {len(self.pipeline.profiles)} profiles in {profiles_dir_yellow}")
+        for profile in self.pipeline.profiles:
+            typer.echo(f"- {profile.name}")
+
+    # def script(
+    #     self,
+    #     name: Optional[str] = typer.Argument(None)
+    # ):
+    #     """
+    #     Access the pipeline scripts.
+    #     Args:
+    #       name (str): The name of the script.
+    #     Examples:
+    #       >>> CLI.script(name='my_script')
+    #     """
+    #     raise NotImplementedError

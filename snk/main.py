@@ -75,15 +75,19 @@ def install(
             [], 
             help="Specify a resource required to run the pipeline (copied to working dir at runtime)."
         ),
+        editable: Optional[bool] = typer.Option(False, '--editable', '-e', help="Force uninstall without asking."),
     ):
     """
     Install a pipeline.
     """
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
+    if not nest.bin_dir_in_path():
+        bin_dir_yellow = typer.style(nest.bin_dir, fg=typer.colors.YELLOW, bold=False)
+        typer.echo(f"Please add SNK_BIN to your $PATH: {bin_dir_yellow}")
     if not Path(pipeline).exists() and not pipeline.startswith('http'):
         pipeline = f"https://github.com/{pipeline}.git"
     try:
-        installed_pipeline = nest.install(pipeline, name=name, tag=tag, config=config, resources=resource)
+        installed_pipeline = nest.install(pipeline, editable=editable, name=name, tag=tag, config=config, resources=resource)
     except PipelineExistsError as e:
         typer.secho(e, fg='red')
         raise typer.Exit()
@@ -113,12 +117,12 @@ def uninstall(
         typer.secho(f"Successfully uninstalled {name}!", fg='green')
         
 
-@app.command()
-def update():
-    """
-    Update a pipeline.
-    """
-    raise NotImplementedError
+# @app.command()
+# def update():
+#     """
+#     Update a pipeline.
+#     """
+#     raise NotImplementedError
 
 
 @app.command()
@@ -128,29 +132,34 @@ def list():
     """
     nest = Nest()
     try:
-        pipelines = os.listdir(nest.pipelines_dir)
+        pipelines = nest.pipelines
     except FileNotFoundError:
         pipelines = []
-    pprint(pipelines)
+    pipeline_dir_yellow = typer.style(nest.pipelines_dir, fg=typer.colors.YELLOW, bold=False)
+    typer.echo(f"Found {len(pipelines)} pipelines in {pipeline_dir_yellow}")
+    for pipeline in pipelines:
+        v = pipeline.version
+        v = v if v else 'latest'
+        typer.echo(f"- {pipeline.name} ({v})")
 
 
-@app.command()
-def run(        
-        pipeline: str = typer.Argument(
-            ..., help="URL or Github name (user/repo) of the pipeline to install."
-        ),
-    ):
-    """
-    Run the pipeline in a temporary environment.
-    """
-    raise NotImplementedError
+# @app.command()
+# def run(        
+#         pipeline: str = typer.Argument(
+#             ..., help="URL or Github name (user/repo) of the pipeline to install."
+#         ),
+#     ):
+#     """
+#     Run the pipeline in a temporary environment.
+#     """
+#     raise NotImplementedError
 
-@app.command()
-def annotations(config: Path):
-    """Generate annotations defaults from config file"""
-    raise NotImplementedError
+# @app.command()
+# def annotations(config: Path):
+#     """Generate annotations defaults from config file"""
+#     raise NotImplementedError
 
-@app.command()
-def create(name: str):
-    """Create a default project that can be installed with snk"""
-    raise NotImplementedError
+# @app.command()
+# def create(name: str):
+#     """Create a default project that can be installed with snk"""
+#     raise NotImplementedError
