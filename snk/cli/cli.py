@@ -68,7 +68,7 @@ class CLI:
         # self.register_command(self.script, help="Access the pipeline scripts.")
         self.register_command(
             add_dynamic_options(self.options)(self.run), 
-            help="Run the dynamic generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.", 
+            help="Run the dynamically generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.", 
             context_settings={
                 "allow_extra_args": True, 
                 "ignore_unknown_options": True, 
