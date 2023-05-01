@@ -10,10 +10,10 @@ def test_init(bin_dir, snk_home):
         assert path.exists()
 
 def test_download(nest: Nest):
-    repo = nest.download('https://github.com/Wytamma/snk-basic-pipeline.git', 'rna-seq-star-deseq2')
+    path = nest.download('https://github.com/Wytamma/snk-basic-pipeline.git', 'rna-seq-star-deseq2')
     expected_location = nest.pipelines_dir / 'rna-seq-star-deseq2'
     assert (expected_location).exists()
-    assert Path(repo.git_dir).parent == expected_location
+    assert path == expected_location
 
 def test_create_package(nest: Nest):
     test_pipeline_path = nest.pipelines_dir / 'pipeline-name'
