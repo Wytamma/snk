@@ -8,7 +8,7 @@ def test_flatten(example_config: Path):
     flat_config = flatten(config)
     assert flat_config['diffexp:contrasts:A-vs-B'] == ['A', 'B']
 
-def test_install(basic_runner):
+def test_installation(basic_runner):
     res = basic_runner(['--help'])
     assert 'snk-basic-pipeline' in res.stdout
 
