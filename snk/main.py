@@ -81,6 +81,7 @@ def install(
     """
     Install a pipeline.
     """
+    global SNK_BIN, SNK_HOME
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
     if not nest.bin_dir_in_path():
         bin_dir_yellow = typer.style(nest.bin_dir, fg=typer.colors.YELLOW, bold=False)
@@ -117,6 +118,7 @@ def uninstall(
     """
     Uninstall a pipeline.
     """
+    global SNK_BIN, SNK_HOME
     nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
     try:
         uninstalled = nest.uninstall(name, force=force)
@@ -140,7 +142,8 @@ def list():
     """
     List the installed pipelines.
     """
-    nest = Nest()
+    global SNK_BIN, SNK_HOME
+    nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
     try:
         pipelines = nest.pipelines
     except FileNotFoundError:
