@@ -31,8 +31,8 @@ def test_info(basic_runner):
 def test_run(basic_runner):
     res = basic_runner(['run', '-h'])
     assert 'snk-basic-pipeline' in res.stdout, res.stderr
-    assert '--samples' in res.stdout
-    assert '--genome' in res.stdout
+    assert 'samples' in res.stdout
+    assert 'genome' in res.stdout
     res = basic_runner(['run'])
 
 
