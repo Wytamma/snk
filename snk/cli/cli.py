@@ -1,3 +1,4 @@
+import inspect
 import sys
 import typer
 from pathlib import Path
@@ -34,7 +35,14 @@ class CLI:
       >>> CLI(Path('/path/to/pipeline'))
     """
 
-    def __init__(self, pipeline_dir_path: Path) -> None:
+    def __init__(self, pipeline_dir_path: Path = None) -> None:
+        if not pipeline_dir_path:
+            # get the calling frame (the frame of the function that called this function)
+            calling_frame = inspect.currentframe().f_back
+            # get the file path from the calling frame
+            pipeline_dir_path = Path(calling_frame.f_globals['__file__'])
+        if pipeline_dir_path.is_file():
+            pipeline_dir_path = pipeline_dir_path.parent
         self.pipeline = Pipeline(path=pipeline_dir_path)
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
@@ -248,19 +256,19 @@ class CLI:
             [],
             "--resource",
             "-r",
-            help="Additional resources to copy to workdir at run time.",
+            help="Additional resources to copy to workdir at run time (relative to pipeline directory).",
         ),
         profile: Optional[str] = typer.Option(
             None,
             "--profile",
             "-p",
-            help=f"Name of profile to use for configuring Snakemake.",
+            help="Name of profile to use for configuring Snakemake.",
         ),
         force: bool = typer.Option(
             False,
             "--force",
             "-f",
-            help="Force the execution of the selected target or the first rule regardless of already created output.",
+            help="Force the execution of pipeline regardless of already created output.",
         ),
         lock: bool = typer.Option(
             False, "--lock", "-l", help="Lock the working directory."
@@ -360,7 +368,7 @@ class CLI:
             args.insert(0, "--verbose")
 
         if force:
-            args.append("--force")
+            args.append("--forceall")
 
         if not lock:
             args.append("--nolock")

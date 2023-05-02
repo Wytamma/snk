@@ -86,6 +86,6 @@ def load_pipeline_snakemake_config(pipeline_dir_path: Path):
     Load snakemake config.
     """
     pipeline_config_path = get_config_from_pipeline_dir(pipeline_dir_path)
-    if not pipeline_config_path.exists():
-        return []
+    if not pipeline_config_path or not pipeline_config_path.exists():
+        return {}
     return snakemake.load_configfile(pipeline_config_path)

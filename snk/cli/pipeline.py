@@ -27,7 +27,10 @@ class Pipeline:
         if path.is_symlink():  # editable mode
             self.repo = None
         else:
-            self.repo = Repo(path)
+            try:
+                self.repo = Repo(path)
+            except InvalidGitRepositoryError:
+                self.repo = None
         self.name = self.path.name
 
     @property
