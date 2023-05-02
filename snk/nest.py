@@ -8,7 +8,11 @@ from typing import List
 import shutil
 import yaml
 
-from .errors import PipelineExistsError, PipelineNotFoundError, InvalidPipelineRepositoryError
+from .errors import (
+    PipelineExistsError,
+    PipelineNotFoundError,
+    InvalidPipelineRepositoryError,
+)
 from .cli.config import SnkConfig
 from .cli.pipeline import Pipeline
 
@@ -36,33 +40,35 @@ class Nest:
         Examples:
           >>> nest = Nest()
         """
-        self.python_interpreter_path = Path(sys.executable) # needs to be the same python that has snk
-        
+        self.python_interpreter_path = Path(
+            sys.executable
+        )  # needs to be the same python that has snk
+
         if not snk_home:
             home_path = self.python_interpreter_path.parent.parent
             if not os.access(home_path, os.W_OK):
-                user_home_path = Path('~').expanduser()
-                snk_home = user_home_path / ".local" / 'snk'
+                user_home_path = Path("~").expanduser()
+                snk_home = user_home_path / ".local" / "snk"
             else:
-                snk_home = home_path / 'snk'
+                snk_home = home_path / "snk"
 
         if not bin_dir:
             bin_dir = self.python_interpreter_path.parent
             if not os.access(bin_dir, os.W_OK):
-                user_home_path = Path('~').expanduser()
-                bin_dir = user_home_path / ".local" / 'bin'
+                user_home_path = Path("~").expanduser()
+                bin_dir = user_home_path / ".local" / "bin"
 
         self.snk_home = Path(snk_home).absolute()
         self.pipelines_dir = self.snk_home / "pipelines"
         self.bin_dir = Path(bin_dir).absolute()
-        
+
         # Create dirs
         self.snk_home.mkdir(parents=True, exist_ok=True)
         self.pipelines_dir.mkdir(parents=True, exist_ok=True)
         self.bin_dir.mkdir(parents=True, exist_ok=True)
 
     def bin_dir_in_path(self) -> bool:
-        path_dirs = os.environ['PATH'].split(os.pathsep)
+        path_dirs = os.environ["PATH"].split(os.pathsep)
         return str(self.bin_dir) in path_dirs
 
     def _check_repo_url_format(self, repo: str):
@@ -75,12 +81,21 @@ class Nest:
         Examples:
           >>> nest._check_repo_url_format('https://github.com/example/repo.git')
         """
-        if not repo.startswith('http'):
-            raise InvalidPipelineRepositoryError('Repo url must start with http')
-        if not repo.endswith('.git'):
-            raise InvalidPipelineRepositoryError('Repo url must end in .git')
+        if not repo.startswith("http"):
+            raise InvalidPipelineRepositoryError("Repo url must start with http")
+        if not repo.endswith(".git"):
+            raise InvalidPipelineRepositoryError("Repo url must end in .git")
 
-    def install(self, pipeline: str, editable = False, name = None, tag = None, config: Path = None, force = False, resources=[]) -> Pipeline:
+    def install(
+        self,
+        pipeline: str,
+        editable=False,
+        name=None,
+        tag=None,
+        config: Path = None,
+        force=False,
+        resources=[],
+    ) -> Pipeline:
         """
         Installs a Snakemake pipeline as a CLI.
         Args:
@@ -106,7 +121,7 @@ class Nest:
             path = self.download(pipeline, name, tag_name=tag)
         except InvalidPipelineRepositoryError:
             pipeline = Path(pipeline)
-            if pipeline.suffix == '.snk':
+            if pipeline.suffix == ".snk":
                 pipeline = pipeline.parent
             if not name:
                 name = pipeline.name
@@ -122,12 +137,12 @@ class Nest:
                 self.additional_resources(pipeline.path, resources)
             self._confirm_installation(name)
         except Exception as e:
-            # remove any half completed steps 
+            # remove any half completed steps
             to_remove = self.get_paths_to_delete(name)
             self.delete_paths(to_remove)
             raise e
         return pipeline
-    
+
     def additional_resources(self, pipeline_dir: Path, resources: List[Path]):
         """
         Modify the .snk file so that resources will be copied at runtime.
@@ -138,9 +153,9 @@ class Nest:
           >>> nest.additional_resources(Path('/path/to/pipeline'), [Path('/path/to/resource1'), Path('/path/to/resource2')])
         """
         # validate_resources(resources)
-        snk_config = SnkConfig.from_path(pipeline_dir / '.snk')
+        snk_config = SnkConfig.from_path(pipeline_dir / ".snk")
         snk_config.resources += [r for r in resources if r not in snk_config.resources]
-        snk_config.to_yaml(pipeline_dir / '.snk')
+        snk_config.to_yaml(pipeline_dir / ".snk")
 
     def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):
         """
@@ -151,9 +166,9 @@ class Nest:
         Examples:
           >>> nest.copy_nonstandard_config(Path('/path/to/pipeline'), Path('/path/to/config.yaml'))
         """
-        config_dir = pipeline_dir / 'config'
+        config_dir = pipeline_dir / "config"
         config_dir.mkdir()
-        shutil.copyfile(pipeline_dir / config_path, config_dir / 'config.yaml')
+        shutil.copyfile(pipeline_dir / config_path, config_dir / "config.yaml")
 
     def get_paths_to_delete(self, pipeline_name: str) -> List[Path]:
         """
@@ -167,22 +182,22 @@ class Nest:
           [Path('/path/to/pipelines/example'), Path('/path/to/bin/example')]
         """
         to_delete = []
-        
-        # remove repo 
+
+        # remove repo
         pipeline_dir = self.pipelines_dir / pipeline_name
         if pipeline_dir.exists() and pipeline_dir.is_dir():
             to_delete.append(pipeline_dir)
         elif pipeline_dir.is_symlink():
             to_delete.append(pipeline_dir)
         else:
-            raise PipelineNotFoundError(f'Could not find pipeline: {pipeline_name}')
+            raise PipelineNotFoundError(f"Could not find pipeline: {pipeline_name}")
 
         # remove link
         pipeline_bin_executable = self.bin_dir / pipeline_name
         if pipeline_bin_executable.exists() and pipeline_bin_executable.is_symlink():
             if str(pipeline_dir) in str(os.readlink(pipeline_bin_executable)):
                 to_delete.append(pipeline_bin_executable)
-        
+
         return to_delete
 
     def delete_paths(self, files: List[Path]):
@@ -203,7 +218,9 @@ class Nest:
                 path.unlink()
             elif path.is_dir():
                 print("Deleting:", path)
-                assert str(self.snk_home) in str(path), "Cannot delete folders outside of SNK_HOME"
+                assert str(self.snk_home) in str(
+                    path
+                ), "Cannot delete folders outside of SNK_HOME"
                 shutil.rmtree(path)
             else:
                 raise TypeError("Invalid file type")
@@ -229,17 +246,21 @@ class Nest:
             for p in to_remove:
                 print(f"    {p}{'/*' if p.is_dir() else ''}")
             ans = input("Proceed (Y/n)? ")
-            proceed = ans.lower() in ['y', 'yes']
+            proceed = ans.lower() in ["y", "yes"]
         if not proceed:
             return False
         self.delete_paths(to_remove)
-        return True 
+        return True
 
     def _check_pipeline_name_available(self, name: str):
         if name in os.listdir(self.pipelines_dir):
-            raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}")
+            raise PipelineExistsError(
+                f"Pipeline '{name}' already exists in {self.pipelines_dir}"
+            )
         if name in os.listdir(self.bin_dir):
-            raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.bin_dir}")
+            raise PipelineExistsError(
+                f"Pipeline '{name}' already exists in {self.bin_dir}"
+            )
 
     def _confirm_installation(self, name: str):
         """
@@ -251,7 +272,7 @@ class Nest:
         """
         pipeline_dir = self.pipelines_dir / name
         assert pipeline_dir.exists()
-        pipelines = [p.name.split('.')[0] for p in self.bin_dir.glob('*')]
+        pipelines = [p.name.split(".")[0] for p in self.bin_dir.glob("*")]
         assert name in pipelines
 
     def _get_name_from_git_url(self, git_url: str):
@@ -262,11 +283,14 @@ class Nest:
         Returns:
           str: The name of the pipeline.
         """
-        return git_url.split('/')[-1].split('.')[0]
+        return git_url.split("/")[-1].split(".")[0]
 
     @property
     def pipelines(self):
-        return [Pipeline(pipeline_dir.absolute()) for pipeline_dir in self.pipelines_dir.glob('*')]
+        return [
+            Pipeline(pipeline_dir.absolute())
+            for pipeline_dir in self.pipelines_dir.glob("*")
+        ]
 
     def download(self, repo_url: str, name: str, tag_name: str = None) -> Path:
         """
@@ -281,25 +305,29 @@ class Nest:
           >>> Nest.download('https://example.com/file.txt')
           None
         """
-        location  = self.pipelines_dir / name
-        options = ['--depth 1', '--single-branch']
+        location = self.pipelines_dir / name
+        options = ["--depth 1", "--single-branch"]
         if tag_name:
-            options.append(f'--branch {tag_name}')
+            options.append(f"--branch {tag_name}")
         try:
             repo = Repo.clone_from(repo_url, location, multi_options=options)
             repo.git.checkout(tag_name)
         except GitCommandError as e:
             if "destination path" in e.stderr:
-                raise PipelineExistsError(f"Pipeline '{name}' already exists in {self.pipelines_dir}")
+                raise PipelineExistsError(
+                    f"Pipeline '{name}' already exists in {self.pipelines_dir}"
+                )
             elif f"Remote branch {tag_name}" in e.stderr:
                 raise PipelineNotFoundError(f"Pipeline tag '{tag_name}' not found")
             elif "not found" in e.stderr:
-                raise PipelineNotFoundError(f"Pipeline repository '{repo_url}' not found")
+                raise PipelineNotFoundError(
+                    f"Pipeline repository '{repo_url}' not found"
+                )
             raise e
         return location
-    
+
     def local(self, path: Path, name: str, editable=False) -> Path:
-        location  = self.pipelines_dir / name
+        location = self.pipelines_dir / name
         if editable:
             os.symlink(path.absolute(), location, target_is_directory=True)
             return location
@@ -309,8 +337,6 @@ class Nest:
         except InvalidGitRepositoryError:
             Repo.init(location, mkdir=False)
         return location
-        
-
 
     def create_package(self, pipeline_dir: Path) -> Path:
         """
@@ -325,8 +351,9 @@ class Nest:
           >>> Nest.create_package('my_package')
         """
         self.validate_SnakeMake_repo(pipeline_dir)
-        
-        template = inspect.cleandoc(f"""
+
+        template = inspect.cleandoc(
+            f"""
             #!/bin/sh
             '''exec' "{self.python_interpreter_path}" "$0" "$@"
             ' '''
@@ -338,19 +365,20 @@ class Nest:
                 sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
                 sys.exit(create_cli("{pipeline_dir}"))
                 
-        """)
+        """
+        )
 
-        pipeline_bin_dir = pipeline_dir / 'bin'
+        pipeline_bin_dir = pipeline_dir / "bin"
         pipeline_bin_dir.mkdir(exist_ok=True)
 
         name = pipeline_dir.name
 
-        if sys.platform.startswith('win'):
-            name += '.exe'
-        
+        if sys.platform.startswith("win"):
+            name += ".exe"
+
         pipeline_executable = pipeline_bin_dir / name
 
-        with open(pipeline_executable, 'w') as f:
+        with open(pipeline_executable, "w") as f:
             f.write(template)
 
         pipeline_executable.chmod(pipeline_executable.stat().st_mode | stat.S_IEXEC)

@@ -5,11 +5,13 @@ from dataclasses import dataclass, field
 
 import yaml
 
+
 @dataclass
 class SnkConfig:
     """
     SNK config holds dynamic cli config and option annotations.
     """
+
     resources: List[Path] = field(default_factory=list)
     annotations: dict = field(default_factory=dict)
 
@@ -21,11 +23,13 @@ class SnkConfig:
         if snk_config_path.exists():
             snk_config_dict = snakemake.load_configfile(snk_config_path)
             snk_config = cls(**snk_config_dict)
-            snk_config.resources = [snk_config_path.parent / resource for resource in snk_config.resources]
+            snk_config.resources = [
+                snk_config_path.parent / resource for resource in snk_config.resources
+            ]
             snk_config.validate_resources(snk_config.resources)
             return snk_config
         return cls()
-    
+
     def validate_resources(self, resources):
         """
         Validate resources.
@@ -37,7 +41,9 @@ class SnkConfig:
             This function does not modify the resources list.
         """
         for resource in resources:
-            assert resource.exists(), FileNotFoundError(f"Could not find resource: {resource}")
+            assert resource.exists(), FileNotFoundError(
+                f"Could not find resource: {resource}"
+            )
 
     def add_resources(self, resources: List[Path], pipeline_dir_path: Path = None):
         processed = []
@@ -58,18 +64,21 @@ class SnkConfig:
         Side Effects:
             Writes the SNK config to the specified path.
         """
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             yaml.dump(vars(self), f)
-                             
-    
+
 
 def get_config_from_pipeline_dir(pipeline_dir_path: Path):
     """Search possible config locations"""
-    for path in [Path('config') / 'config.yaml', Path('config') / 'config.yml', 'config.yaml', 'config.yml']:
+    for path in [
+        Path("config") / "config.yaml",
+        Path("config") / "config.yml",
+        "config.yaml",
+        "config.yml",
+    ]:
         if (pipeline_dir_path / path).exists():
-            return pipeline_dir_path / path 
+            return pipeline_dir_path / path
     return None
-
 
 
 def load_pipeline_snakemake_config(pipeline_dir_path: Path):

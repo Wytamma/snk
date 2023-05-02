@@ -3,6 +3,7 @@ import sys
 from typing import Optional
 from git import Repo, GitCommandError, InvalidGitRepositoryError
 
+
 class Pipeline:
     """
     Represents a pipeline.
@@ -11,7 +12,8 @@ class Pipeline:
       repo (Repo): The git repository of the pipeline.
       name (str): The name of the pipeline.
     """
-    def __init__(self, path:Path) -> None:
+
+    def __init__(self, path: Path) -> None:
         """
         Initializes a Pipeline object.
         Args:
@@ -22,12 +24,12 @@ class Pipeline:
             Initializes the `repo` and `name` attributes.
         """
         self.path = path
-        if path.is_symlink(): # editable mode 
+        if path.is_symlink():  # editable mode
             self.repo = None
         else:
             self.repo = Repo(path)
         self.name = self.path.name
-    
+
     @property
     def version(self):
         """
@@ -37,7 +39,7 @@ class Pipeline:
         """
         try:
             # TODO: default to commit
-            version = self.repo.git.describe(['--tags','--exact-match']) 
+            version = self.repo.git.describe(["--tags", "--exact-match"])
         except Exception:
             version = None
         return version
@@ -49,30 +51,32 @@ class Pipeline:
         Returns:
             Path: The path to the pipeline executable.
         """
-        pipeline_bin_dir = self.path / 'bin'
+        pipeline_bin_dir = self.path / "bin"
         name = self.name
-        if sys.platform.startswith('win'):
-            name += '.exe'
+        if sys.platform.startswith("win"):
+            name += ".exe"
         return pipeline_bin_dir / name
-    
+
     def _find_folder(self, name) -> Optional[Path]:
         """Search for folder"""
         if (self.path / name).exists():
             return self.path / name
-        if (self.path / 'workflow' / name).exists():
-            return self.path / 'workflow' / name
+        if (self.path / "workflow" / name).exists():
+            return self.path / "workflow" / name
         return None
-    
+
     @property
     def profiles(self):
-        pipeline_profile_dir = self._find_folder('profiles')
+        pipeline_profile_dir = self._find_folder("profiles")
         if pipeline_profile_dir:
             return [p for p in pipeline_profile_dir.glob("*") if p.is_dir()]
         return []
-        
+
     @property
     def environments(self):
-        pipeline_environments_dir = self._find_folder('envs')
+        pipeline_environments_dir = self._find_folder("envs")
         if pipeline_environments_dir:
-            return [e for e in pipeline_environments_dir.glob("*.yaml")] + [e for e in pipeline_environments_dir.glob("*.yml")]
+            return [e for e in pipeline_environments_dir.glob("*.yaml")] + [
+                e for e in pipeline_environments_dir.glob("*.yml")
+            ]
         return []

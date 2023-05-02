@@ -14,8 +14,11 @@ from rich.syntax import Syntax
 from art import text2art
 
 
-
-from .config import SnkConfig, get_config_from_pipeline_dir, load_pipeline_snakemake_config
+from .config import (
+    SnkConfig,
+    get_config_from_pipeline_dir,
+    load_pipeline_snakemake_config,
+)
 from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_args
 from .pipeline import Pipeline
 
@@ -30,15 +33,17 @@ class CLI:
     Examples:
       >>> CLI(Path('/path/to/pipeline'))
     """
+
     def __init__(self, pipeline_dir_path: Path) -> None:
         self.pipeline = Pipeline(path=pipeline_dir_path)
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
-        self.snk_config: SnkConfig = SnkConfig.from_path(pipeline_dir_path / '.snk')
+        self.snk_config: SnkConfig = SnkConfig.from_path(pipeline_dir_path / ".snk")
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
-        self.conda_prefix_dir = pipeline_dir_path / '.conda'
+        self.conda_prefix_dir = pipeline_dir_path / ".conda"
         self.name = self.pipeline.name
+
         def _print_pipline_version(ctx: typer.Context, value: bool):
             if value:
                 typer.echo(self.pipeline.version)
@@ -50,30 +55,53 @@ class CLI:
                 raise typer.Exit()
 
         def callback(
-            ctx: typer.Context, 
-            version: Optional[bool] = typer.Option(None, '-v', '--version', help="Show the pipeline version.", is_eager=True, callback=_print_pipline_version, show_default=False),
-            path: Optional[bool] = typer.Option(None, '-p', '--path', help="Show the pipeline path.", is_eager=True, callback=_print_pipline_path, show_default=False)
+            ctx: typer.Context,
+            version: Optional[bool] = typer.Option(
+                None,
+                "-v",
+                "--version",
+                help="Show the pipeline version.",
+                is_eager=True,
+                callback=_print_pipline_version,
+                show_default=False,
+            ),
+            path: Optional[bool] = typer.Option(
+                None,
+                "-p",
+                "--path",
+                help="Show the pipeline path.",
+                is_eager=True,
+                callback=_print_pipline_path,
+                show_default=False,
+            ),
         ):
             if ctx.invoked_subcommand is None:
-                typer.echo(f'{ctx.get_help()}')
+                typer.echo(f"{ctx.get_help()}")
+
         # dynamically create the logo
         callback.__doc__ = f"{self.create_logo()}"
 
-        # registration 
-        self.register_callback(callback, invoke_without_command=True, context_settings={"help_option_names": ["-h", "--help"]})
-        self.register_command(self.info, help="Display information about current pipeline install.")
+        # registration
+        self.register_callback(
+            callback,
+            invoke_without_command=True,
+            context_settings={"help_option_names": ["-h", "--help"]},
+        )
+        self.register_command(
+            self.info, help="Display information about current pipeline install."
+        )
         self.register_command(self.config, help="Access the pipeline configuration.")
         self.register_command(self.env, help="Access the pipeline conda environments.")
         self.register_command(self.profile, help="Access the pipeline profiles.")
         # self.register_command(self.script, help="Access the pipeline scripts.")
         self.register_command(
-            add_dynamic_options(self.options)(self.run), 
-            help="Run the dynamically generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.", 
+            add_dynamic_options(self.options)(self.run),
+            help="Run the dynamically generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
-                "allow_extra_args": True, 
-                "ignore_unknown_options": True, 
-                "help_option_names": ["-h", "--help"]
-            }
+                "allow_extra_args": True,
+                "ignore_unknown_options": True,
+                "help_option_names": ["-h", "--help"],
+            },
         )
 
     def __call__(self):
@@ -120,8 +148,8 @@ class CLI:
         Examples:
           >>> CLI.create_logo()
         """
-        logo = text2art(self.name, font=font)        
-        doc  = f"""\b{logo}\bA Snakemake pipeline CLI generated with snk"""
+        logo = text2art(self.name, font=font)
+        doc = f"""\b{logo}\bA Snakemake pipeline CLI generated with snk"""
         return doc
 
     def _print_snakemake_help(value: bool):
@@ -136,7 +164,7 @@ class CLI:
         """
         if value:
             snakemake.main("-h")
-    
+
     def _find_snakefile(self):
         """
         Search possible snakefile locations.
@@ -147,9 +175,9 @@ class CLI:
         """
         for path in snakemake.SNAKEFILE_CHOICES:
             if (self.pipeline.path / path).exists():
-                return self.pipeline.path / path 
+                return self.pipeline.path / path
         raise FileNotFoundError("Snakefile not found!")
-    
+
     @contextmanager
     def copy_resources(self, resources: List[Path], cleanup: bool):
         """
@@ -182,42 +210,92 @@ class CLI:
         try:
             for resource in resources:
                 abs_path = self.pipeline.path / resource
-                destination = Path('.') / resource.name
-                if not destination.exists(): 
+                destination = Path(".") / resource.name
+                if not destination.exists():
                     # make sure you don't delete files that are already there...
                     copy_resource(abs_path, destination)
                     copied_resources.append(destination)
                 else:
                     typer.secho(
-                        f"Resource {resource.name} already exists... Skipping!", 
-                        fg=typer.colors.YELLOW
+                        f"Resource {resource.name} already exists... Skipping!",
+                        fg=typer.colors.YELLOW,
                     )
 
             yield
         finally:
             if not cleanup:
-                return 
+                return
             for copied_resource in copied_resources:
                 if copied_resource.exists():
                     remove_resource(copied_resource)
 
     def run(
-            self,
-            ctx: typer.Context,
-            target: str = typer.Argument(None, help="File to generate. If None will run the pipeline 'all' rule."),
-            configfile: Path = typer.Option(None, help="Path to snakemake config file. Overrides existing config and defaults.", exists=True, dir_okay=False),
-            resource: List[Path] = typer.Option([], "--resource", "-r", help="Additional resources to copy to workdir at run time."),
-            profile: Optional[str] = typer.Option(None, "--profile", "-p", help=f"Name of profile to use for configuring Snakemake.",),
-            force: bool = typer.Option(False, "--force", "-f", help="Force the execution of the selected target or the first rule regardless of already created output."),
-            lock: bool = typer.Option(False, "--lock", "-l", help="Lock the working directory."),
-            keep_resources: bool = typer.Option(False, "--keep-resources", "-R", help="Keep resources after pipeline completes."),
-            keep_snakemake: bool = typer.Option(False, "--keep-snakemake", "-S", help="Keep .snakemake folder after pipeline completes."),
-            cores: int = typer.Option(None, "--cores", "-c", help="Set the number of cores to use. If None will use all cores."),
-            verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Run pipeline in verbose mode.",),
-            help_snakemake: Optional[bool] = typer.Option(
-                False, "--help-snakemake", "-hs", help="Print the snakemake help and exit.", is_eager=True, callback=_print_snakemake_help, show_default=False
-            ),
-        ):
+        self,
+        ctx: typer.Context,
+        target: str = typer.Argument(
+            None, help="File to generate. If None will run the pipeline 'all' rule."
+        ),
+        configfile: Path = typer.Option(
+            None,
+            help="Path to snakemake config file. Overrides existing config and defaults.",
+            exists=True,
+            dir_okay=False,
+        ),
+        resource: List[Path] = typer.Option(
+            [],
+            "--resource",
+            "-r",
+            help="Additional resources to copy to workdir at run time.",
+        ),
+        profile: Optional[str] = typer.Option(
+            None,
+            "--profile",
+            "-p",
+            help=f"Name of profile to use for configuring Snakemake.",
+        ),
+        force: bool = typer.Option(
+            False,
+            "--force",
+            "-f",
+            help="Force the execution of the selected target or the first rule regardless of already created output.",
+        ),
+        lock: bool = typer.Option(
+            False, "--lock", "-l", help="Lock the working directory."
+        ),
+        keep_resources: bool = typer.Option(
+            False,
+            "--keep-resources",
+            "-R",
+            help="Keep resources after pipeline completes.",
+        ),
+        keep_snakemake: bool = typer.Option(
+            False,
+            "--keep-snakemake",
+            "-S",
+            help="Keep .snakemake folder after pipeline completes.",
+        ),
+        cores: int = typer.Option(
+            None,
+            "--cores",
+            "-c",
+            help="Set the number of cores to use. If None will use all cores.",
+        ),
+        verbose: Optional[bool] = typer.Option(
+            False,
+            "--verbose",
+            "-v",
+            help="Run pipeline in verbose mode.",
+        ),
+        help_snakemake: Optional[bool] = typer.Option(
+            False,
+            "--help-snakemake",
+            "-hs",
+            help="Print the snakemake help and exit.",
+            is_eager=True,
+            callback=_print_snakemake_help,
+            show_default=False,
+        ),
+    ):
         """
         Run the pipeline.
         Args:
@@ -236,37 +314,41 @@ class CLI:
         """
         args = []
         if not cores:
-            cores = 'all'
-        args.extend([
-            "--use-conda",
-            f"--conda-prefix={self.conda_prefix_dir}",
-            f"--cores={cores}",
-        ])
+            cores = "all"
+        args.extend(
+            [
+                "--use-conda",
+                f"--conda-prefix={self.conda_prefix_dir}",
+                f"--cores={cores}",
+            ]
+        )
         if not self.snakefile.exists():
-            raise ValueError('Could not find Snakefile') # this should occur at install
+            raise ValueError("Could not find Snakefile")  # this should occur at install
         else:
             args.append(f"--snakefile={self.snakefile}")
-        
+
         if not configfile:
             configfile = get_config_from_pipeline_dir(self.pipeline.path)
         args.append(f"--configfile={configfile}")
 
         if profile:
-          found_profile = [p for p in self.pipeline.profiles if profile==p.name]
-          if found_profile:
-              profile = found_profile[0]
-          args.append(f"--profile={profile}")
-        
+            found_profile = [p for p in self.pipeline.profiles if profile == p.name]
+            if found_profile:
+                profile = found_profile[0]
+            args.append(f"--profile={profile}")
+
         # Set up conda frontend
         mamba_found = True
         try:
             subprocess.run(["mamba", "--version"], capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            typer.secho("Mamba not found! Install for speed up.", fg=typer.colors.YELLOW)
+            typer.secho(
+                "Mamba not found! Install for speed up.", fg=typer.colors.YELLOW
+            )
             mamba_found = False
         if not mamba_found:
             args.append("--conda-frontend=conda")
-        
+
         typer.echo(self.create_logo())
         typer.echo()
 
@@ -278,30 +360,34 @@ class CLI:
 
         if not lock:
             args.append("--nolock")
-            
+
         if target:
             args.append(target)
-        targets_and_or_snakemake, config_dict_list = parse_config_args(ctx.args, options=self.options)
+        targets_and_or_snakemake, config_dict_list = parse_config_args(
+            ctx.args, options=self.options
+        )
 
         args.extend(targets_and_or_snakemake)
 
-        configs = [f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list]
+        configs = [
+            f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list
+        ]
         if configs:
             args.extend(["--config", *configs])
         if verbose:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
-        
+
         self.snk_config.add_resources(resource, self.pipeline.path)
-        
+
         with self.copy_resources(self.snk_config.resources, cleanup=not keep_resources):
             try:
-              status = 0
-              snakemake.main(args)
+                status = 0
+                snakemake.main(args)
             except SystemExit as e:
                 status = e
         if not keep_snakemake and Path(".snakemake").exists():
             if verbose:
-              typer.secho("Deleting .snakemake folder", fg="yellow")
+                typer.secho("Deleting .snakemake folder", fg="yellow")
             shutil.rmtree(".snakemake")
         sys.exit(status)
 
@@ -314,10 +400,11 @@ class CLI:
           >>> CLI.info()
         """
         import json
+
         info_dict = {}
-        info_dict['name'] = self.pipeline.path.name
-        info_dict['version'] = self.pipeline.version
-        info_dict['pipeline_dir_path'] = str(self.pipeline.path)
+        info_dict["name"] = self.pipeline.path.name
+        info_dict["version"] = self.pipeline.version
+        info_dict["pipeline_dir_path"] = str(self.pipeline.path)
         typer.echo(json.dumps(info_dict, indent=2))
 
     def config(self):
@@ -330,14 +417,13 @@ class CLI:
         """
         config_path = get_config_from_pipeline_dir(self.pipeline.path)
         if not config_path:
-            typer.secho("Could not find config...", fg='red')
+            typer.secho("Could not find config...", fg="red")
             raise typer.Exit(1)
         with open(config_path) as f:
             code = f.read()
-            syntax = Syntax(code, 'yaml')
+            syntax = Syntax(code, "yaml")
             console = Console()
             console.print(syntax)
-    
 
     def env(
         self,
@@ -350,17 +436,25 @@ class CLI:
         Examples:
           >>> CLI.env(name='my_env')
         """
-        environments_dir_yellow = typer.style(self.pipeline.path / 'envs', fg=typer.colors.YELLOW)
-        typer.echo(f"Found {len(self.pipeline.environments)} environments in {environments_dir_yellow}")
+        environments_dir_yellow = typer.style(
+            self.pipeline.path / "envs", fg=typer.colors.YELLOW
+        )
+        typer.echo(
+            f"Found {len(self.pipeline.environments)} environments in {environments_dir_yellow}"
+        )
         for env in self.pipeline.environments:
             typer.echo(f"- {env}")
-    
+
     def profile(
         self,
         name: str = typer.Argument(None, help="The name of the profile."),
     ):
-        profiles_dir_yellow = typer.style(self.pipeline.path / 'profiles', fg=typer.colors.YELLOW)
-        typer.echo(f"Found {len(self.pipeline.profiles)} profiles in {profiles_dir_yellow}")
+        profiles_dir_yellow = typer.style(
+            self.pipeline.path / "profiles", fg=typer.colors.YELLOW
+        )
+        typer.echo(
+            f"Found {len(self.pipeline.profiles)} profiles in {profiles_dir_yellow}"
+        )
         for profile in self.pipeline.profiles:
             typer.echo(f"- {profile.name}")
 

@@ -7,6 +7,7 @@ from datetime import datetime
 import typer
 import sys
 import collections  # MutableMapping import hack
+
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     from collections.abc import MutableMapping
 else:
@@ -14,17 +15,18 @@ else:
 
 
 types = {
-    'int': int,
-    'integer': int,
-    'str': str,
-    'string': str,
-    'path': Path,
-    'bool': bool,
-    'boolean': bool,
-    'list': List[str],
-    'list[path]': List[Path],
-    'list[int]': List[int],
+    "int": int,
+    "integer": int,
+    "str": str,
+    "string": str,
+    "path": Path,
+    "bool": bool,
+    "boolean": bool,
+    "list": List[str],
+    "list[path]": List[Path],
+    "list[int]": List[int],
 }
+
 
 def create_cli_parameter(option):
     """
@@ -39,10 +41,15 @@ def create_cli_parameter(option):
       Parameter('foo', kind=Parameter.POSITIONAL_OR_KEYWORD, default=typer.Option(..., help='[CONFIG] A number'), annotation=int)
     """
     return Parameter(
-        option['name'], 
-        kind=Parameter.POSITIONAL_OR_KEYWORD, 
-        default=typer.Option(... if option['required'] else option['default'], help=f"[CONFIG] {option['help']}"), 
-        annotation=types.get(option['type'].lower(), str))
+        option["name"],
+        kind=Parameter.POSITIONAL_OR_KEYWORD,
+        default=typer.Option(
+            ... if option["required"] else option["default"],
+            help=f"[CONFIG] {option['help']}",
+        ),
+        annotation=types.get(option["type"].lower(), str),
+    )
+
 
 def add_dynamic_options(options: List[dict]):
     """
@@ -58,6 +65,7 @@ def add_dynamic_options(options: List[dict]):
       >>> my_func
       <function my_func at 0x7f8f9f9f9f90>
     """
+
     def inner(func: Callable):
         """
         Wraps a function with dynamic options.
@@ -67,6 +75,7 @@ def add_dynamic_options(options: List[dict]):
         for op in options[::-1]:
             params.insert(1, create_cli_parameter(op))
         new_sig = func_sig.replace(parameters=params)
+
         @wraps(func, new_sig=new_sig)
         def func_wrapper(*args, **kwargs):
             """
@@ -79,19 +88,23 @@ def add_dynamic_options(options: List[dict]):
             Notes:
                 This function is used as an inner function in the `add_dynamic_options` decorator.
             """
-            if kwargs['configfile']:
+            if kwargs["configfile"]:
                 # need to check if kwargs in options have changed
                 # parse the new configfile and update the defautls
                 raise NotImplementedError
             for op in options:
-                kwargs['ctx'].args.extend([f"--{op['name']}", kwargs[op['name']]])
-            kwargs= {k:v for k,v in kwargs.items() if k in func_sig.parameters.keys()}
+                kwargs["ctx"].args.extend([f"--{op['name']}", kwargs[op["name"]]])
+            kwargs = {
+                k: v for k, v in kwargs.items() if k in func_sig.parameters.keys()
+            }
             return func(*args, **kwargs)
+
         return func_wrapper
+
     return inner
 
 
-def flatten(d, parent_key='', sep=':'):
+def flatten(d, parent_key="", sep=":"):
     """
     Flattens a nested dictionary.
     Args:
@@ -130,6 +143,7 @@ def convert_key_to_snakemake_format(key, value):
 
     return result_dict
 
+
 def serialise(d):
     """
     Serialises a data structure into a string.
@@ -154,6 +168,7 @@ def serialise(d):
     # return anything else, like a string or number
     return d
 
+
 def parse_config_args(args: List[str], options):
     """
     Parses a list of arguments and a list of options.
@@ -166,27 +181,29 @@ def parse_config_args(args: List[str], options):
       >>> parse_config_args(['-name', 'John', '-age', '20'], [{'name': 'name', 'default': '', 'help': '', 'type': 'str', 'required': True}, {'name': 'age', 'default': '', 'help': '', 'type': 'int', 'required': True}])
       (['John', '20'], [{'name': 'name', 'John'}, {'age': 20}])
     """
-    names = [op['name'] for op in options]
+    names = [op["name"] for op in options]
     config = []
     parsed = []
-    flag=None
+    flag = None
     for arg in args:
         if flag:
-            name = flag.lstrip('-')
-            op = next(op for op in options if op['name'] == name)
-            if op['default'] == serialise(arg):
+            name = flag.lstrip("-")
+            op = next(op for op in options if op["name"] == name)
+            if op["default"] == serialise(arg):
                 # skip args that don't change
-                flag=None
+                flag = None
                 continue
-            if ":" in op['original_key']:
-                samkemake_format_config = convert_key_to_snakemake_format(op['original_key'], arg)
+            if ":" in op["original_key"]:
+                samkemake_format_config = convert_key_to_snakemake_format(
+                    op["original_key"], arg
+                )
                 name = list(samkemake_format_config.keys())[0]
                 arg = samkemake_format_config[name]
             # config.append(f'{name}={serialise(arg)}')
             config.append({name: serialise(arg)})
-            flag=None
+            flag = None
             continue
-        if arg.startswith('-') and arg.lstrip('-') in names:
+        if arg.startswith("-") and arg.lstrip("-") in names:
             flag = arg
             continue
         parsed.append(arg)
@@ -209,21 +226,23 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
     options = []
     flat_snk_annotations = flatten(snk_config.annotations)
     for op in flat_config:
-        name = flat_snk_annotations.get(f"{op}:name", op.replace(':', '_'))
+        name = flat_snk_annotations.get(f"{op}:name", op.replace(":", "_"))
         help = flat_snk_annotations.get(f"{op}:help", "")
-        # TODO be smarter here 
-        # look up the List type e.g. if type == list then check the frist index type 
+        # TODO be smarter here
+        # look up the List type e.g. if type == list then check the frist index type
         # also can probably just pass the type around instead of the string?
-        param_type = flat_snk_annotations.get(f"{op}:type", f"{type(flat_config[op]).__name__}")  # TODO refactor 
+        param_type = flat_snk_annotations.get(
+            f"{op}:type", f"{type(flat_config[op]).__name__}"
+        )  # TODO refactor
         required = flat_snk_annotations.get(f"{op}:required", False)
         options.append(
             {
-                'name':name.replace('-', '_'),
-                'original_key': op,
-                'default': flat_config[op],
-                'help': help,
-                'type': param_type,
-                'required': required
+                "name": name.replace("-", "_"),
+                "original_key": op,
+                "default": flat_config[op],
+                "help": help,
+                "type": param_type,
+                "required": required,
             }
         )
     # TODO: find annotations missing from config and add them to options
