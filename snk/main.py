@@ -74,8 +74,11 @@ def install(
         [],
         help="Specify a resource required to run the pipeline (copied to working dir at runtime).",
     ),
+    force: Optional[bool] = typer.Option(
+        False, "--force", "-f", help="Force install (overwrites existing installs)."
+    ),
     editable: Optional[bool] = typer.Option(
-        False, "--editable", "-e", help="Force uninstall without asking."
+        False, "--editable", "-e", help="Whether to install the pipeline in editable mode."
     ),
 ):
     """
@@ -96,6 +99,7 @@ def install(
             tag=tag,
             config=config,
             resources=resource,
+            force=force
         )
     except PipelineExistsError as e:
         typer.secho(e, fg="red")

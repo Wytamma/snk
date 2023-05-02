@@ -111,13 +111,22 @@ class Nest:
         Examples:
           >>> nest.install('https://github.com/example/repo.git', name='example', tag='v1.0.0')
         """
+        def handle_force_installation(name: str):
+            try:
+                self.uninstall(name=name, force=True)
+            except PipelineNotFoundError:
+                pass
+
         if name in [p.name for p in self.pipelines]:
             raise ValueError("")
         try:
             self._check_repo_url_format(pipeline)
             if not name:
                 name = self._get_name_from_git_url(pipeline)
-            self._check_pipeline_name_available(name)
+            if not force:
+                self._check_pipeline_name_available(name)
+            else:
+                handle_force_installation(name)
             path = self.download(pipeline, name, tag_name=tag)
         except InvalidPipelineRepositoryError:
             pipeline = Path(pipeline)
@@ -125,7 +134,10 @@ class Nest:
                 pipeline = pipeline.parent
             if not name:
                 name = pipeline.name
-            self._check_pipeline_name_available(name)
+            if not force:
+                self._check_pipeline_name_available(name)
+            else:
+                handle_force_installation(name)
             path = self.local(pipeline, name, editable)
         try:
             pipeline = Pipeline(path=path)

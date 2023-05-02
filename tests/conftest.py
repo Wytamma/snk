@@ -29,3 +29,16 @@ def basic_runner(tmp_path_factory):
     print(basic_pipeline.executable)
     runner = CLIRunner([basic_pipeline.executable])
     return runner
+
+@pytest.fixture()
+def local_pipeline(tmp_path_factory):
+    path = Path(tmp_path_factory.mktemp("snk"))
+    (path / 'home').mkdir()
+    (path / 'bin').mkdir()
+    nest = Nest(path / 'home', path / 'bin')
+    print(nest.bin_dir)
+    print(nest.snk_home)
+    local_pipeline = nest.install("tests/data/pipeline")
+    expected = nest.pipelines_dir / 'pipeline'
+    assert expected.exists()
+    return local_pipeline
