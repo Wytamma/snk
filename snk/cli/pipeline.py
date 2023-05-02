@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+from typing import Optional
 from git import Repo, GitCommandError, InvalidGitRepositoryError
 
 class Pipeline:
@@ -53,18 +54,25 @@ class Pipeline:
         if sys.platform.startswith('win'):
             name += '.exe'
         return pipeline_bin_dir / name
-        
+    
+    def _find_folder(self, name) -> Optional[Path]:
+        """Search for folder"""
+        if (self.path / name).exists():
+            return self.path / name
+        if (self.path / 'workflow' / name).exists():
+            return self.path / 'workflow' / name
+        return None
+    
     @property
     def profiles(self):
-        pipeline_profile_dir = self.path / 'profiles'
-        if not pipeline_profile_dir.exists():
-            return []
-        return [p for p in pipeline_profile_dir.glob("*") if p.is_dir()]
+        pipeline_profile_dir = self._find_folder('profiles')
+        if pipeline_profile_dir:
+            return [p for p in pipeline_profile_dir.glob("*") if p.is_dir()]
+        return []
         
     @property
     def environments(self):
-        pipeline_environments_dir = self.path / 'envs'
-        if not pipeline_environments_dir.exists():
-            return []
-        return [e for e in pipeline_environments_dir.glob("*.ya?ml")]
-        
+        pipeline_environments_dir = self._find_folder('envs')
+        if pipeline_environments_dir:
+            return [e for e in pipeline_environments_dir.glob("*.yaml")] + [e for e in pipeline_environments_dir.glob("*.yml")]
+        return []
