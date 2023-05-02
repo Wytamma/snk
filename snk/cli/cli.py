@@ -43,6 +43,7 @@ class CLI:
         self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / ".conda"
         self.name = self.pipeline.name
+        self.verbose = False
 
         def _print_pipline_version(ctx: typer.Context, value: bool):
             if value:
@@ -216,10 +217,7 @@ class CLI:
                     copy_resource(abs_path, destination)
                     copied_resources.append(destination)
                 else:
-                    typer.secho(
-                        f"Resource {resource.name} already exists... Skipping!",
-                        fg=typer.colors.YELLOW,
-                    )
+                    raise FileExistsError(f"Resource '{resource.name}' already exists!")
 
             yield
         finally:
@@ -227,6 +225,11 @@ class CLI:
                 return
             for copied_resource in copied_resources:
                 if copied_resource.exists():
+                    if self.verbose:
+                        typer.secho(
+                            f"Deleting '{resource.name}' resource...",
+                            fg=typer.colors.YELLOW,
+                        )
                     remove_resource(copied_resource)
 
     def run(
@@ -312,6 +315,7 @@ class CLI:
         Examples:
           >>> CLI.run(target='my_target', configfile=Path('/path/to/config.yaml'), resource=[Path('/path/to/resource')], verbose=True)
         """
+        self.verbose = verbose
         args = []
         if not cores:
             cores = "all"
@@ -381,15 +385,15 @@ class CLI:
 
         with self.copy_resources(self.snk_config.resources, cleanup=not keep_resources):
             try:
-                status = 0
                 snakemake.main(args)
             except SystemExit as e:
-                status = e
+                status = int(str(e))
+                if status:
+                    sys.exit(status)
         if not keep_snakemake and Path(".snakemake").exists():
             if verbose:
-                typer.secho("Deleting .snakemake folder", fg="yellow")
+                typer.secho("Deleting '.snakemake' folder...", fg="yellow")
             shutil.rmtree(".snakemake")
-        sys.exit(status)
 
     def info(self):
         """

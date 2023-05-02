@@ -8,15 +8,6 @@ def test_flatten(example_config: Path):
     flat_config = flatten(config)
     assert flat_config['diffexp:contrasts:A-vs-B'] == ['A', 'B']
 
-def test_installation(basic_runner):
-    res = basic_runner(['--help'])
-    assert 'snk-basic-pipeline' in res.stdout
-
-def test_info(basic_runner):
-    res = basic_runner(['info'])
-    assert 'snk-basic-pipeline' in res.stdout, res.stderr
-    assert 'version' in res.stdout
-    assert 'pipeline_dir_path' in res.stdout
 
 @pytest.mark.parametrize("key, value, expected", [
     ("a:b:c", 42, {"a": {"b": {"c": 42}}}),
@@ -27,9 +18,21 @@ def test_info(basic_runner):
 def test_convert_key_to_snakemake_format(key, value, expected):
     assert convert_key_to_snakemake_format(key, value) == expected
 
+def test_installation(basic_runner):
+    res = basic_runner(['--help'])
+    assert 'snk-basic-pipeline' in res.stdout
 
-# def test_run(basic_runner):
-#     res = basic_runner(['info'])
-#     assert 'snk-basic-pipeline' in res.stdout, res.stderr
-#     assert 'version' in res.stdout
-#     assert 'pipeline_dir_path' in res.stdout
+def test_info(basic_runner):
+    res = basic_runner(['info'])
+    assert 'snk-basic-pipeline' in res.stdout, res.stderr
+    assert 'version' in res.stdout
+    assert 'pipeline_dir_path' in res.stdout
+
+def test_run(basic_runner):
+    res = basic_runner(['run', '-h'])
+    assert 'snk-basic-pipeline' in res.stdout, res.stderr
+    assert '--samples' in res.stdout
+    assert '--genome' in res.stdout
+    res = basic_runner(['run'])
+
+
