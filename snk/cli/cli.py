@@ -3,7 +3,6 @@ import sys
 import typer
 from pathlib import Path
 from typing import Optional, List, Callable
-from datetime import datetime
 import subprocess
 import shutil
 import os
@@ -21,7 +20,7 @@ from .config import (
     load_pipeline_snakemake_config,
 )
 from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_args
-from .pipeline import Pipeline
+from ..pipeline import Pipeline
 
 
 class CLI:
@@ -248,6 +247,7 @@ class CLI:
         ),
         configfile: Path = typer.Option(
             None,
+            "--config",
             help="Path to snakemake config file. Overrides existing config and defaults.",
             exists=True,
             dir_okay=False,

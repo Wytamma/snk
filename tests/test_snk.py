@@ -3,7 +3,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from snk.main import app
-from snk.cli.pipeline import Pipeline
+from snk.pipeline import Pipeline
 
 runner = CliRunner()
 

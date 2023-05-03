@@ -6,7 +6,6 @@ import inspect
 import os
 from typing import List
 import shutil
-import yaml
 
 from .errors import (
     PipelineExistsError,
@@ -14,7 +13,7 @@ from .errors import (
     InvalidPipelineRepositoryError,
 )
 from .cli.config import SnkConfig
-from .cli.pipeline import Pipeline
+from .pipeline import Pipeline
 
 
 class Nest:
@@ -117,8 +116,7 @@ class Nest:
             except PipelineNotFoundError:
                 pass
 
-        if name in [p.name for p in self.pipelines]:
-            raise ValueError("")
+        self._check_pipeline_name_available(name)
         try:
             self._check_repo_url_format(pipeline)
             if not name:
@@ -127,33 +125,32 @@ class Nest:
                 self._check_pipeline_name_available(name)
             else:
                 handle_force_installation(name)
-            path = self.download(pipeline, name, tag_name=tag)
+            pipeline_path = self.download(pipeline, name, tag_name=tag)
         except InvalidPipelineRepositoryError:
-            pipeline = Path(pipeline)
-            if pipeline.suffix == ".snk":
-                pipeline = pipeline.parent
+            pipeline_local_path = Path(pipeline)
+            if pipeline_local_path.suffix == ".snk":
+                pipeline_local_path = pipeline_local_path.parent
             if not name:
-                name = pipeline.name
+                name = pipeline_local_path.name
             if not force:
                 self._check_pipeline_name_available(name)
             else:
                 handle_force_installation(name)
-            path = self.local(pipeline, name, editable)
+            pipeline_path = self.local(pipeline_local_path, name, editable)
         try:
-            pipeline = Pipeline(path=path)
-            pipeline_executable = self.create_package(pipeline.path)
+            pipeline_executable = self.create_package(pipeline_path)
             self.link_pipeline_executable_to_bin(pipeline_executable)
             if config:
-                self.copy_nonstandard_config(pipeline.path, config)
+                self.copy_nonstandard_config(pipeline_path, config)
             if resources:
-                self.additional_resources(pipeline.path, resources)
+                self.additional_resources(pipeline_path, resources)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps
             to_remove = self.get_paths_to_delete(name)
             self.delete_paths(to_remove)
             raise e
-        return pipeline
+        return Pipeline(pipeline_path)
 
     def additional_resources(self, pipeline_dir: Path, resources: List[Path]):
         """
@@ -265,6 +262,8 @@ class Nest:
         return True
 
     def _check_pipeline_name_available(self, name: str):
+        if not name:
+            return None
         if name in os.listdir(self.pipelines_dir):
             raise PipelineExistsError(
                 f"Pipeline '{name}' already exists in {self.pipelines_dir}"
