@@ -88,10 +88,10 @@ def add_dynamic_options(options: List[dict]):
             Notes:
                 This function is used as an inner function in the `add_dynamic_options` decorator.
             """
-            if kwargs["configfile"]:
-                # need to check if kwargs in options have changed
-                # parse the new configfile and update the defautls
-                raise NotImplementedError
+            # if kwargs["configfile"]:
+            #     # need to check if kwargs in options have changed
+            #     # parse the new configfile and update the defautls
+            #     raise NotImplementedError
             for op in options:
                 kwargs["ctx"].args.extend([f"--{op['name']}", kwargs[op["name"]]])
             kwargs = {
