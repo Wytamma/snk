@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 import typer
 from pathlib import Path
 import os
@@ -14,6 +15,7 @@ SNK_BIN = None
 # fmt: off
 @app.callback(context_settings={"help_option_names": ["-h", "--help"]})
 def callback(
+    ctx: typer.Context,
     home: Optional[Path] = typer.Option(
             None, 
             envvar="SNK_HOME", 
@@ -47,14 +49,13 @@ def callback(
  \n
  Snakemake pipeline management system
     """
-    global SNK_BIN, SNK_HOME
-    SNK_BIN = bin
-    SNK_HOME = home
+    ctx.obj = SimpleNamespace(snk_home = home, snk_bin = bin)
 # fmt: on
 
 
 @app.command()
 def install(
+    ctx: typer.Context,
     pipeline: str = typer.Argument(
         ..., help="Path, URL or Github name (user/repo) of the pipeline to install."
     ),
@@ -84,8 +85,7 @@ def install(
     """
     Install a pipeline.
     """
-    global SNK_BIN, SNK_HOME
-    nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
+    nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
     if not nest.bin_dir_in_path():
         bin_dir_yellow = typer.style(nest.bin_dir, fg=typer.colors.YELLOW, bold=False)
         typer.echo(f"Please add SNK_BIN to your $PATH: {bin_dir_yellow}")
@@ -114,6 +114,7 @@ def install(
 
 @app.command()
 def uninstall(
+    ctx: typer.Context,
     name: str = typer.Argument(..., help="Name of the pipeline to uninstall."),
     force: Optional[bool] = typer.Option(
         False, "--force", "-f", help="Force uninstall without asking."
@@ -122,8 +123,7 @@ def uninstall(
     """
     Uninstall a pipeline.
     """
-    global SNK_BIN, SNK_HOME
-    nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
+    nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
     try:
         uninstalled = nest.uninstall(name, force=force)
     except PipelineNotFoundError as e:
@@ -142,12 +142,13 @@ def uninstall(
 
 
 @app.command()
-def list():
+def list(
+    ctx: typer.Context,
+):
     """
     List the installed pipelines.
     """
-    global SNK_BIN, SNK_HOME
-    nest = Nest(snk_home=SNK_HOME, bin_dir=SNK_BIN)
+    nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
     try:
         pipelines = nest.pipelines
     except FileNotFoundError:
