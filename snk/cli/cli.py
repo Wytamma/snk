@@ -49,6 +49,11 @@ class CLI:
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / ".conda"
+        if " " in str(pipeline_dir_path):
+            # cannot have spaces!
+            self.singularity_prefix_dir = None
+        else:
+            self.singularity_prefix_dir = pipeline_dir_path / ".singularity"
         self.name = self.pipeline.name
         self.verbose = False
 
@@ -334,6 +339,8 @@ class CLI:
                 f"--cores={cores}",
             ]
         )
+        if self.singularity_prefix_dir:
+            args.append(f"--singularity-prefix={self.singularity_prefix_dir}")
         if not self.snakefile.exists():
             raise ValueError("Could not find Snakefile")  # this should occur at install
         else:
