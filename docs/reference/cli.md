@@ -6,5 +6,5 @@
 
 ::: snk.cli.utils
 
-::: snk.cli.pipeline
+::: snk.pipeline
 

@@ -20,7 +20,7 @@ from .config import (
     load_pipeline_snakemake_config,
 )
 from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_args
-from ..pipeline import Pipeline
+from snk.pipeline import Pipeline
 
 
 class CLI:
