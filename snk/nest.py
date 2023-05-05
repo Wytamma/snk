@@ -128,7 +128,7 @@ class Nest:
             pipeline_path = self.download(pipeline, name, tag_name=tag)
         except InvalidPipelineRepositoryError:
             pipeline_local_path = Path(pipeline)
-            if pipeline_local_path.suffix == ".snk":
+            if pipeline_local_path.name == ".snk":
                 pipeline_local_path = pipeline_local_path.parent
             if not name:
                 name = pipeline_local_path.name
