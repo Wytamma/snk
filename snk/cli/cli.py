@@ -1,4 +1,6 @@
 import inspect
+import platform
+
 import sys
 import typer
 from pathlib import Path
@@ -328,6 +330,8 @@ class CLI:
         Examples:
           >>> CLI.run(target='my_target', configfile=Path('/path/to/config.yaml'), resource=[Path('/path/to/resource')], verbose=True)
         """
+        if platform.system() == "Darwin" and platform.processor() == "arm" and not os.environ.get("CONDA_SUBDIR"):
+            os.environ["CONDA_SUBDIR"] = "osx-64"
         self.verbose = verbose
         args = []
         if not cores:
@@ -339,7 +343,8 @@ class CLI:
                 f"--cores={cores}",
             ]
         )
-        if self.singularity_prefix_dir:
+        if self.singularity_prefix_dir and "--use-singularity" in ctx.args:
+            # only set prefix if --use-singularity is explicitly called
             args.append(f"--singularity-prefix={self.singularity_prefix_dir}")
         if not self.snakefile.exists():
             raise ValueError("Could not find Snakefile")  # this should occur at install
