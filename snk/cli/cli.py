@@ -46,7 +46,7 @@ class CLI:
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
         self.snk_config: SnkConfig = SnkConfig.from_path(pipeline_dir_path / ".snk")
-        self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
+        self.run_options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / ".conda"
         if " " in str(pipeline_dir_path):
@@ -106,9 +106,8 @@ class CLI:
         self.register_command(self.config, help="Access the pipeline configuration.")
         self.register_command(self.env, help="Access the pipeline conda environments.")
         self.register_command(self.profile, help="Access the pipeline profiles.")
-        # self.register_command(self.script, help="Access the pipeline scripts.")
         self.register_command(
-            add_dynamic_options(self.options)(self.run),
+            add_dynamic_options(self.run_options)(self.run),
             help="Run the dynamically generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
                 "allow_extra_args": True,
@@ -116,6 +115,11 @@ class CLI:
                 "help_option_names": ["-h", "--help"],
             },
         )
+        from .rule import create_rule_subcommand
+        self.add_app(
+            create_rule_subcommand, 
+            name="rule", 
+            help="Access the pipeline rules.")
 
     def __call__(self):
         """
@@ -138,6 +142,10 @@ class CLI:
           >>> CLI.register_command(my_command)
         """
         self.app.command(**command_kwargs)(command)
+
+    def add_app(self, create_app_func: Callable, **command_kwargs) -> None:
+        typer_instance = create_app_func(cli=self)
+        self.app.add_typer(typer_instance, **command_kwargs)
 
     def register_callback(self, command: Callable, **command_kwargs) -> None:
         """
@@ -383,7 +391,7 @@ class CLI:
         if target:
             args.append(target)
         targets_and_or_snakemake, config_dict_list = parse_config_args(
-            ctx.args, options=self.options
+            ctx.args, options=self.run_options
         )
 
         args.extend(targets_and_or_snakemake)
@@ -476,16 +484,3 @@ class CLI:
         )
         for profile in self.pipeline.profiles:
             typer.echo(f"- {profile.name}")
-
-    # def script(
-    #     self,
-    #     name: Optional[str] = typer.Argument(None)
-    # ):
-    #     """
-    #     Access the pipeline scripts.
-    #     Args:
-    #       name (str): The name of the script.
-    #     Examples:
-    #       >>> CLI.script(name='my_script')
-    #     """
-    #     raise NotImplementedError
