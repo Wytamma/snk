@@ -62,7 +62,7 @@ You can also configure the pipeline using a config file.
 ```
 rna-seq-star-deseq2 config # print the config 
 rna-seq-star-deseq2 config > config.yml # save the config 
-rna-seq-star-deseq2 run --configfile config.yml # run with config 
+rna-seq-star-deseq2 run --config config.yml # run with config 
 ```
 
 # how it works
