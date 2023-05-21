@@ -197,6 +197,7 @@ class Nest:
         if pipeline_dir.exists() and pipeline_dir.is_dir():
             to_delete.append(pipeline_dir)
         elif pipeline_dir.is_symlink():
+            # editable 
             to_delete.append(pipeline_dir)
         else:
             raise PipelineNotFoundError(f"Could not find pipeline: {pipeline_name}")
@@ -266,11 +267,11 @@ class Nest:
             return None
         if name in os.listdir(self.pipelines_dir):
             raise PipelineExistsError(
-                f"Pipeline '{name}' already exists in {self.pipelines_dir}"
+                f"Pipeline '{name}' already exists in SNK_HOME ({self.pipelines_dir})"
             )
-        if name in os.listdir(self.bin_dir):
+        if name in os.listdir(self.bin_dir) and (not (self.bin_dir / name).is_symlink() or str(self.pipelines_dir) not in os.readlink(self.bin_dir / name)):
             raise PipelineExistsError(
-                f"Pipeline '{name}' already exists in {self.bin_dir}"
+                f"File '{name}' already exists in SNK_BIN ({self.bin_dir})" 
             )
 
     def _confirm_installation(self, name: str):
@@ -409,7 +410,13 @@ class Nest:
           >>> Nest.link_pipeline_executable_to_bin('my_executable')
         """
         name = pipeline_executable_path.name
-        os.symlink(pipeline_executable_path.absolute(), self.bin_dir / name)
+        if (self.bin_dir / name).is_symlink() and os.readlink(self.bin_dir / name) == str(pipeline_executable_path):
+            # skip if it's already there
+            return self.bin_dir / name
+        try:
+            os.symlink(pipeline_executable_path.absolute(), self.bin_dir / name)    
+        except FileExistsError:
+            raise PipelineExistsError(f"File '{name}' already exists in SNK_BIN ({self.bin_dir})")    
         return self.bin_dir / name
 
     def validate_SnakeMake_repo(self, repo: Repo):
@@ -423,5 +430,5 @@ class Nest:
           >>> Nest.validate_SnakeMake_repo('/path/to/repo')
           True
         """
-        print("Skipping validation!")
+        #print("Skipping validation!")
         pass
