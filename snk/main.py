@@ -60,7 +60,10 @@ def install(
         ..., help="Path, URL or Github name (user/repo) of the pipeline to install."
     ),
     name: Optional[str] = typer.Option(
-        None, help="Rename the pipeline (this name will be used to call the CLI.)"
+        None, 
+        "--name",
+        "-n",
+        help="Rename the pipeline (this name will be used to call the CLI.)"
     ),
     tag: Optional[str] = typer.Option(
         None,
