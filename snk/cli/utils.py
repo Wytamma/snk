@@ -40,12 +40,14 @@ def create_cli_parameter(option):
       >>> create_cli_parameter(option)
       Parameter('foo', kind=Parameter.POSITIONAL_OR_KEYWORD, default=typer.Option(..., help='[CONFIG] A number'), annotation=int)
     """
+    meta = option['meta'] if option.get('meta', False) else 'CONFIG'
+    arg_or_option = typer.Argument if option.get('arg', False) else typer.Option
     return Parameter(
         option["name"],
         kind=Parameter.POSITIONAL_OR_KEYWORD,
-        default=typer.Option(
+        default=arg_or_option(
             ... if option["required"] else option["default"],
-            help=f"[CONFIG] {option['help']}",
+            help=f"[{meta}] {option['help']}",
         ),
         annotation=types.get(option["type"].lower(), str),
     )

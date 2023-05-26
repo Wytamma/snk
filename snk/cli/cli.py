@@ -115,11 +115,14 @@ class CLI:
                 "help_option_names": ["-h", "--help"],
             },
         )
-        from .rule import create_rule_subcommand
-        self.add_app(
-            create_rule_subcommand, 
-            name="rule", 
-            help="Access the pipeline rules.")
+        from .subcommands import create_rule_subcommand
+        try:
+            self.add_app(
+                create_rule_subcommand, 
+                name="rule", 
+                help="Access the pipeline rules.")
+        except Exception:
+            pass
 
     def __call__(self):
         """
