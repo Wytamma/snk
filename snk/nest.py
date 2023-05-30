@@ -164,7 +164,7 @@ class Nest:
         """
         # validate_resources(resources)
         snk_config = SnkConfig.from_path(pipeline_dir / ".snk")
-        snk_config.resources += [str(r) for r in resources if r not in snk_config.resources]
+        snk_config.add_resources(resources, pipeline_dir)
         snk_config.to_yaml(pipeline_dir / ".snk")
 
     def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):
