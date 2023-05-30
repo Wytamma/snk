@@ -198,7 +198,7 @@ class CLI:
             self, 
             resources: List[Path], 
             cleanup: bool, 
-            symlink_resources_folder: bool = False
+            symlink_resources: bool = False
         ):
         """
         Copy resources to the current working directory.
@@ -215,15 +215,14 @@ class CLI:
         """
         copied_resources = []
 
-        def copy_resource(src, dst):
-            if src.is_dir():
+        def copy_resource(src, dst, symlink=False):
+            target_is_directory = src.is_dir()
+            if symlink:
+                os.symlink(src, dst, target_is_directory=target_is_directory)
+            elif target_is_directory:
                 shutil.copytree(src, dst)
             else:
                 shutil.copy(src, dst)
-
-        def symlink_resource(src, dst):
-            target_is_directory = src.is_dir()
-            os.symlink(src, dst, target_is_directory=target_is_directory)
 
         def remove_resource(resource: Path):
             if resource.is_symlink():
@@ -236,26 +235,33 @@ class CLI:
         try:
             # 
             resources_folder = self.pipeline.path / 'resources'
-            destination = Path(".") / 'resources'
-            if destination.exists():
-                typer.secho(
-                    "Resources folder exists! Skipping...\n",
-                    fg=typer.colors.RED,
-                )
-            else:
-                if resources_folder.exists():
-                    if symlink_resources_folder:
-                        symlink_resource(resources_folder, destination)
-                    else:
-                        copy_resource(resources_folder, destination)
-                    copied_resources.append(destination)
+            # destination = Path(".") / 'resources'
+            # if destination.exists():
+            #     typer.secho(
+            #         "Resources folder exists! Skipping...\n",
+            #         fg=typer.colors.RED,
+            #     )
+            # else:
+            #     if resources_folder.exists():
+            #         if symlink_resources:
+            #             symlink_resource(resources_folder, destination)
+            #         else:
+            #             copy_resource(resources_folder, destination)
+            #         copied_resources.append(destination)
+            if resources_folder.exists():
+                resources.insert(0, Path('resources'))
             for resource in resources:
                 abs_path = self.pipeline.path / resource
                 destination = Path(".") / resource.name
                 if not destination.exists():
                     # make sure you don't delete files that are already there...
-                    copy_resource(abs_path, destination)
+                    copy_resource(abs_path, destination, symlink=symlink_resources)
                     copied_resources.append(destination)
+                elif destination.exists() and not cleanup:
+                    typer.secho(
+                        f"Resource '{resource.name}' already exists! Skipping...",
+                        fg=typer.colors.RED,
+                    )
                 else:
                     raise FileExistsError(f"Resource '{resource.name}' already exists!")
 
@@ -432,7 +438,7 @@ class CLI:
         with self.copy_resources(
             self.snk_config.resources, 
             cleanup=not keep_resources, 
-            symlink_resources_folder=self.snk_config.symlink_resources_folder
+            symlink_resources=self.snk_config.symlink_resources
         ):
             try:
                 snakemake.main(args)
