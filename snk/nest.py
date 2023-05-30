@@ -93,7 +93,7 @@ class Nest:
         tag=None,
         config: Path = None,
         force=False,
-        resources=[],
+        additional_resources=[],
     ) -> Pipeline:
         """
         Installs a Snakemake pipeline as a CLI.
@@ -104,7 +104,8 @@ class Nest:
           tag (str, optional): The tag of the pipeline. Defaults to None.
           config (Path, optional): The path to the config file. Defaults to None.
           force (bool, optional): Whether to force the installation. Defaults to False.
-          resources (list, optional): A list of additional resources to copy. Defaults to [].
+          additional_resources (list, optional): A list of resources additional to the resources folder to copy. Defaults to [].
+          symlink_resources_folder (bool, optional): Whether to symlink the resources folder instead of copying it. Defaults to False.
         Returns:
           Pipeline: The installed pipeline.
         Examples:
@@ -142,8 +143,8 @@ class Nest:
             self.link_pipeline_executable_to_bin(pipeline_executable)
             if config:
                 self.copy_nonstandard_config(pipeline_path, config)
-            if resources:
-                self.additional_resources(pipeline_path, resources)
+            if additional_resources:
+                self.additional_resources(pipeline_path, additional_resources)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps
@@ -163,7 +164,7 @@ class Nest:
         """
         # validate_resources(resources)
         snk_config = SnkConfig.from_path(pipeline_dir / ".snk")
-        snk_config.resources += [r for r in resources if r not in snk_config.resources]
+        snk_config.resources += [str(r) for r in resources if r not in snk_config.resources]
         snk_config.to_yaml(pipeline_dir / ".snk")
 
     def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):

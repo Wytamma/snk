@@ -14,7 +14,8 @@ class SnkConfig:
 
     resources: List[Path] = field(default_factory=list)
     annotations: dict = field(default_factory=dict)
-
+    symlink_resources_folder: bool = False
+    
     @classmethod
     def from_path(cls, snk_config_path: Path):
         """

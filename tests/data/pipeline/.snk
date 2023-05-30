@@ -2,3 +2,4 @@ annotations:
   text:
     type: str
     help: "A string to save to a file"
+symlink_resources_folder: true

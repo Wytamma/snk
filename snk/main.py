@@ -76,7 +76,7 @@ def install(
     ),
     resource: Optional[List[Path]] = typer.Option(
         [],
-        help="Specify a resource required to run the pipeline (copied to working dir at runtime).",
+        help="Specify resources additional to the resources folder required by the pipeline (copied to working dir at runtime).",
     ),
     force: Optional[bool] = typer.Option(
         False, "--force", "-f", help="Force install (overwrites existing installs)."
@@ -101,7 +101,7 @@ def install(
             name=name,
             tag=tag,
             config=config,
-            resources=resource,
+            additional_resources=resource,
             force=force
         )
     except PipelineExistsError as e:

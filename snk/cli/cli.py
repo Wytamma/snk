@@ -194,7 +194,12 @@ class CLI:
         raise FileNotFoundError("Snakefile not found!")
 
     @contextmanager
-    def copy_resources(self, resources: List[Path], cleanup: bool):
+    def copy_resources(
+            self, 
+            resources: List[Path], 
+            cleanup: bool, 
+            symlink_resources_folder: bool = False
+        ):
         """
         Copy resources to the current working directory.
         Args:
@@ -216,13 +221,34 @@ class CLI:
             else:
                 shutil.copy(src, dst)
 
-        def remove_resource(resource):
-            if resource.is_dir():
+        def symlink_resource(src, dst):
+            target_is_directory = src.is_dir()
+            os.symlink(src, dst, target_is_directory=target_is_directory)
+
+        def remove_resource(resource: Path):
+            if resource.is_symlink():
+                resource.unlink()
+            elif resource.is_dir():
                 shutil.rmtree(resource)
             else:
                 os.remove(resource)
 
         try:
+            # 
+            resources_folder = self.pipeline.path / 'resources'
+            destination = Path(".") / 'resources'
+            if destination.exists():
+                typer.secho(
+                    "Resources folder exists! Skipping...\n",
+                    fg=typer.colors.RED,
+                )
+            else:
+                if resources_folder.exists():
+                    if symlink_resources_folder:
+                        symlink_resource(resources_folder, destination)
+                    else:
+                        copy_resource(resources_folder, destination)
+                    copied_resources.append(destination)
             for resource in resources:
                 abs_path = self.pipeline.path / resource
                 destination = Path(".") / resource.name
@@ -241,7 +267,7 @@ class CLI:
                 if copied_resource.exists():
                     if self.verbose:
                         typer.secho(
-                            f"Deleting '{resource.name}' resource...",
+                            f"Deleting '{copied_resource.name}' resource...",
                             fg=typer.colors.YELLOW,
                         )
                     remove_resource(copied_resource)
@@ -403,7 +429,11 @@ class CLI:
 
         self.snk_config.add_resources(resource, self.pipeline.path)
 
-        with self.copy_resources(self.snk_config.resources, cleanup=not keep_resources):
+        with self.copy_resources(
+            self.snk_config.resources, 
+            cleanup=not keep_resources, 
+            symlink_resources_folder=self.snk_config.symlink_resources_folder
+        ):
             try:
                 snakemake.main(args)
             except SystemExit as e:
