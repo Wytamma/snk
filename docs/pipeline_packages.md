@@ -9,7 +9,7 @@ Using turning a pipeline into a package means that you are committing to a diffe
 
 !!! info
 
-    All the code from this guide can be found here -> https://github.com/Wytamma/snk-pipeline-package-example
+    All the code from this guide can be found in the repo [snk-pipeline-package-example](https://github.com/Wytamma/snk-pipeline-package-example)
 
 ## Project structure
 
