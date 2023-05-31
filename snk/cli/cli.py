@@ -216,6 +216,11 @@ class CLI:
         copied_resources = []
 
         def copy_resource(src, dst, symlink=False):
+            if self.verbose:
+                typer.secho(
+                    f"- Copying resource '{src}' to '{dst}'",
+                    fg=typer.colors.YELLOW,
+                )
             target_is_directory = src.is_dir()
             if symlink:
                 os.symlink(src, dst, target_is_directory=target_is_directory)
@@ -232,24 +237,16 @@ class CLI:
             else:
                 os.remove(resource)
 
+
+        resources_folder = self.pipeline.path / 'resources'
+        if resources_folder.exists():
+            resources.insert(0, Path('resources'))
+        if self.verbose:
+            typer.secho(
+                f"Copying {len(resources)} resources to working directory...",
+                fg=typer.colors.YELLOW,
+            )
         try:
-            # 
-            resources_folder = self.pipeline.path / 'resources'
-            # destination = Path(".") / 'resources'
-            # if destination.exists():
-            #     typer.secho(
-            #         "Resources folder exists! Skipping...\n",
-            #         fg=typer.colors.RED,
-            #     )
-            # else:
-            #     if resources_folder.exists():
-            #         if symlink_resources:
-            #             symlink_resource(resources_folder, destination)
-            #         else:
-            #             copy_resource(resources_folder, destination)
-            #         copied_resources.append(destination)
-            if resources_folder.exists():
-                resources.insert(0, Path('resources'))
             for resource in resources:
                 abs_path = self.pipeline.path / resource
                 destination = Path(".") / resource.name
@@ -257,14 +254,11 @@ class CLI:
                     # make sure you don't delete files that are already there...
                     copy_resource(abs_path, destination, symlink=symlink_resources)
                     copied_resources.append(destination)
-                elif destination.exists() and not cleanup:
+                elif self.verbose:
                     typer.secho(
-                        f"Resource '{resource.name}' already exists! Skipping...",
-                        fg=typer.colors.RED,
+                        f"- Resource '{resource.name}' already exists! Skipping...",
+                        fg=typer.colors.YELLOW,
                     )
-                else:
-                    raise FileExistsError(f"Resource '{resource.name}' already exists!")
-
             yield
         finally:
             if not cleanup:
@@ -434,22 +428,24 @@ class CLI:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
 
         self.snk_config.add_resources(resource, self.pipeline.path)
-
-        with self.copy_resources(
-            self.snk_config.resources, 
-            cleanup=not keep_resources, 
-            symlink_resources=self.snk_config.symlink_resources
-        ):
-            try:
-                snakemake.main(args)
-            except SystemExit as e:
-                status = int(str(e))
-                if status:
-                    sys.exit(status)
-        if not keep_snakemake and Path(".snakemake").exists():
-            if verbose:
-                typer.secho("Deleting '.snakemake' folder...", fg="yellow")
-            shutil.rmtree(".snakemake")
+        try:
+            with self.copy_resources(
+                self.snk_config.resources, 
+                cleanup=not keep_resources, 
+                symlink_resources=self.snk_config.symlink_resources
+            ):
+                try:
+                    snakemake.main(args)
+                except SystemExit as e:
+                    status = int(str(e))
+                    if status:
+                        sys.exit(status)
+            if not keep_snakemake and Path(".snakemake").exists():
+                if verbose:
+                    typer.secho("Deleting '.snakemake' folder...", fg="yellow")
+                shutil.rmtree(".snakemake")
+        except FileExistsError as e:
+            typer.secho(e, fg=typer.colors.RED)
 
     def info(self):
         """
