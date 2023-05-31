@@ -428,24 +428,21 @@ class CLI:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
 
         self.snk_config.add_resources(resource, self.pipeline.path)
-        try:
-            with self.copy_resources(
-                self.snk_config.resources, 
-                cleanup=not keep_resources, 
-                symlink_resources=self.snk_config.symlink_resources
-            ):
-                try:
-                    snakemake.main(args)
-                except SystemExit as e:
-                    status = int(str(e))
-                    if status:
-                        sys.exit(status)
-            if not keep_snakemake and Path(".snakemake").exists():
-                if verbose:
-                    typer.secho("Deleting '.snakemake' folder...", fg="yellow")
-                shutil.rmtree(".snakemake")
-        except FileExistsError as e:
-            typer.secho(e, fg=typer.colors.RED)
+        with self.copy_resources(
+            self.snk_config.resources, 
+            cleanup=not keep_resources, 
+            symlink_resources=self.snk_config.symlink_resources
+        ):
+            try:
+                snakemake.main(args)
+            except SystemExit as e:
+                status = int(str(e))
+                if status:
+                    sys.exit(status)
+        if not keep_snakemake and Path(".snakemake").exists():
+            if verbose:
+                typer.secho("Deleting '.snakemake' folder...", fg="yellow")
+            shutil.rmtree(".snakemake")
 
     def info(self):
         """
