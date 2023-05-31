@@ -220,7 +220,7 @@ dist/pipeline_name-0.0.1.tar.gz ... success
 https://pypi.org/project/pipeline-name/0.0.1/
 ```
 
-The pipeline is now on pypi and can we installed with `pip`!
+The pipeline is now on pypi and can be installed with `pip`!
 
 ```bash
 pip install pipeline-name
