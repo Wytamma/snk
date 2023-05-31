@@ -3,7 +3,7 @@ title: Pipeline Packages
 ---
 # Using Snk CLI to build self contained tools
 
-While `snk` is useful for managing pipelines, using snk does add an extra step to typical install processes. User must first install snk before they can `snk install` your pipeline. However, it is possible to build pipeline as a standalone package (relying on pip or conda to do the installation) and only using `snk` to dynamically generate the CLI for you. 
+While `snk` is useful for managing pipelines, using snk does add an extra step to typical install processes. User must first install snk before they can `snk install` your pipeline. However, it is possible to build a pipeline as a standalone package (relying on `pip` or `conda` to do the installation) and only using `snk` to dynamically generate the CLI. 
 
 Turning a pipeline into a package means that you are committing to a different style of project. A good example of this style is [pangolin](https://github.com/cov-lineages/pangolin), a tool for assigning SARS-CoV-2 genome sequences to global lineages. Pangolin has a CLI that wraps serval Snakemake rules. From the user perspective they `conda install pangolin` and then use the CLI `pangolin <query>` to run the tool. Pangolin abstracts away the execution of the Snakemake pipeline. Using the snk CLI class can do the same except by using snk you don't have to build the Snakemake wrapper. 
 
