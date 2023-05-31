@@ -5,7 +5,7 @@ title: Pipeline Packages
 
 While `snk` is useful for managing pipelines, using snk does add an extra step to typical install processes. User must first install snk before they can `snk install` your pipeline. However, it is possible to build pipeline as a standalone package (relying on pip or conda to do the installation) and only using `snk` to dynamically generate the CLI for you. 
 
-Using turning a pipeline into a package means that you are committing to a different style project. A good example of this style of package is [pangolin](https://github.com/cov-lineages/pangolin), a tool for assigning SARS-CoV-2 genome sequences to global lineages. Pangolin has a CLI the wraps serval Snakemake rules. From the user perspective they `conda install pangolin` and then use the CLI `pangolin <query>` to run the tool. Pangolin abstracts away the running of the Snakemake pipeline. Using the snk CLI class we can do the same except by using snk you don't have to build the Snakemake wrapper. 
+Turning a pipeline into a package means that you are committing to a different style of project. A good example of this style is [pangolin](https://github.com/cov-lineages/pangolin), a tool for assigning SARS-CoV-2 genome sequences to global lineages. Pangolin has a CLI that wraps serval Snakemake rules. From the user perspective they `conda install pangolin` and then use the CLI `pangolin <query>` to run the tool. Pangolin abstracts away the execution of the Snakemake pipeline. Using the snk CLI class can do the same except by using snk you don't have to build the Snakemake wrapper. 
 
 !!! info
 
@@ -35,7 +35,7 @@ pipeline-name
 
 ## Configuration
 
-The `pyproject.toml` file is used to configure the project metadata, dependencies, environments, etc. (see https://hatch.pypa.io/latest/config/metadata/ for details). Replace the default dependencies of `click` with `snk` e.g.
+The `pyproject.toml` file is used to configure the project metadata, dependencies, environments, etc. (see https://hatch.pypa.io/latest/config/metadata/ for details). Replace the default dependency of `click` with `snk` e.g.
 
 ```toml
 dependencies = [
@@ -50,7 +50,7 @@ The `[project.scripts]` section in the `pyproject.toml` file is used to define t
 pipeline-name = "pipeline_name.cli:pipeline_name"
 ```
 
-Modify the the default CLI to the dynamic CLI generated with snk by replacing the contents of `src/pipeline_name/cli/__init__.py` with the following:
+Modify the the default hatch CLI to the dynamic CLI generated with snk by replacing the contents of `src/pipeline_name/cli/__init__.py` with the following:
 
 ```python
 from pathlib import Path
@@ -66,7 +66,7 @@ pipeline_name = CLI(pipeline_dir_path = Path(__file__).parent.parent)
 
 ## Adding the pipeline 
 
-All that's left to do it add our pipeline. The simplest way to do this is to add a `Snakefile` and `config`. Here we add a simple pipeline that saves a message to a file. 
+All that's left to do it add the Snakemake pipeline. The simplest way to do this is to add a `Snakefile` and `config`. Here we add a simple pipeline that saves a message to a file. 
 
 ```python
 # src/pipeline_name/workflow/Snakefile
