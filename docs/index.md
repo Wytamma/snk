@@ -7,23 +7,22 @@ title: Home
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/snk.svg)](https://pypi.org/project/snk)
 [![write-the - docs](https://badgen.net/badge/write-the/docs/blue?icon=https://raw.githubusercontent.com/Wytamma/write-the/master/images/write-the-icon.svg)](https://write-the.wytamma.com/)
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FWytamma%2Fsnk&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://github.com/Wytamma/snk)
------
 
-**Table of Contents**
+---
 
-- [Installation](#installation)
-- [About](#about)
-- [License](#license)
+**Documentation**: <a href="https://snk.wytamma.com" target="_blank">https://snk.wytamma.com</a>
+
+**Source Code**: <a href="https://github.com/Wytamma/snk" target="_blank">https://github.com/Wytamma/snk</a>
+
+---
+
+Snk (pronounced snek) is a SNaKemake pipeline management system. Snk allows you to install Snakemake pipelines as Command Line Interfaces (CLIs). Using a pipeline as a CLI increases its interoperability and allows complex pipelines to be used as modular components in a larger system. Snk, using python magic, will dynamic genrate the pipeline CLI using the pipeline configuration file.
 
 ## Installation
 
 ```console
 pip install snk
 ```
-
-## About
-
-Snk (pronounced snek) is a SNaKemake pipeline management system. Snk allows you to install Snakemake pipelines as Command Line Interfaces (CLIs). Using a pipeline as a CLI increases its interoperability and allows complex pipelines to be used as modular components in a larger system. Snk, using python magic, will dynamic genrate the pipeline CLI using the pipeline configuration file.
 
 ## Basic Use
 
@@ -41,13 +40,15 @@ Successfully installed variant-calling (v2.1.1)!
 ```
 variant-calling --help
 ```
-<img width="747" alt="image" src="https://user-images.githubusercontent.com/13726005/213120475-a025e741-c9be-4aaa-ae62-37ed6c39b698.png">
+<img width="862" alt="main cli" src="https://github.com/Wytamma/snk/assets/13726005/bb3997c5-9ee6-465d-8f79-c94067ce9997">
 
 ### View run options
 
 ```
 variant-calling run -h
 ```
+<img width="862" alt="run cli" src="https://github.com/Wytamma/snk/assets/13726005/34c40a7c-72c2-4245-9589-7c3c8982be08">
+
 
 ### Create a DAG
 
@@ -56,7 +57,7 @@ Here we use the `.test` resources included in the pipeline to create the DAG.
 ```
 variant-calling run -r .test/config -r .test/data --dag dag.pdf
 ```
-![dag](https://github.com/Wytamma/snk/assets/13726005/f79bcfd3-f6cd-401e-b5d8-904e7d5f1835)
+<img width="862" alt="dag" src="https://github.com/Wytamma/snk/assets/13726005/f79bcfd3-f6cd-401e-b5d8-904e7d5f1835">
 
 
 ### Configure 
