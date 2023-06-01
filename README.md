@@ -48,11 +48,13 @@ variant-calling run -h
 
 ### Create a DAG
 
-Here we use the .test resources included in the pipeline to ge teh 
+Here we use the `.test` resources included in the pipeline to create the DAG.
 
 ```
 variant-calling run -r .test/config -r .test/data --dag dag.pdf
 ```
+![dag](https://github.com/Wytamma/snk/assets/13726005/f79bcfd3-f6cd-401e-b5d8-904e7d5f1835)
+
 
 ### Configure 
 
