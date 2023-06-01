@@ -21,7 +21,7 @@ from .config import (
     get_config_from_pipeline_dir,
     load_pipeline_snakemake_config,
 )
-from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_args
+from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_args, dag_filetype_callback
 from snk.pipeline import Pipeline
 
 
@@ -108,7 +108,6 @@ class CLI:
         self.register_command(self.config, help="Access the pipeline configuration.")
         self.register_command(self.env, help="Access the pipeline conda environments.")
         self.register_command(self.profile, help="Access the pipeline profiles.")
-        # self.register_command(self.script, help="Access the pipeline scripts.")
         self.register_command(
             add_dynamic_options(self.options)(self.run),
             help="Run the dynamically generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.",
@@ -218,7 +217,7 @@ class CLI:
         def copy_resource(src, dst, symlink=False):
             if self.verbose:
                 typer.secho(
-                    f"- Copying resource '{src}' to '{dst}'",
+                    f"  - Copying resource '{src}' to '{dst}'",
                     fg=typer.colors.YELLOW,
                 )
             target_is_directory = src.is_dir()
@@ -256,7 +255,7 @@ class CLI:
                     copied_resources.append(destination)
                 elif self.verbose:
                     typer.secho(
-                        f"- Resource '{resource.name}' already exists! Skipping...",
+                        f"  - Resource '{resource.name}' already exists! Skipping...",
                         fg=typer.colors.YELLOW,
                     )
             yield
@@ -271,7 +270,10 @@ class CLI:
                             fg=typer.colors.YELLOW,
                         )
                     remove_resource(copied_resource)
-
+    def error(self, msg):
+        typer.secho(msg, fg="red")
+        raise typer.Exit(1)
+    
     def run(
         self,
         ctx: typer.Context,
@@ -317,6 +319,13 @@ class CLI:
             "--keep-snakemake",
             "-S",
             help="Keep .snakemake folder after pipeline completes.",
+        ),
+        dag: Optional[Path] = typer.Option(
+            None, 
+            "--dag",
+            "-d",
+            help="Save directed acyclic graph to file. Must end in .pdf, .png or .svg", 
+            callback=dag_filetype_callback,
         ),
         cores: int = typer.Option(
             None,
@@ -427,12 +436,17 @@ class CLI:
         if verbose:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
 
-        self.snk_config.add_resources(resource, self.pipeline.path)
+        try:
+            self.snk_config.add_resources(resource, self.pipeline.path)
+        except FileNotFoundError as e:
+            self.error(str(e))
         with self.copy_resources(
             self.snk_config.resources, 
             cleanup=not keep_resources, 
             symlink_resources=self.snk_config.symlink_resources
         ):
+            if dag:
+                return self.save_dag(snakemake_args=args, filename=dag)
             try:
                 snakemake.main(args)
             except SystemExit as e:
@@ -511,15 +525,38 @@ class CLI:
         for profile in self.pipeline.profiles:
             typer.echo(f"- {profile.name}")
 
-    # def script(
-    #     self,
-    #     name: Optional[str] = typer.Argument(None)
-    # ):
-    #     """
-    #     Access the pipeline scripts.
-    #     Args:
-    #       name (str): The name of the script.
-    #     Examples:
-    #       >>> CLI.script(name='my_script')
-    #     """
-    #     raise NotImplementedError
+    
+    def save_dag(
+        self,
+        snakemake_args: List[str],
+        filename: Path
+    ):
+        from contextlib import redirect_stdout
+        import io
+
+        snakemake_args.append("--dag")
+        
+        fileType = filename.suffix.lstrip('.')
+        
+        # Create a file-like object to redirect the stdout
+        snakemake_output = io.StringIO()
+        # Use redirect_stdout to redirect stdout to the file-like object
+        with redirect_stdout(snakemake_output):
+            # Capture the output of snakemake.main(args) using a try-except block
+            try:
+                snakemake.main(snakemake_args)
+            except SystemExit:  # Catch SystemExit exception to prevent termination
+                pass
+        try:
+            echo_process = subprocess.Popen(['echo', snakemake_output.getvalue()], stdout=subprocess.PIPE)
+            dot_process = subprocess.Popen(['dot', f'-T{fileType}'], stdin=echo_process.stdout, stdout=subprocess.PIPE)
+            with open(filename, 'w') as output_file:
+                if self.verbose:
+                    typer.secho(
+                        f"Saving dag to {filename}", fg=typer.colors.YELLOW
+                    )
+                subprocess.run(['cat'], stdin=dot_process.stdout, stdout=output_file)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            typer.secho(
+                "dot command not found!", fg=typer.colors.RED
+            )
