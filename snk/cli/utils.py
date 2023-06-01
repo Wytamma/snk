@@ -247,3 +247,12 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
         )
     # TODO: find annotations missing from config and add them to options
     return options
+
+
+def dag_filetype_callback(ctx: typer.Context, file: Path):
+    allowed=[".pdf", ".png", ".svg"]
+    if ctx.resilient_parsing or not file:
+        return
+    if file.suffix not in allowed:
+        raise typer.BadParameter(f"Dag file suffix must be one of {','.join(allowed)}!")
+    return file

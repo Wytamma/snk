@@ -28,11 +28,14 @@ def test_info(basic_runner):
     assert 'version' in res.stdout
     assert 'pipeline_dir_path' in res.stdout
 
-def test_run(basic_runner):
+def test_run_cli(basic_runner):
     res = basic_runner(['run', '-h'])
     assert 'snk-basic-pipeline' in res.stdout, res.stderr
     assert 'samples' in res.stdout
     assert 'genome' in res.stdout
-    res = basic_runner(['run'])
 
-
+@pytest.mark.parametrize("filetype", ['pdf', 'svg', 'png'])
+def test_dag(local_runner, tmp_path, filetype):
+    res = local_runner(['run', '--dag', f'{tmp_path}/dag.{filetype}'])
+    assert 'DAG' in res.stderr, res.stderr
+    assert Path(f'{tmp_path}/dag.{filetype}').exists()

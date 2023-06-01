@@ -42,9 +42,8 @@ class SnkConfig:
             This function does not modify the resources list.
         """
         for resource in resources:
-            assert resource.exists(), FileNotFoundError(
-                f"Could not find resource: {resource}"
-            )
+            if not resource.exists(): 
+                raise FileNotFoundError(f"Could not find resource: {resource}")
 
     def add_resources(self, resources: List[Path], pipeline_dir_path: Path = None):
         processed = []
