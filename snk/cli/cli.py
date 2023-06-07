@@ -557,6 +557,8 @@ class CLI:
                     )
                 subprocess.run(['cat'], stdin=dot_process.stdout, stdout=output_file)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            typer.secho(
-                "dot command not found!", fg=typer.colors.RED
+            typer.echo(
+                "dot command not found!", fg=typer.colors.RED, err=True
             )
+            raise typer.Exit(1)
+            
