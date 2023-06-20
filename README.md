@@ -73,15 +73,7 @@ variant-calling config > config.yml # save the config
 variant-calling run --config config.yml # run with config 
 ```
 
-## how it works
-
-When installing a pipeline snk will
-
-- create directory `$PYTHON_BIN_DIR/../snk/pipelines/PIPELINE`
-- install the pipeline into this directory
-- expose CLI at `$PYTHON_BIN_DIR` that point to pipeline directory in `snk/pipelines/PIPELINE/bin`
-- As long as `$PYTHON_BIN_DIR` is on your PATH, you can now invoke the pipeline globally
-
+Read the [documentation](https://snk.wytamma.com") for more information.
 
 ## License
 
