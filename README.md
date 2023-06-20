@@ -13,7 +13,7 @@
 
 ---
 
-Snk (pronounced snek) is a SNaKemake pipeline management system. Snk allows you to install Snakemake pipelines as Command Line Interfaces (CLIs). Using a pipeline as a CLI increases its interoperability and allows complex pipelines to be used as modular components in a larger system. Snk, using python magic and the pipeline configuration file, will dynamic genrate the CLI.
+Snk (pronounced snek) is a SNaKemake pipeline management system. Snk allows you to install Snakemake pipelines as dynamically generated Command Line Interfaces (CLIs). Using a pipeline as a CLI increases its interoperability and allows complex pipelines to be used as modular components in a larger system.
 
 ## Installation
 
