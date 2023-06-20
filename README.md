@@ -25,7 +25,7 @@ pip install snk
 
 ### Install a pipeline as a CLI
 
-Install the dna-seq-gatk-variant-calling pipeline (v2.1.1) as `variant-calling`.
+Install the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) pipeline (v2.1.1) as `variant-calling`.
 
 ```
 snk install snakemake-workflows/dna-seq-gatk-variant-calling --name variant-calling -t v2.1.1
