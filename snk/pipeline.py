@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 from typing import Optional
-from git import Repo, GitCommandError, InvalidGitRepositoryError
+from git import Repo, InvalidGitRepositoryError
 
 
 class Pipeline:
@@ -12,6 +12,9 @@ class Pipeline:
       repo (Repo): The git repository of the pipeline.
       name (str): The name of the pipeline.
     """
+    path: Path = None
+    repo: Optional[Repo] = None
+    name: str = None
 
     def __init__(self, path: Path) -> None:
         """
