@@ -12,6 +12,10 @@ class SnkConfig:
     SNK config holds dynamic cli config and option annotations.
     """
 
+    art: str = None
+    logo: str = None
+    tagline: str = "A Snakemake pipeline CLI generated with Snk"
+    font: str = "small"
     resources: List[Path] = field(default_factory=list)
     annotations: dict = field(default_factory=dict)
     symlink_resources: bool = False

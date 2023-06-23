@@ -92,9 +92,12 @@ class CLI:
         ):
             if ctx.invoked_subcommand is None:
                 typer.echo(f"{ctx.get_help()}")
-
+        
         # dynamically create the logo
-        callback.__doc__ = f"{self.create_logo()}"
+        tagline: str = self.snk_config.tagline
+        font: str = self.snk_config.font
+        self.logo = self.create_logo(tagline=tagline, font=font)
+        callback.__doc__ = self.logo
 
         # registration
         self.register_callback(
@@ -152,7 +155,7 @@ class CLI:
         """
         self.app.callback(**command_kwargs)(command)
 
-    def create_logo(self, font="small"):
+    def create_logo(self, tagline="A Snakemake pipeline CLI generated with snk", font="small"):
         """
         Create a logo for the CLI.
         Args:
@@ -162,8 +165,12 @@ class CLI:
         Examples:
           >>> CLI.create_logo()
         """
-        logo = text2art(self.name, font=font)
-        doc = f"""\b{logo}\bA Snakemake pipeline CLI generated with snk"""
+        if self.snk_config.art:
+            art = self.snk_config.art
+        else:
+            logo = self.snk_config.logo if self.snk_config.logo else self.name
+            art = text2art(logo, font=font)
+        doc = f"""\b{art}\b{tagline}"""
         return doc
 
     def _print_snakemake_help(value: bool):
@@ -408,7 +415,7 @@ class CLI:
         if not mamba_found:
             args.append("--conda-frontend=conda")
 
-        typer.echo(self.create_logo())
+        typer.echo(self.logo)
         typer.echo()
 
         if verbose:
