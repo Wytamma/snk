@@ -144,7 +144,7 @@ class Nest:
             if config:
                 self.copy_nonstandard_config(pipeline_path, config)
             if additional_resources:
-                self.additional_resources(pipeline_path, additional_resources)
+                self.additional_resources(pipeline_path, additional_resources)            
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps
@@ -153,19 +153,33 @@ class Nest:
             raise e
         return Pipeline(pipeline_path)
 
-    def additional_resources(self, pipeline_dir: Path, resources: List[Path]):
+    def modify_snk_config(self, pipeline_path: Path, **kwargs):
+        """
+        Modify the .snk file.
+        Args:
+          pipeline_path (Path): The path to the pipeline directory.
+          name (str): The name of the pipeline.
+        Examples:
+          >>> nest.modify_snk_config(Path('/path/to/pipeline'), 'example')
+        """
+        snk_config = SnkConfig.from_path(pipeline_path / ".snk")
+        for key, value in kwargs.items():
+            setattr(snk_config, key, value)
+        snk_config.to_yaml(pipeline_path / ".snk")
+    
+    def additional_resources(self, pipeline_path: Path, resources: List[Path]):
         """
         Modify the .snk file so that resources will be copied at runtime.
         Args:
-          pipeline_dir (Path): The path to the pipeline directory.
+          pipeline_path (Path): The path to the pipeline directory.
           resources (List[Path]): A list of additional resources to copy.
         Examples:
           >>> nest.additional_resources(Path('/path/to/pipeline'), [Path('/path/to/resource1'), Path('/path/to/resource2')])
         """
         # validate_resources(resources)
-        snk_config = SnkConfig.from_path(pipeline_dir / ".snk")
-        snk_config.add_resources(resources, pipeline_dir)
-        snk_config.to_yaml(pipeline_dir / ".snk")
+        snk_config = SnkConfig.from_path(pipeline_path / ".snk")
+        snk_config.add_resources(resources, pipeline_path)
+        snk_config.to_yaml(pipeline_path / ".snk")
 
     def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):
         """
@@ -352,17 +366,6 @@ class Nest:
         return location
 
     def create_package(self, pipeline_dir: Path) -> Path:
-        """
-        Creates a package in the local environment.
-        Args:
-          package_name (str): The name of the package to create.
-        Returns:
-          None
-        Side Effects:
-          Creates a package in the local environment.
-        Examples:
-          >>> Nest.create_package('my_package')
-        """
         self.validate_SnakeMake_repo(pipeline_dir)
 
         template = inspect.cleandoc(
