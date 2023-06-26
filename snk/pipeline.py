@@ -60,6 +60,11 @@ class Pipeline:
             name += ".exe"
         return pipeline_bin_dir / name
 
+    @property
+    def editable(self):
+        """Is the pipeline editable?"""
+        return self.path.is_symlink()
+
     def _find_folder(self, name) -> Optional[Path]:
         """Search for folder"""
         if (self.path / name).exists():

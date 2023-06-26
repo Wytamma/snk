@@ -1,9 +1,8 @@
 from types import SimpleNamespace
 import typer
 from pathlib import Path
-import os
 from typing import Optional, List
-from rich.pretty import pprint
+from rich import print
 from .nest import Nest
 from .errors import PipelineExistsError, PipelineNotFoundError
 
@@ -161,9 +160,12 @@ def list(
     )
     typer.echo(f"Found {len(pipelines)} pipelines in {pipeline_dir_yellow}")
     for pipeline in pipelines:
+        if pipeline.editable:
+            print(f'- {pipeline.name} ([bold green]editable[/bold green]) -> "{pipeline.path}"')
+            continue
         v = pipeline.version
         v = v if v else "latest"
-        typer.echo(f"- {pipeline.name} ({v})")
+        print(f"- {pipeline.name} ([bold green]{v}[/bold green])")
 
 
 # @app.command()
