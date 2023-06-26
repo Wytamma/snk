@@ -4,7 +4,7 @@ import platform
 import sys
 import typer
 from pathlib import Path
-from typing import Optional, List, Callable
+from typing import Optional, List
 import subprocess
 import shutil
 import os
@@ -16,7 +16,7 @@ from rich.syntax import Syntax
 from art import text2art
 
 from snk.cli.dynamic_typer import DynamicTyper
-
+from snk.cli.subcommands import EnvApp
 
 from .config import (
     SnkConfig,
@@ -112,7 +112,12 @@ class CLI(DynamicTyper):
         )
         self.register_command(self.config, help="Access the pipeline configuration.")
         if self.pipeline.environments:
-            self.register_command(self.env, help="Access the pipeline conda environments.")
+            env_app = EnvApp(pipeline=self.pipeline, conda_prefix_dir=self.conda_prefix_dir)
+            self.register_group(
+                env_app,
+                name="env",
+                help="Access the pipeline conda environments."
+            )
         if self.pipeline.profiles:
             self.register_command(self.profile, help="Access the pipeline profiles.")
         self.register_command(

@@ -38,17 +38,17 @@ class DynamicTyper:
         """
         self.app.callback(**command_kwargs)(command)
 
-    def register_subcommand(self, app: typer.Typer, **command_kwargs) -> None:
+    def register_group(self, group: "DynamicTyper", **command_kwargs) -> None:
         """
-        Register a subcommand to the CLI.
+        Register a subcommand group group to the CLI.
         Args:
-          command (Callable): The subcommand to register.
+          group (DynamicTyper): The subcommand group to register.
         Side Effects:
-          Registers the subcommand to the CLI.
+          Registers the subcommand group to the CLI.
         Examples:
-          >>> CLI.register_subcommand(my_subcommand)
+          >>> CLI.register_app(my_group)
         """
-        self.app.add_typer(app, **command_kwargs)
+        self.app.add_typer(group.app, **command_kwargs)
     
     def error(self, msg):
         typer.secho(msg, fg="red")
