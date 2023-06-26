@@ -129,8 +129,6 @@ class Nest:
             pipeline_path = self.download(pipeline, name, tag_name=tag)
         except InvalidPipelineRepositoryError:
             pipeline_local_path = Path(pipeline)
-            if pipeline_local_path.name == ".snk":
-                pipeline_local_path = pipeline_local_path.parent
             if not name:
                 name = pipeline_local_path.name
             if not force:
@@ -155,21 +153,24 @@ class Nest:
 
     def modify_snk_config(self, pipeline_path: Path, **kwargs):
         """
-        Modify the .snk file.
+        Modify the snk config file.
         Args:
           pipeline_path (Path): The path to the pipeline directory.
           name (str): The name of the pipeline.
         Examples:
           >>> nest.modify_snk_config(Path('/path/to/pipeline'), 'example')
         """
-        snk_config = SnkConfig.from_path(pipeline_path / ".snk")
+        snk_config = SnkConfig.from_pipeline_dir(
+            pipeline_path, 
+            create_if_not_exists=True
+        )
         for key, value in kwargs.items():
             setattr(snk_config, key, value)
-        snk_config.to_yaml(pipeline_path / ".snk")
+        snk_config.save()
     
     def additional_resources(self, pipeline_path: Path, resources: List[Path]):
         """
-        Modify the .snk file so that resources will be copied at runtime.
+        Modify the snk config file so that resources will be copied at runtime.
         Args:
           pipeline_path (Path): The path to the pipeline directory.
           resources (List[Path]): A list of additional resources to copy.
@@ -177,9 +178,9 @@ class Nest:
           >>> nest.additional_resources(Path('/path/to/pipeline'), [Path('/path/to/resource1'), Path('/path/to/resource2')])
         """
         # validate_resources(resources)
-        snk_config = SnkConfig.from_path(pipeline_path / ".snk")
+        snk_config = SnkConfig.from_pipeline_dir(pipeline_path, create_if_not_exists=True)
         snk_config.add_resources(resources, pipeline_path)
-        snk_config.to_yaml(pipeline_path / ".snk")
+        snk_config.save()
 
     def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):
         """

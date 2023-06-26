@@ -47,7 +47,7 @@ class CLI:
         self.pipeline = Pipeline(path=pipeline_dir_path)
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
-        self.snk_config: SnkConfig = SnkConfig.from_path(pipeline_dir_path / ".snk")
+        self.snk_config = SnkConfig.from_pipeline_dir(pipeline_dir_path, create_if_not_exists=True)
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / ".conda"
