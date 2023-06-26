@@ -112,7 +112,12 @@ class CLI(DynamicTyper):
         )
         self.register_command(self.config, help="Access the pipeline configuration.")
         if self.pipeline.environments:
-            env_app = EnvApp(pipeline=self.pipeline, conda_prefix_dir=self.conda_prefix_dir)
+            env_app = EnvApp(
+                pipeline=self.pipeline, 
+                conda_prefix_dir=self.conda_prefix_dir,
+                snakemake_config=self.snakemake_config,
+                snakefile=self.snakefile,
+            )
             self.register_group(
                 env_app,
                 name="env",
