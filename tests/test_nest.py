@@ -21,10 +21,18 @@ def test_create_package(nest: Nest):
     path = nest.create_package(pipeline_dir=test_pipeline_path)
     assert path == test_pipeline_path / 'bin' / 'pipeline-name'
 
+def test_install(nest: Nest):
+    pipeline = nest.install('tests/data/pipeline')
+    assert pipeline.name == 'pipeline'
+    pipeline = nest.install('tests/data/pipeline', name='new-pipeline-name')
+    assert pipeline.name == 'new-pipeline-name'
+    assert pipeline.path.name == 'new-pipeline-name'
+
+
 def test_link_pipeline_executable_to_bin(nest: Nest):
     pipeline_executable_path = Path('tests/data/bin/snk-basic-pipeline')
     executable_path = nest.link_pipeline_executable_to_bin(pipeline_executable_path)
-    assert executable_path.exists() == True and executable_path.is_symlink() == True
+    assert executable_path.exists() is True and executable_path.is_symlink() is True
 
 def test_uninstall(nest:Nest):
     pass

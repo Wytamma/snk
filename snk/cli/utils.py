@@ -23,6 +23,7 @@ types = {
     "bool": bool,
     "boolean": bool,
     "list": List[str],
+    "list[str]": List[str],
     "list[path]": List[Path],
     "list[int]": List[int],
 }
@@ -49,7 +50,10 @@ def create_cli_parameter(option):
             ... if option["required"] else option["default"],
             help=f"[{meta}] {option['help']}",
         ),
-        annotation=types.get(option["type"].lower(), str),
+        annotation=types.get(
+            option["type"].lower(), 
+            List[str] if 'list' in option["type"].lower() else str
+        ),
     )
 
 
@@ -211,6 +215,11 @@ def parse_config_args(args: List[str], options):
         parsed.append(arg)
     return parsed, config
 
+def get_default_type(v):
+    default_type = type(v)
+    if default_type == list and len(v) > 0:
+        return f"List[{type(v[0]).__name__}]"
+    return str(default_type.__name__)
 
 def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
     """
@@ -234,7 +243,7 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
         # look up the List type e.g. if type == list then check the frist index type
         # also can probably just pass the type around instead of the string?
         param_type = flat_snk_annotations.get(
-            f"{op}:type", f"{type(flat_config[op]).__name__}"
+            f"{op}:type", get_default_type(flat_config[op])
         )  # TODO refactor
         required = flat_snk_annotations.get(f"{op}:required", False)
         options.append(
@@ -249,3 +258,12 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
         )
     # TODO: find annotations missing from config and add them to options
     return options
+
+
+def dag_filetype_callback(ctx: typer.Context, file: Path):
+    allowed=[".pdf", ".png", ".svg"]
+    if ctx.resilient_parsing or not file:
+        return
+    if file.suffix not in allowed:
+        raise typer.BadParameter(f"Dag file suffix must be one of {','.join(allowed)}!")
+    return file

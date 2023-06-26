@@ -1,0 +1,8 @@
+annotations:
+  text:
+    type: str
+    help: "A string to save to a file"
+symlink_resources: true
+logo: "MyPipeline"
+tagline: "\nA pipeline to test the pipeline logo and tagline"
+font: "cybermedium"

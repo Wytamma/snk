@@ -1,9 +1,8 @@
 from types import SimpleNamespace
 import typer
 from pathlib import Path
-import os
 from typing import Optional, List
-from rich.pretty import pprint
+from rich import print
 from .nest import Nest
 from .errors import PipelineExistsError, PipelineNotFoundError
 
@@ -60,7 +59,10 @@ def install(
         ..., help="Path, URL or Github name (user/repo) of the pipeline to install."
     ),
     name: Optional[str] = typer.Option(
-        None, help="Rename the pipeline (this name will be used to call the CLI.)"
+        None, 
+        "--name",
+        "-n",
+        help="Rename the pipeline (this name will be used to call the CLI.)"
     ),
     tag: Optional[str] = typer.Option(
         None,
@@ -73,7 +75,7 @@ def install(
     ),
     resource: Optional[List[Path]] = typer.Option(
         [],
-        help="Specify a resource required to run the pipeline (copied to working dir at runtime).",
+        help="Specify resources additional to the resources folder required by the pipeline (copied to working dir at runtime).",
     ),
     force: Optional[bool] = typer.Option(
         False, "--force", "-f", help="Force install (overwrites existing installs)."
@@ -98,7 +100,7 @@ def install(
             name=name,
             tag=tag,
             config=config,
-            resources=resource,
+            additional_resources=resource,
             force=force
         )
     except PipelineExistsError as e:
@@ -158,9 +160,12 @@ def list(
     )
     typer.echo(f"Found {len(pipelines)} pipelines in {pipeline_dir_yellow}")
     for pipeline in pipelines:
+        if pipeline.editable:
+            print(f'- {pipeline.name} ([bold green]editable[/bold green]) -> "{pipeline.path}"')
+            continue
         v = pipeline.version
         v = v if v else "latest"
-        typer.echo(f"- {pipeline.name} ({v})")
+        print(f"- {pipeline.name} ([bold green]{v}[/bold green])")
 
 
 # @app.command()

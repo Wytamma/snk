@@ -20,6 +20,7 @@ jobs:
           key: ${{ github.ref }}
           path: .cache
       - run: pip install hatch
+      - run: sudo apt-get -y install graphviz
       - run: hatch run cov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

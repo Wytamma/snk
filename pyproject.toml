@@ -59,9 +59,9 @@ test = "cov --no-cov"
 python = ["37", "38", "39", "310", "311"]
 
 # requires hatch-containers
-[tool.hatch.envs.docker]
-type = "container"
-image = "wytamma/snk"
+# [tool.hatch.envs.docker]
+# type = "container"
+# image = "wytamma/snk"
 
 [tool.coverage.run]
 branch = true

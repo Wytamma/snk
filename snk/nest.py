@@ -93,7 +93,7 @@ class Nest:
         tag=None,
         config: Path = None,
         force=False,
-        resources=[],
+        additional_resources=[],
     ) -> Pipeline:
         """
         Installs a Snakemake pipeline as a CLI.
@@ -104,7 +104,8 @@ class Nest:
           tag (str, optional): The tag of the pipeline. Defaults to None.
           config (Path, optional): The path to the config file. Defaults to None.
           force (bool, optional): Whether to force the installation. Defaults to False.
-          resources (list, optional): A list of additional resources to copy. Defaults to [].
+          additional_resources (list, optional): A list of resources additional to the resources folder to copy. Defaults to [].
+          symlink_resources_folder (bool, optional): Whether to symlink the resources folder instead of copying it. Defaults to False.
         Returns:
           Pipeline: The installed pipeline.
         Examples:
@@ -128,8 +129,6 @@ class Nest:
             pipeline_path = self.download(pipeline, name, tag_name=tag)
         except InvalidPipelineRepositoryError:
             pipeline_local_path = Path(pipeline)
-            if pipeline_local_path.name == ".snk":
-                pipeline_local_path = pipeline_local_path.parent
             if not name:
                 name = pipeline_local_path.name
             if not force:
@@ -142,8 +141,8 @@ class Nest:
             self.link_pipeline_executable_to_bin(pipeline_executable)
             if config:
                 self.copy_nonstandard_config(pipeline_path, config)
-            if resources:
-                self.additional_resources(pipeline_path, resources)
+            if additional_resources:
+                self.additional_resources(pipeline_path, additional_resources)            
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps
@@ -152,19 +151,36 @@ class Nest:
             raise e
         return Pipeline(pipeline_path)
 
-    def additional_resources(self, pipeline_dir: Path, resources: List[Path]):
+    def modify_snk_config(self, pipeline_path: Path, **kwargs):
         """
-        Modify the .snk file so that resources will be copied at runtime.
+        Modify the snk config file.
         Args:
-          pipeline_dir (Path): The path to the pipeline directory.
+          pipeline_path (Path): The path to the pipeline directory.
+          name (str): The name of the pipeline.
+        Examples:
+          >>> nest.modify_snk_config(Path('/path/to/pipeline'), 'example')
+        """
+        snk_config = SnkConfig.from_pipeline_dir(
+            pipeline_path, 
+            create_if_not_exists=True
+        )
+        for key, value in kwargs.items():
+            setattr(snk_config, key, value)
+        snk_config.save()
+    
+    def additional_resources(self, pipeline_path: Path, resources: List[Path]):
+        """
+        Modify the snk config file so that resources will be copied at runtime.
+        Args:
+          pipeline_path (Path): The path to the pipeline directory.
           resources (List[Path]): A list of additional resources to copy.
         Examples:
           >>> nest.additional_resources(Path('/path/to/pipeline'), [Path('/path/to/resource1'), Path('/path/to/resource2')])
         """
         # validate_resources(resources)
-        snk_config = SnkConfig.from_path(pipeline_dir / ".snk")
-        snk_config.resources += [r for r in resources if r not in snk_config.resources]
-        snk_config.to_yaml(pipeline_dir / ".snk")
+        snk_config = SnkConfig.from_pipeline_dir(pipeline_path, create_if_not_exists=True)
+        snk_config.add_resources(resources, pipeline_path)
+        snk_config.save()
 
     def copy_nonstandard_config(self, pipeline_dir: Path, config_path: Path):
         """
@@ -197,6 +213,7 @@ class Nest:
         if pipeline_dir.exists() and pipeline_dir.is_dir():
             to_delete.append(pipeline_dir)
         elif pipeline_dir.is_symlink():
+            # editable 
             to_delete.append(pipeline_dir)
         else:
             raise PipelineNotFoundError(f"Could not find pipeline: {pipeline_name}")
@@ -266,11 +283,11 @@ class Nest:
             return None
         if name in os.listdir(self.pipelines_dir):
             raise PipelineExistsError(
-                f"Pipeline '{name}' already exists in {self.pipelines_dir}"
+                f"Pipeline '{name}' already exists in SNK_HOME ({self.pipelines_dir})"
             )
-        if name in os.listdir(self.bin_dir):
+        if name in os.listdir(self.bin_dir) and (not (self.bin_dir / name).is_symlink() or str(self.pipelines_dir) not in os.readlink(self.bin_dir / name)):
             raise PipelineExistsError(
-                f"Pipeline '{name}' already exists in {self.bin_dir}"
+                f"File '{name}' already exists in SNK_BIN ({self.bin_dir})" 
             )
 
     def _confirm_installation(self, name: str):
@@ -350,17 +367,6 @@ class Nest:
         return location
 
     def create_package(self, pipeline_dir: Path) -> Path:
-        """
-        Creates a package in the local environment.
-        Args:
-          package_name (str): The name of the package to create.
-        Returns:
-          None
-        Side Effects:
-          Creates a package in the local environment.
-        Examples:
-          >>> Nest.create_package('my_package')
-        """
         self.validate_SnakeMake_repo(pipeline_dir)
 
         template = inspect.cleandoc(
@@ -409,7 +415,13 @@ class Nest:
           >>> Nest.link_pipeline_executable_to_bin('my_executable')
         """
         name = pipeline_executable_path.name
-        os.symlink(pipeline_executable_path.absolute(), self.bin_dir / name)
+        if (self.bin_dir / name).is_symlink() and os.readlink(self.bin_dir / name) == str(pipeline_executable_path):
+            # skip if it's already there
+            return self.bin_dir / name
+        try:
+            os.symlink(pipeline_executable_path.absolute(), self.bin_dir / name)    
+        except FileExistsError:
+            raise PipelineExistsError(f"File '{name}' already exists in SNK_BIN ({self.bin_dir})")    
         return self.bin_dir / name
 
     def validate_SnakeMake_repo(self, repo: Repo):
@@ -423,5 +435,5 @@ class Nest:
           >>> Nest.validate_SnakeMake_repo('/path/to/repo')
           True
         """
-        print("Skipping validation!")
+        #print("Skipping validation!")
         pass

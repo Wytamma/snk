@@ -26,6 +26,9 @@ extra:
       link: https://github.com/Wytamma/write-the
       name: Generated with write-the
 
+markdown_extensions:
+  - admonition
+  
 plugins:
 - search
 - mkdocstrings

@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 from typing import Optional
-from git import Repo, GitCommandError, InvalidGitRepositoryError
+from git import Repo, InvalidGitRepositoryError
 
 
 class Pipeline:
@@ -59,6 +59,11 @@ class Pipeline:
         if sys.platform.startswith("win"):
             name += ".exe"
         return pipeline_bin_dir / name
+
+    @property
+    def editable(self):
+        """Is the pipeline editable?"""
+        return self.path.is_symlink()
 
     def _find_folder(self, name) -> Optional[Path]:
         """Search for folder"""
