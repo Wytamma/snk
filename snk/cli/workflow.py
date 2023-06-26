@@ -136,12 +136,5 @@ def create_workflow(
             keep_metadata=keep_metadata,
             latency_wait=latency_wait,
         )
-
-        workflow.include(
-            snakefile,
-            overwrite_default_target=True,
-            print_compilation=print_compilation,
-        )
-        # workflow.check()
         return workflow
 
