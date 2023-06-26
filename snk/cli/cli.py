@@ -109,11 +109,13 @@ class CLI:
             self.info, help="Display information about current pipeline install."
         )
         self.register_command(self.config, help="Access the pipeline configuration.")
-        self.register_command(self.env, help="Access the pipeline conda environments.")
-        self.register_command(self.profile, help="Access the pipeline profiles.")
+        if self.pipeline.environments:
+            self.register_command(self.env, help="Access the pipeline conda environments.")
+        if self.pipeline.profiles:
+            self.register_command(self.profile, help="Access the pipeline profiles.")
         self.register_command(
             add_dynamic_options(self.options)(self.run),
-            help="Run the dynamically generated pipeline CLI.\n\nAll unrecognized arguments are passed onto Snakemake.",
+            help="Run the Snakemake pipeline.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
                 "allow_extra_args": True,
                 "ignore_unknown_options": True,
