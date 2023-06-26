@@ -174,7 +174,7 @@ Finished job 0.
 Complete log: .snakemake/log/2023-05-31T142144.694274.snakemake.log
 ```
 
-We can also add a `.snk` file to add annotations to the CLI. See [.snk]() docs for details.
+We can also add a `snk.yaml` file to add annotations to the CLI. See [Snk Config](/snk_config_file/) docs for details.
 
 ```
 pipeline-name
@@ -186,7 +186,7 @@ pipeline-name
 │       ├── __about__.py
 │       ├── __init__.py
 │       ├── __main__.py
-│       ├── .snk <-
+│       ├── snk.yaml <-
 │       ├── cli
 │       │   └── __init__.py
 │       ├── config.yaml
