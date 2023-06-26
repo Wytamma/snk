@@ -4,7 +4,7 @@ import platform
 import sys
 import typer
 from pathlib import Path
-from typing import Optional, List, Callable
+from typing import Optional, List
 import subprocess
 import shutil
 import os
@@ -15,6 +15,8 @@ from rich.console import Console
 from rich.syntax import Syntax
 from art import text2art
 
+from snk.cli.dynamic_typer import DynamicTyper
+from snk.cli.subcommands import EnvApp
 
 from .config import (
     SnkConfig,
@@ -25,9 +27,9 @@ from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_
 from snk.pipeline import Pipeline
 
 
-class CLI:
+class CLI(DynamicTyper):
     """
-    Constructor for the CLI class.
+    Constructor for the dynamic Snk CLI class.
     Args:
       pipeline_dir_path (Path): Path to the pipeline directory.
     Side Effects:
@@ -110,7 +112,17 @@ class CLI:
         )
         self.register_command(self.config, help="Access the pipeline configuration.")
         if self.pipeline.environments:
-            self.register_command(self.env, help="Access the pipeline conda environments.")
+            env_app = EnvApp(
+                pipeline=self.pipeline, 
+                conda_prefix_dir=self.conda_prefix_dir,
+                snakemake_config=self.snakemake_config,
+                snakefile=self.snakefile,
+            )
+            self.register_group(
+                env_app,
+                name="env",
+                help="Access the pipeline conda environments."
+            )
         if self.pipeline.profiles:
             self.register_command(self.profile, help="Access the pipeline profiles.")
         self.register_command(
@@ -122,40 +134,6 @@ class CLI:
                 "help_option_names": ["-h", "--help"],
             },
         )
-
-    def __call__(self):
-        """
-        Invoke the CLI.
-        Side Effects:
-          Invokes the CLI.
-        Examples:
-          >>> CLI(Path('/path/to/pipeline'))()
-        """
-        self.app()
-
-    def register_command(self, command: Callable, **command_kwargs) -> None:
-        """
-        Register a command to the CLI.
-        Args:
-          command (Callable): The command to register.
-        Side Effects:
-          Registers the command to the CLI.
-        Examples:
-          >>> CLI.register_command(my_command)
-        """
-        self.app.command(**command_kwargs)(command)
-
-    def register_callback(self, command: Callable, **command_kwargs) -> None:
-        """
-        Register a callback to the CLI.
-        Args:
-          command (Callable): The callback to register.
-        Side Effects:
-          Registers the callback to the CLI.
-        Examples:
-          >>> CLI.register_callback(my_callback)
-        """
-        self.app.callback(**command_kwargs)(command)
 
     def create_logo(self, tagline="A Snakemake pipeline CLI generated with snk", font="small"):
         """
@@ -279,9 +257,6 @@ class CLI:
                             fg=typer.colors.YELLOW,
                         )
                     remove_resource(copied_resource)
-    def error(self, msg):
-        typer.secho(msg, fg="red")
-        raise typer.Exit(1)
     
     def run(
         self,
