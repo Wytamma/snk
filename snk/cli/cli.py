@@ -108,7 +108,7 @@ class CLI(DynamicTyper):
             context_settings={"help_option_names": ["-h", "--help"]},
         )
         self.register_command(
-            self.info, help="Display information about current pipeline install."
+            self.info, help="Display information about the pipeline."
         )
         self.register_command(self.config, help="Access the pipeline configuration.")
         if self.pipeline.environments:
