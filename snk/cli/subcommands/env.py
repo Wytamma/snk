@@ -78,13 +78,14 @@ class EnvApp(DynamicTyper):
             bufsize=-1,
             shell=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
         )
-        stdout, stderr = proc.communicate()
+        stdout, _ = proc.communicate()
         if proc.returncode:
-            if stderr:
-                self.error(stderr)
-            raise subprocess.CalledProcessError(proc.returncode, cmd, output=stdout, stderr=stderr)
+            msg = f"Command failed with exit code {proc.returncode}"
+            if stdout:
+                msg += f"\n{stdout.decode('utf-8')}"
+            self.error(msg)
         if stdout:
             typer.echo(stdout)
 
@@ -105,11 +106,11 @@ class EnvApp(DynamicTyper):
 
     def activate(self, env_name: str = typer.Argument(..., help="The name of the environment.")):
         env_path = self._get_conda_env_path(env_name)
+        self.log(f"Activating {env_name} environment... (type 'exit' to deactivate)")
         env = Env(self.workflow, env_file=env_path.resolve())
         env.create()
         user_shell = os.environ.get('SHELL', '/bin/sh')
         activate_cmd = self._shellcmd(env.address, user_shell)
-        self.log(f"Activating {env_name} environment... (type 'exit' to deactivate)")
         subprocess.run(activate_cmd, shell=True, env=os.environ.copy())
         self.log(f"Exiting {env_name} environment...")
         
