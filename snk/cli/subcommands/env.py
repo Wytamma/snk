@@ -58,7 +58,6 @@ class EnvApp(DynamicTyper):
 
     def show(self, name: str = typer.Argument(..., help="The name of the environment.")):
         env_path = self._get_conda_env_path(name)
-        # typer.echo(f"{env}", err=True)
         with open(env_path) as f:
             code = f.read()
             syntax = Syntax(code, "yaml")
