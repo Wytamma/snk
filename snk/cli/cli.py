@@ -47,6 +47,7 @@ class CLI(DynamicTyper):
         if pipeline_dir_path.is_file():
             pipeline_dir_path = pipeline_dir_path.parent
         self.pipeline = Pipeline(path=pipeline_dir_path)
+        self.version = self.pipeline.version
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
         self.snk_config = SnkConfig.from_pipeline_dir(pipeline_dir_path, create_if_not_exists=True)
@@ -63,7 +64,7 @@ class CLI(DynamicTyper):
 
         def _print_pipline_version(ctx: typer.Context, value: bool):
             if value:
-                typer.echo(self.pipeline.version)
+                typer.echo(self.version)
                 raise typer.Exit()
 
         def _print_pipline_path(ctx: typer.Context, value: bool):
@@ -454,7 +455,7 @@ class CLI(DynamicTyper):
 
         info_dict = {}
         info_dict["name"] = self.pipeline.path.name
-        info_dict["version"] = self.pipeline.version
+        info_dict["version"] = self.version
         info_dict["pipeline_dir_path"] = str(self.pipeline.path)
         typer.echo(json.dumps(info_dict, indent=2))
 
