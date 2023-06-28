@@ -1,5 +1,8 @@
+import os
+import shutil
 import subprocess
 from pathlib import Path
+import sys
 from typing import List, Optional
 import typer
 
@@ -8,7 +11,7 @@ from snk.cli.workflow import create_workflow
 from snk.pipeline import Pipeline
 from rich.console import Console
 from rich.syntax import Syntax
-from snakemake.deployment.conda import Conda, Env
+from snakemake.deployment.conda import Conda, Env, CreateCondaEnvironmentException
 from snk.cli.config import get_config_from_pipeline_dir
 
 class EnvApp(DynamicTyper):
@@ -18,10 +21,19 @@ class EnvApp(DynamicTyper):
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
         self.app = typer.Typer()
+        self.workflow = create_workflow(
+            self.snakefile,
+            config=self.snakemake_config,
+            configfiles=[get_config_from_pipeline_dir(self.pipeline.path)],
+            use_conda = True,
+            conda_prefix=self.conda_prefix_dir.resolve(),
+        )
         self.register_command(self.list, help="List the environments in the pipeline.")
         self.register_command(self.show, help="Show the environments config file contents.")
         self.register_command(self.run, help="Run a command in one of the pipeline environments.")
         self.register_command(self.activate, help="Activate a pipeline conda environment.")
+        self.register_command(self.prune, help="Delete all conda environments")
+        self.register_command(self.create, help="Create all conda environments")
 
     def list(self):
         environments_dir_yellow = typer.style(
@@ -38,6 +50,11 @@ class EnvApp(DynamicTyper):
         if not env:
             self.error(f"Environment {name} not found!")
         return env[0]
+    
+    def _shellcmd(self, env_address: str, cmd: str) -> str:
+        if sys.platform.lower().startswith("win"):
+            return Conda().shellcmd_win(env_address, cmd)
+        return Conda().shellcmd(env_address, cmd)
 
     def show(self, name: str = typer.Argument(..., help="The name of the environment.")):
         env_path = self._get_conda_env_path(name)
@@ -50,19 +67,13 @@ class EnvApp(DynamicTyper):
 
     def run(
             self, 
-            name: str = typer.Argument(..., help="The name of the environment."),
-            cmd: List[str] = typer.Argument(..., help="The command to run.")
+            env_name: str = typer.Option(..., "--env", "-e", help="The name of the environment."),
+            cmd: List[str] = typer.Argument(..., help="The command to run in environment.")
         ):
-        env_path = self._get_conda_env_path(name)
-        workflow = create_workflow(
-            self.snakefile,
-            config=self.snakemake_config,
-            configfiles=[get_config_from_pipeline_dir(self.pipeline.path)],
-            use_conda = True,
-        )
-        env = Env(workflow, env_file=env_path, env_dir=self.conda_prefix_dir)
-        cmd = Conda().shellcmd(env.address, " ".join(cmd))
-        
+        env_path = self._get_conda_env_path(env_name)
+        env = Env(self.workflow, env_file=env_path.resolve())
+        env.create()
+        cmd = self._shellcmd(env.address, " ".join(cmd))
         proc = subprocess.Popen(
             cmd,
             bufsize=-1,
@@ -78,9 +89,29 @@ class EnvApp(DynamicTyper):
         if stdout:
             typer.echo(stdout)
 
-    def create(self, name: Optional[str] = typer.Argument(..., help="The name of the environment.")):
-        raise NotImplementedError
+    def prune(self, force: bool = typer.Option(False, "--force", "-f", help="Force deletion of the environments.")):
+        if force or input(f"Delete {self.conda_prefix_dir}? [y/N] ").lower() == "y":
+            # delete self.conda_prefix_dir directory
+            shutil.rmtree(self.conda_prefix_dir)
+            self.log(f"Deleted {self.conda_prefix_dir}")
     
-    def activate(self, name: str = typer.Argument(..., help="The name of the environment.")):
-        raise NotImplementedError
+    def create(self):
+        for env_path in self.pipeline.environments:
+            env = Env(self.workflow, env_file=env_path.resolve())
+            try:
+                env.create()
+            except CreateCondaEnvironmentException:
+                self.error(f"Environment {env_path.name} could not be created!", exit=False)
+
+
+    def activate(self, env_name: str = typer.Argument(..., help="The name of the environment.")):
+        env_path = self._get_conda_env_path(env_name)
+        env = Env(self.workflow, env_file=env_path.resolve())
+        env.create()
+        user_shell = os.environ.get('SHELL', '/bin/sh')
+        activate_cmd = self._shellcmd(env.address, user_shell)
+        self.log(f"Activating {env_name} environment... (type 'exit' to deactivate)")
+        subprocess.run(activate_cmd, shell=True, env=os.environ.copy())
+        self.log(f"Exiting {env_name} environment...")
+        
     
