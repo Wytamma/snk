@@ -73,21 +73,7 @@ class EnvApp(DynamicTyper):
         env = Env(self.workflow, env_file=env_path.resolve())
         env.create()
         cmd = self._shellcmd(env.address, " ".join(cmd))
-        proc = subprocess.Popen(
-            cmd,
-            bufsize=-1,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-        stdout, _ = proc.communicate()
-        if proc.returncode:
-            msg = f"Command failed with exit code {proc.returncode}"
-            if stdout:
-                msg += f"\n{stdout.decode('utf-8')}"
-            self.error(msg)
-        if stdout:
-            typer.echo(stdout)
+        subprocess.run(cmd, shell=True, env=os.environ.copy())
 
     def prune(self, force: bool = typer.Option(False, "--force", "-f", help="Force deletion of the environments.")):
         if force or input(f"Delete {self.conda_prefix_dir}? [y/N] ").lower() == "y":
