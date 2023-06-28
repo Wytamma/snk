@@ -50,6 +50,10 @@ class DynamicTyper:
         """
         self.app.add_typer(group.app, **command_kwargs)
     
-    def error(self, msg):
+    def error(self, msg, exit=True):
         typer.secho(msg, fg="red")
-        raise typer.Exit(1)
+        if exit:
+          raise typer.Exit(1)
+    
+    def log(self, msg):
+        typer.secho(msg, fg="yellow")
