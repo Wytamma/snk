@@ -23,7 +23,12 @@ from .config import (
     get_config_from_pipeline_dir,
     load_pipeline_snakemake_config,
 )
-from .utils import add_dynamic_options, build_dynamic_cli_options, parse_config_args, dag_filetype_callback
+from .utils import (
+    add_dynamic_options,
+    build_dynamic_cli_options,
+    parse_config_args,
+    dag_filetype_callback,
+)
 from snk.pipeline import Pipeline
 
 
@@ -43,14 +48,16 @@ class CLI(DynamicTyper):
             # get the calling frame (the frame of the function that called this function)
             calling_frame = inspect.currentframe().f_back
             # get the file path from the calling frame
-            pipeline_dir_path = Path(calling_frame.f_globals['__file__'])
+            pipeline_dir_path = Path(calling_frame.f_globals["__file__"])
         if pipeline_dir_path.is_file():
             pipeline_dir_path = pipeline_dir_path.parent
         self.pipeline = Pipeline(path=pipeline_dir_path)
         self.version = self.pipeline.version
         self.app = typer.Typer()
         self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
-        self.snk_config = SnkConfig.from_pipeline_dir(pipeline_dir_path, create_if_not_exists=True)
+        self.snk_config = SnkConfig.from_pipeline_dir(
+            pipeline_dir_path, create_if_not_exists=True
+        )
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / ".conda"
@@ -95,7 +102,7 @@ class CLI(DynamicTyper):
         ):
             if ctx.invoked_subcommand is None:
                 typer.echo(f"{ctx.get_help()}")
-        
+
         # dynamically create the logo
         tagline: str = self.snk_config.tagline
         font: str = self.snk_config.font
@@ -108,21 +115,17 @@ class CLI(DynamicTyper):
             invoke_without_command=True,
             context_settings={"help_option_names": ["-h", "--help"]},
         )
-        self.register_command(
-            self.info, help="Display information about the pipeline."
-        )
+        self.register_command(self.info, help="Display information about the pipeline.")
         self.register_command(self.config, help="Access the pipeline configuration.")
         if self.pipeline.environments:
             env_app = EnvApp(
-                pipeline=self.pipeline, 
+                pipeline=self.pipeline,
                 conda_prefix_dir=self.conda_prefix_dir,
                 snakemake_config=self.snakemake_config,
                 snakefile=self.snakefile,
             )
             self.register_group(
-                env_app,
-                name="env",
-                help="Access the pipeline conda environments."
+                env_app, name="env", help="Access the pipeline conda environments."
             )
         if self.pipeline.profiles:
             self.register_command(self.profile, help="Access the pipeline profiles.")
@@ -136,7 +139,9 @@ class CLI(DynamicTyper):
             },
         )
 
-    def create_logo(self, tagline="A Snakemake pipeline CLI generated with snk", font="small"):
+    def create_logo(
+        self, tagline="A Snakemake pipeline CLI generated with snk", font="small"
+    ):
         """
         Create a logo for the CLI.
         Args:
@@ -182,11 +187,8 @@ class CLI(DynamicTyper):
 
     @contextmanager
     def copy_resources(
-            self, 
-            resources: List[Path], 
-            cleanup: bool, 
-            symlink_resources: bool = False
-        ):
+        self, resources: List[Path], cleanup: bool, symlink_resources: bool = False
+    ):
         """
         Copy resources to the current working directory.
         Args:
@@ -224,10 +226,9 @@ class CLI(DynamicTyper):
             else:
                 os.remove(resource)
 
-
-        resources_folder = self.pipeline.path / 'resources'
+        resources_folder = self.pipeline.path / "resources"
         if resources_folder.exists():
-            resources.insert(0, Path('resources'))
+            resources.insert(0, Path("resources"))
         if self.verbose:
             typer.secho(
                 f"Copying {len(resources)} resources to working directory...",
@@ -258,7 +259,7 @@ class CLI(DynamicTyper):
                             fg=typer.colors.YELLOW,
                         )
                     remove_resource(copied_resource)
-    
+
     def run(
         self,
         ctx: typer.Context,
@@ -306,10 +307,10 @@ class CLI(DynamicTyper):
             help="Keep .snakemake folder after pipeline completes.",
         ),
         dag: Optional[Path] = typer.Option(
-            None, 
+            None,
             "--dag",
             "-d",
-            help="Save directed acyclic graph to file. Must end in .pdf, .png or .svg", 
+            help="Save directed acyclic graph to file. Must end in .pdf, .png or .svg",
             callback=dag_filetype_callback,
         ),
         cores: int = typer.Option(
@@ -350,7 +351,11 @@ class CLI(DynamicTyper):
         Examples:
           >>> CLI.run(target='my_target', configfile=Path('/path/to/config.yaml'), resource=[Path('/path/to/resource')], verbose=True)
         """
-        if platform.system() == "Darwin" and platform.processor() == "arm" and not os.environ.get("CONDA_SUBDIR"):
+        if (
+            platform.system() == "Darwin"
+            and platform.processor() == "arm"
+            and not os.environ.get("CONDA_SUBDIR")
+        ):
             os.environ["CONDA_SUBDIR"] = "osx-64"
         self.verbose = verbose
         args = []
@@ -426,9 +431,9 @@ class CLI(DynamicTyper):
         except FileNotFoundError as e:
             self.error(str(e))
         with self.copy_resources(
-            self.snk_config.resources, 
-            cleanup=not keep_resources, 
-            symlink_resources=self.snk_config.symlink_resources
+            self.snk_config.resources,
+            cleanup=not keep_resources,
+            symlink_resources=self.snk_config.symlink_resources,
         ):
             if dag:
                 return self.save_dag(snakemake_args=args, filename=dag)
@@ -513,19 +518,14 @@ class CLI(DynamicTyper):
         for profile in self.pipeline.profiles:
             typer.echo(f"- {profile.name}")
 
-    
-    def save_dag(
-        self,
-        snakemake_args: List[str],
-        filename: Path
-    ):
+    def save_dag(self, snakemake_args: List[str], filename: Path):
         from contextlib import redirect_stdout
         import io
 
         snakemake_args.append("--dag")
-        
-        fileType = filename.suffix.lstrip('.')
-        
+
+        fileType = filename.suffix.lstrip(".")
+
         # Create a file-like object to redirect the stdout
         snakemake_output = io.StringIO()
         # Use redirect_stdout to redirect stdout to the file-like object
@@ -536,17 +536,18 @@ class CLI(DynamicTyper):
             except SystemExit:  # Catch SystemExit exception to prevent termination
                 pass
         try:
-            echo_process = subprocess.Popen(['echo', snakemake_output.getvalue()], stdout=subprocess.PIPE)
-            dot_process = subprocess.Popen(['dot', f'-T{fileType}'], stdin=echo_process.stdout, stdout=subprocess.PIPE)
-            with open(filename, 'w') as output_file:
-                if self.verbose:
-                    typer.secho(
-                        f"Saving dag to {filename}", fg=typer.colors.YELLOW
-                    )
-                subprocess.run(['cat'], stdin=dot_process.stdout, stdout=output_file)
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            typer.echo(
-                "dot command not found!", fg=typer.colors.RED, err=True
+            echo_process = subprocess.Popen(
+                ["echo", snakemake_output.getvalue()], stdout=subprocess.PIPE
             )
+            dot_process = subprocess.Popen(
+                ["dot", f"-T{fileType}"],
+                stdin=echo_process.stdout,
+                stdout=subprocess.PIPE,
+            )
+            with open(filename, "w") as output_file:
+                if self.verbose:
+                    typer.secho(f"Saving dag to {filename}", fg=typer.colors.YELLOW)
+                subprocess.run(["cat"], stdin=dot_process.stdout, stdout=output_file)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            typer.echo("dot command not found!", fg=typer.colors.RED, err=True)
             raise typer.Exit(1)
-            
