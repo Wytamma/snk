@@ -1,6 +1,6 @@
+from dataclasses import dataclass
 from pathlib import Path
 from snakemake import Workflow, update_config, load_configfile, dict_to_key_value_args, common
-from snakemake.persistence import Persistence
 import os
 
 def create_workflow( 
@@ -138,6 +138,12 @@ def create_workflow(
             keep_metadata=keep_metadata,
             latency_wait=latency_wait,
         )
-        workflow.persistence = Persistence(conda_prefix=Path(conda_prefix).resolve() if conda_prefix else None)
+        @dataclass
+        class PersistenceMock:
+            conda_env_path: Path
+
+        workflow.persistence = PersistenceMock(
+            conda_env_path=Path(conda_prefix).resolve() if conda_prefix else None,
+        )
         return workflow
 
