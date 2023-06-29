@@ -32,8 +32,8 @@ class EnvApp(DynamicTyper):
         self.register_command(self.show, help="Show the environments config file contents.")
         self.register_command(self.run, help="Run a command in one of the pipeline environments.")
         self.register_command(self.activate, help="Activate a pipeline conda environment.")
-        self.register_command(self.prune, help="Delete all conda environments")
-        self.register_command(self.create, help="Create all conda environments")
+        self.register_command(self.prune, help="Delete all conda environments.")
+        self.register_command(self.create, help="Create all conda environments.")
 
     def list(self):
         environments_dir_yellow = typer.style(
