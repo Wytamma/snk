@@ -68,6 +68,12 @@ class CLI(DynamicTyper):
             self.singularity_prefix_dir = pipeline_dir_path / ".singularity"
         self.name = self.pipeline.name
         self.verbose = False
+        if (
+            platform.system() == "Darwin"
+            and platform.processor() == "arm"
+            and not os.environ.get("CONDA_SUBDIR")
+        ):
+            os.environ["CONDA_SUBDIR"] = "osx-64"
 
         def _print_pipline_version(ctx: typer.Context, value: bool):
             if value:
@@ -351,12 +357,6 @@ class CLI(DynamicTyper):
         Examples:
           >>> CLI.run(target='my_target', configfile=Path('/path/to/config.yaml'), resource=[Path('/path/to/resource')], verbose=True)
         """
-        if (
-            platform.system() == "Darwin"
-            and platform.processor() == "arm"
-            and not os.environ.get("CONDA_SUBDIR")
-        ):
-            os.environ["CONDA_SUBDIR"] = "osx-64"
         self.verbose = verbose
         args = []
         if not cores:
