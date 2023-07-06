@@ -66,7 +66,7 @@ class EnvApp(DynamicTyper):
 
     def run(
             self, 
-            env_name: str = typer.Option(..., "--env", "-e", help="The name of the environment."),
+            env_name: str = typer.Argument(..., help="The name of the environment."),
             cmd: List[str] = typer.Argument(..., help="The command to run in environment.")
         ):
         env_path = self._get_conda_env_path(env_name)
