@@ -1,5 +1,2 @@
 text: "hello world!"
 output: "hello.txt"
-test:
-  tester: "tester"
-  test2: "test2"
