@@ -1,6 +1,7 @@
 annotations:
   times: 
     type: int
+    help: Number of times to repeat the message
   text:
     default: "Hi from snk.yaml"
     type: str

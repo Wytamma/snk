@@ -232,7 +232,7 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
       [{'name': 'name', 'original_key': 'name', 'default': 'John', 'help': '', 'type': 'str', 'required': True}, {'name': 'age', 'original_key': 'age', 'default': 20, 'help': '', 'type': 'int', 'required': True}]
     """
     flat_config = flatten(snakemake_config)
-    options = []
+    options = {}
     flat_snk_annotations = flatten(snk_config.annotations)
     for op in flat_config:
         name = flat_snk_annotations.get(f"{op}:name", op.replace(":", "_"))
@@ -250,8 +250,7 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
             updated = True
         except KeyError:
             default = flat_config[op]
-        options.append(
-            {
+        options[op] = {
                 "name": name.replace("-", "_"),
                 "original_key": op,
                 "default": default,
@@ -260,9 +259,26 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
                 "type": param_type,
                 "required": required,
             }
-        )
-    # TODO: find annotations missing from config and add them to options
-    return options
+    # Find annotations missing from config and add them to options
+    for an in flat_snk_annotations:
+        op = ":".join(an.split(":")[:-1])
+        if op in options:
+            continue
+        name = flat_snk_annotations.get(f"{op}:name", op.replace(":", "_"))
+        help = flat_snk_annotations.get(f"{op}:help", "")
+        param_type = flat_snk_annotations.get(f"{op}:type", "str")
+        required = flat_snk_annotations.get(f"{op}:required", False)
+        default = flat_snk_annotations.get(f"{op}:default", None)
+        options[op] = {
+            "name": name.replace("-", "_"),
+            "original_key": op,
+            "default": default,
+            "updated": False,
+            "help": help,
+            "type": param_type,
+            "required": required,
+        }
+    return list(options.values())
 
 
 def dag_filetype_callback(ctx: typer.Context, file: Path):
