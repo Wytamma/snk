@@ -25,10 +25,10 @@ from .config import (
 )
 from .utils import (
     add_dynamic_options,
-    build_dynamic_cli_options,
     parse_config_args,
     dag_filetype_callback,
 )
+from .options.utils import build_dynamic_cli_options
 from snk.pipeline import Pipeline
 
 

@@ -13,6 +13,7 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 10:
 else:
     from collections import MutableMapping
 
+from snk.cli.options import Option
 
 types = {
     "int": int,
@@ -29,33 +30,35 @@ types = {
 }
 
 
-def create_cli_parameter(option):
+def create_cli_parameter(option: Option):
     """
     Creates a parameter for a CLI option.
     Args:
-      option (dict): A dictionary containing the option's name, type, required status, default value, and help message.
+      option (Option): An Option object containing the option's name, type, required status, default value, and help message.
     Returns:
       Parameter: A parameter object for the CLI option.
     Examples:
-      >>> option = {'name': 'foo', 'type': 'int', 'required': True, 'default': 0, 'help': 'A number'}
+      >>> option = Option(name='foo', type='int', required=True, default=0, help='A number')
       >>> create_cli_parameter(option)
       Parameter('foo', kind=Parameter.POSITIONAL_OR_KEYWORD, default=typer.Option(..., help='[CONFIG] A number'), annotation=int)
     """
+    # If option type is not in type mapping, fallback to 'str'
+    type_annotation = types.get(
+        option.type.lower(), 
+        List[str] if 'list' in option.type.lower() else str)
+
     return Parameter(
-        option["name"],
+        option.name,
         kind=Parameter.POSITIONAL_OR_KEYWORD,
         default=typer.Option(
-            ... if option["required"] else option["default"],
-            help=f"[CONFIG] {option['help']}",
+            ... if option.required else option.default,
+            help=f"[CONFIG] {option.help}",
         ),
-        annotation=types.get(
-            option["type"].lower(), 
-            List[str] if 'list' in option["type"].lower() else str
-        ),
+        annotation=type_annotation,
     )
 
 
-def add_dynamic_options(options: List[dict]):
+def add_dynamic_options(options: List[Option]):
     """
     Decorator to add dynamic options to a function.
     Args:
@@ -97,7 +100,7 @@ def add_dynamic_options(options: List[dict]):
             #     # parse the new configfile and update the defautls
             #     raise NotImplementedError
             for op in options:
-                kwargs["ctx"].args.extend([f"--{op['name']}", kwargs[op["name"]]])
+                kwargs["ctx"].args.extend([f"--{op.name}", kwargs[op.name]])
             kwargs = {
                 k: v for k, v in kwargs.items() if k in func_sig.parameters.keys()
             }
@@ -173,37 +176,36 @@ def serialise(d):
     return d
 
 
-def parse_config_args(args: List[str], options):
+def parse_config_args(args: List[str], options: List[Option]):
     """
     Parses a list of arguments and a list of options.
     Args:
       args (List[str]): A list of arguments.
-      options (List[dict]): A list of options.
+      options (List[Option]): A list of options.
     Returns:
       (List[str], List[dict]): A tuple of parsed arguments and config.
     Examples:
       >>> parse_config_args(['-name', 'John', '-age', '20'], [{'name': 'name', 'default': '', 'help': '', 'type': 'str', 'required': True}, {'name': 'age', 'default': '', 'help': '', 'type': 'int', 'required': True}])
       (['John', '20'], [{'name': 'name', 'John'}, {'age': 20}])
     """
-    names = [op["name"] for op in options]
+    names = [op.name for op in options]
     config = []
     parsed = []
     flag = None
     for arg in args:
         if flag:
             name = flag.lstrip("-")
-            op = next(op for op in options if op["name"] == name)
-            if op["default"] == serialise(arg) and op["updated"] is False:
+            op = next(op for op in options if op.name == name)
+            if op.updated is False and op.default == serialise(arg):
                 # skip args that don't change
                 flag = None
                 continue
-            if ":" in op["original_key"]:
+            if ":" in op.original_key:
                 samkemake_format_config = convert_key_to_snakemake_format(
-                    op["original_key"], arg
+                    op.original_key, arg
                 )
                 name = list(samkemake_format_config.keys())[0]
                 arg = samkemake_format_config[name]
-            # config.append(f'{name}={serialise(arg)}')
             config.append({name: serialise(arg)})
             flag = None
             continue
@@ -218,67 +220,6 @@ def get_default_type(v):
     if default_type == list and len(v) > 0:
         return f"List[{type(v[0]).__name__}]"
     return str(default_type.__name__)
-
-def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
-    """
-    Builds a list of options from a snakemake config and a snk config.
-    Args:
-      snakemake_config (dict): A snakemake config.
-      snk_config (SnkConfig): A snk config.
-    Returns:
-      List[dict]: A list of options.
-    Examples:
-      >>> build_dynamic_cli_options({'name': 'John', 'age': 20}, {'annotations': {'name:name': 'name', 'name:help': '', 'name:type': 'str', 'name:required': True, 'age:name': 'age', 'age:help': '', 'age:type': 'int', 'age:required': True}})
-      [{'name': 'name', 'original_key': 'name', 'default': 'John', 'help': '', 'type': 'str', 'required': True}, {'name': 'age', 'original_key': 'age', 'default': 20, 'help': '', 'type': 'int', 'required': True}]
-    """
-    flat_config = flatten(snakemake_config)
-    options = {}
-    flat_snk_annotations = flatten(snk_config.annotations)
-    for op in flat_config:
-        name = flat_snk_annotations.get(f"{op}:name", op.replace(":", "_"))
-        help = flat_snk_annotations.get(f"{op}:help", "")
-        # TODO be smarter here
-        # look up the List type e.g. if type == list then check the frist index type
-        # also can probably just pass the type around instead of the string?
-        param_type = flat_snk_annotations.get(
-            f"{op}:type", get_default_type(flat_config[op])
-        )  # TODO refactor
-        required = flat_snk_annotations.get(f"{op}:required", False)
-        updated = False
-        try:
-            default = flat_snk_annotations[f"{op}:default"]
-            updated = True
-        except KeyError:
-            default = flat_config[op]
-        options[op] = {
-                "name": name.replace("-", "_"),
-                "original_key": op,
-                "default": default,
-                "updated": updated,
-                "help": help,
-                "type": param_type,
-                "required": required,
-            }
-    # Find annotations missing from config and add them to options
-    for an in flat_snk_annotations:
-        op = ":".join(an.split(":")[:-1])
-        if op in options:
-            continue
-        name = flat_snk_annotations.get(f"{op}:name", op.replace(":", "_"))
-        help = flat_snk_annotations.get(f"{op}:help", "")
-        param_type = flat_snk_annotations.get(f"{op}:type", "str")
-        required = flat_snk_annotations.get(f"{op}:required", False)
-        default = flat_snk_annotations.get(f"{op}:default", None)
-        options[op] = {
-            "name": name.replace("-", "_"),
-            "original_key": op,
-            "default": default,
-            "updated": False,
-            "help": help,
-            "type": param_type,
-            "required": required,
-        }
-    return list(options.values())
 
 
 def dag_filetype_callback(ctx: typer.Context, file: Path):
