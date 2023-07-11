@@ -3,5 +3,7 @@ configfile: "config.yaml"
 rule hello_world:
     output: config['output']
     params:
-        text=config['text']
-    shell: "echo {params.text} > {output}"
+        text=config['text'],
+        times=config['times'] if config['times'] else 1
+    threads: config['times']
+    shell: "for i in {{1..{params.times}}}; do echo {params.text} >> {output}; done"
