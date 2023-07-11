@@ -193,7 +193,7 @@ def parse_config_args(args: List[str], options):
         if flag:
             name = flag.lstrip("-")
             op = next(op for op in options if op["name"] == name)
-            if op["default"] == serialise(arg):
+            if op["default"] == serialise(arg) and op["updated"] is False:
                 # skip args that don't change
                 flag = None
                 continue
@@ -244,11 +244,18 @@ def build_dynamic_cli_options(snakemake_config, snk_config: SnkConfig):
             f"{op}:type", get_default_type(flat_config[op])
         )  # TODO refactor
         required = flat_snk_annotations.get(f"{op}:required", False)
+        updated = False
+        try:
+            default = flat_snk_annotations[f"{op}:default"]
+            updated = True
+        except KeyError:
+            default = flat_config[op]
         options.append(
             {
                 "name": name.replace("-", "_"),
                 "original_key": op,
-                "default": flat_config[op],
+                "default": default,
+                "updated": updated,
                 "help": help,
                 "type": param_type,
                 "required": required,
