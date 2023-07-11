@@ -28,6 +28,7 @@ class EnvApp(DynamicTyper):
             use_conda = True,
             conda_prefix=self.conda_prefix_dir.resolve(),
         )
+        self.register_default_command(self.list)
         self.register_command(self.list, help="List the environments in the pipeline.")
         self.register_command(self.show, help="Show the environments config file contents.")
         self.register_command(self.run, help="Run a command in one of the pipeline environments.")

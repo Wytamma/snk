@@ -14,6 +14,40 @@ class DynamicTyper:
         """
         self.app()
 
+    def register_default_command(self, command: Callable, **command_kwargs) -> None:
+        """
+        Register a default command to the CLI.
+        Args:
+          command (Callable): The command to register.
+        Side Effects:
+          Registers the command to the CLI.
+        Examples:
+          >>> CLI.register_default_command(my_command)
+        """
+        from makefun import with_signature
+        from inspect import signature, Parameter
+
+        command_signature = signature(command)
+        params = list(command_signature.parameters.values())
+        has_ctx = any([p.name == 'ctx' for p in params])
+        if not has_ctx:
+            params.insert(0, Parameter(
+                'ctx', 
+                kind=Parameter.POSITIONAL_OR_KEYWORD,
+                annotation=typer.Context
+              )
+            )
+            command_signature = command_signature.replace(parameters=params)
+
+        @with_signature(command_signature)
+        def wrapper(ctx: typer.Context, *args, **kwargs):
+            if ctx.invoked_subcommand is None:
+                if has_ctx:
+                    return command(ctx, *args, **kwargs)
+                return command(*args, **kwargs)
+  
+        self.register_callback(wrapper, invoke_without_command=True, **command_kwargs)
+
     def register_command(self, command: Callable, **command_kwargs) -> None:
         """
         Register a command to the CLI.

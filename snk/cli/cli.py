@@ -16,7 +16,7 @@ from rich.syntax import Syntax
 from art import text2art
 
 from snk.cli.dynamic_typer import DynamicTyper
-from snk.cli.subcommands import EnvApp
+from snk.cli.subcommands import EnvApp, ConfigApp
 
 from .config import (
     SnkConfig,
@@ -122,7 +122,12 @@ class CLI(DynamicTyper):
             context_settings={"help_option_names": ["-h", "--help"]},
         )
         self.register_command(self.info, help="Display information about the pipeline.")
-        self.register_command(self.config, help="Access the pipeline configuration.")
+        config_app = ConfigApp(
+            pipeline=self.pipeline,
+        )
+        self.register_group(
+            config_app, name="config", help="Access the pipeline configuration."
+        )
         if self.pipeline.environments:
             env_app = EnvApp(
                 pipeline=self.pipeline,
