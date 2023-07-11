@@ -66,10 +66,10 @@ class EnvApp(DynamicTyper):
 
     def run(
             self, 
-            env_name: str = typer.Argument(..., help="The name of the environment."),
+            name: str = typer.Argument(..., help="The name of the environment."),
             cmd: List[str] = typer.Argument(..., help="The command to run in environment.")
         ):
-        env_path = self._get_conda_env_path(env_name)
+        env_path = self._get_conda_env_path(name)
         env = Env(self.workflow, env_file=env_path.resolve())
         env.create()
         cmd = self._shellcmd(env.address, " ".join(cmd))
@@ -90,14 +90,14 @@ class EnvApp(DynamicTyper):
                 self.error(f"Environment {env_path.name} could not be created!", exit=False)
 
 
-    def activate(self, env_name: str = typer.Argument(..., help="The name of the environment.")):
-        env_path = self._get_conda_env_path(env_name)
-        self.log(f"Activating {env_name} environment... (type 'exit' to deactivate)")
+    def activate(self, name: str = typer.Argument(..., help="The name of the environment.")):
+        env_path = self._get_conda_env_path(name)
+        self.log(f"Activating {name} environment... (type 'exit' to deactivate)")
         env = Env(self.workflow, env_file=env_path.resolve())
         env.create()
         user_shell = os.environ.get('SHELL', '/bin/sh')
         activate_cmd = self._shellcmd(env.address, user_shell)
         subprocess.run(activate_cmd, shell=True, env=os.environ.copy())
-        self.log(f"Exiting {env_name} environment...")
+        self.log(f"Exiting {name} environment...")
         
     
