@@ -57,13 +57,15 @@ class Nest:
                 user_home_path = Path("~").expanduser()
                 bin_dir = user_home_path / ".local" / "bin"
 
-        self.snk_home = Path(snk_home).absolute()
-        self.pipelines_dir = self.snk_home / "pipelines"
         self.bin_dir = Path(bin_dir).absolute()
+        self.snk_home = Path(snk_home).absolute()
+        self.snk_pipelines_dir = self.snk_home / "pipelines"
+        self.snk_executable_dir = self.snk_home / "bin"
 
         # Create dirs
         self.snk_home.mkdir(parents=True, exist_ok=True)
-        self.pipelines_dir.mkdir(parents=True, exist_ok=True)
+        self.snk_pipelines_dir.mkdir(parents=True, exist_ok=True)
+        self.snk_executable_dir.mkdir(parents=True, exist_ok=True)
         self.bin_dir.mkdir(parents=True, exist_ok=True)
 
     def bin_dir_in_path(self) -> bool:
@@ -137,8 +139,9 @@ class Nest:
                 handle_force_installation(name)
             pipeline_path = self.local(pipeline_local_path, name, editable)
         try:
-            pipeline_executable = self.create_package(pipeline_path)
-            self.link_pipeline_executable_to_bin(pipeline_executable)
+            self.validate_SnakeMake_repo(pipeline_path)
+            pipeline_executable_path = self.create_executable(pipeline_path, name)
+            self.link_pipeline_executable_to_bin(pipeline_executable_path)
             if config:
                 self.copy_nonstandard_config(pipeline_path, config)
             if additional_resources:
@@ -209,21 +212,26 @@ class Nest:
         to_delete = []
 
         # remove repo
-        pipeline_dir = self.pipelines_dir / pipeline_name
+        pipeline_dir = self.snk_pipelines_dir / pipeline_name
         if pipeline_dir.exists() and pipeline_dir.is_dir():
             to_delete.append(pipeline_dir)
         elif pipeline_dir.is_symlink():
             # editable 
             to_delete.append(pipeline_dir)
-        else:
-            raise PipelineNotFoundError(f"Could not find pipeline: {pipeline_name}")
+
+        pipeline_executable = self.snk_executable_dir / pipeline_name
+        if pipeline_executable.exists():
+            to_delete.append(pipeline_executable)
 
         # remove link
-        pipeline_bin_executable = self.bin_dir / pipeline_name
-        if pipeline_bin_executable.exists() and pipeline_bin_executable.is_symlink():
-            if str(pipeline_dir) in str(os.readlink(pipeline_bin_executable)):
-                to_delete.append(pipeline_bin_executable)
+        pipeline_symlink_executable = self.bin_dir / pipeline_name
+        if pipeline_symlink_executable.is_symlink():
+            if str(os.readlink(pipeline_symlink_executable)) == str(pipeline_executable):
+                to_delete.append(pipeline_symlink_executable)
 
+        if not to_delete:
+            raise PipelineNotFoundError(f"Could not find pipeline: {pipeline_name}")
+        
         return to_delete
 
     def delete_paths(self, files: List[Path]):
@@ -236,11 +244,17 @@ class Nest:
         Examples:
           >>> nest.delete_paths([Path('/path/to/pipelines/example'), Path('/path/to/bin/example')])
         """
-        # check that the files are in self.pipelines_dir
+        # check that the files are in self.snk_pipelines_dir
         # i.e. if it is a symlink read the link and check
         for path in files:
             if path.is_symlink():
                 print("Unlinking:", path)
+                path.unlink()
+            elif path.is_file():
+                print("Deleting:", path)
+                assert str(self.snk_home) in str(
+                    path
+                ), "Cannot delete files outside of SNK_HOME"
                 path.unlink()
             elif path.is_dir():
                 print("Deleting:", path)
@@ -279,16 +293,24 @@ class Nest:
         return True
 
     def _check_pipeline_name_available(self, name: str):
+        
         if not name:
             return None
-        if name in os.listdir(self.pipelines_dir):
+        if name in os.listdir(self.snk_pipelines_dir):
             raise PipelineExistsError(
-                f"Pipeline '{name}' already exists in SNK_HOME ({self.pipelines_dir})"
+                f"Pipeline '{name}' already exists in SNK_HOME ({self.snk_pipelines_dir})"
             )
-        if name in os.listdir(self.bin_dir) and (not (self.bin_dir / name).is_symlink() or str(self.pipelines_dir) not in os.readlink(self.bin_dir / name)):
-            raise PipelineExistsError(
-                f"File '{name}' already exists in SNK_BIN ({self.bin_dir})" 
-            )
+        
+        if name in os.listdir(self.bin_dir):
+           # check if orfan symlink
+            def is_orfan_symlink(name):
+                return (self.bin_dir / name).is_symlink() and str(self.snk_home) in os.readlink(self.bin_dir / name)
+            if is_orfan_symlink(name):
+                self.delete_paths([self.bin_dir / name])
+            else:
+                raise PipelineExistsError(
+                    f"File '{name}' already exists in SNK_BIN ({self.bin_dir})" 
+                )
 
     def _confirm_installation(self, name: str):
         """
@@ -298,7 +320,7 @@ class Nest:
         Examples:
           >>> nest._confirm_installation('example')
         """
-        pipeline_dir = self.pipelines_dir / name
+        pipeline_dir = self.snk_pipelines_dir / name
         assert pipeline_dir.exists()
         pipelines = [p.name.split(".")[0] for p in self.bin_dir.glob("*")]
         assert name in pipelines
@@ -317,7 +339,7 @@ class Nest:
     def pipelines(self):
         return [
             Pipeline(pipeline_dir.absolute())
-            for pipeline_dir in self.pipelines_dir.glob("*")
+            for pipeline_dir in self.snk_pipelines_dir.glob("*")
         ]
 
     def download(self, repo_url: str, name: str, tag_name: str = None) -> Path:
@@ -333,7 +355,7 @@ class Nest:
           >>> Nest.download('https://example.com/file.txt')
           None
         """
-        location = self.pipelines_dir / name
+        location = self.snk_pipelines_dir / name
         options = ["--depth 1", "--single-branch"]
         if tag_name:
             options.append(f"--branch {tag_name}")
@@ -343,7 +365,7 @@ class Nest:
         except GitCommandError as e:
             if "destination path" in e.stderr:
                 raise PipelineExistsError(
-                    f"Pipeline '{name}' already exists in {self.pipelines_dir}"
+                    f"Pipeline '{name}' already exists in {self.snk_pipelines_dir}"
                 )
             elif f"Remote branch {tag_name}" in e.stderr:
                 raise PipelineNotFoundError(f"Pipeline tag '{tag_name}' not found")
@@ -355,7 +377,7 @@ class Nest:
         return location
 
     def local(self, path: Path, name: str, editable=False) -> Path:
-        location = self.pipelines_dir / name
+        location = self.snk_pipelines_dir / name
         if editable:
             os.symlink(path.absolute(), location, target_is_directory=True)
             return location
@@ -366,9 +388,8 @@ class Nest:
             Repo.init(location, mkdir=False)
         return location
 
-    def create_package(self, pipeline_dir: Path) -> Path:
-        self.validate_SnakeMake_repo(pipeline_dir)
-
+    def create_executable(self, pipeline_path: Path, name: str) -> Path:
+        
         template = inspect.cleandoc(
             f"""
             #!/bin/sh
@@ -380,21 +401,16 @@ class Nest:
             from snk import create_cli
             if __name__ == "__main__":
                 sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
-                sys.exit(create_cli("{pipeline_dir}"))
+                sys.exit(create_cli("{pipeline_path.resolve()}"))
                 
         """
         )
 
-        pipeline_bin_dir = pipeline_dir / "bin"
-        pipeline_bin_dir.mkdir(exist_ok=True)
-
-        name = pipeline_dir.name
-
         if sys.platform.startswith("win"):
             name += ".exe"
 
-        pipeline_executable = pipeline_bin_dir / name
-
+        pipeline_executable = self.snk_executable_dir / name
+        
         with open(pipeline_executable, "w") as f:
             f.write(template)
 
@@ -421,7 +437,7 @@ class Nest:
         try:
             os.symlink(pipeline_executable_path.absolute(), self.bin_dir / name)    
         except FileExistsError:
-            raise PipelineExistsError(f"File '{name}' already exists in SNK_BIN ({self.bin_dir})")    
+            raise PipelineExistsError(f"File '{name}' already exists in SNK_BIN ({self.bin_dir})")
         return self.bin_dir / name
 
     def validate_SnakeMake_repo(self, repo: Repo):

@@ -24,7 +24,7 @@ def example_config():
 def basic_runner(tmp_path_factory):
     nest = Nest(tmp_path_factory.mktemp("snk"), tmp_path_factory.mktemp("bin"))
     basic_pipeline = nest.install('https://github.com/Wytamma/snk-basic-pipeline.git')
-    expected = nest.pipelines_dir / 'snk-basic-pipeline'
+    expected = nest.snk_pipelines_dir / 'snk-basic-pipeline'
     assert expected.exists()
     print(basic_pipeline.executable)
     runner = CLIRunner([basic_pipeline.executable])
@@ -39,7 +39,7 @@ def local_pipeline(tmp_path_factory):
     print(nest.bin_dir)
     print(nest.snk_home)
     local_pipeline = nest.install("tests/data/pipeline")
-    expected = nest.pipelines_dir / 'pipeline'
+    expected = nest.snk_pipelines_dir / 'pipeline'
     assert expected.exists()
     return local_pipeline
 

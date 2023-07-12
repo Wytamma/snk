@@ -156,7 +156,7 @@ def list(
     except FileNotFoundError:
         pipelines = []
     pipeline_dir_yellow = typer.style(
-        nest.pipelines_dir, fg=typer.colors.YELLOW, bold=False
+        nest.snk_pipelines_dir, fg=typer.colors.YELLOW, bold=False
     )
     typer.echo(f"Found {len(pipelines)} pipelines in {pipeline_dir_yellow}")
     for pipeline in pipelines:

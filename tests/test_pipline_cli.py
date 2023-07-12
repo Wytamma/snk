@@ -19,24 +19,24 @@ def test_flatten(example_config: Path):
 def test_convert_key_to_snakemake_format(key, value, expected):
     assert convert_key_to_snakemake_format(key, value) == expected
 
-def test_installation(basic_runner):
-    res = basic_runner(['--help'])
+def test_help(local_runner: CLIRunner):
+    res = local_runner(['--help'])
     assert res.code == 0, res.stderr
-    assert 'snk-basic-pipeline' in res.stdout
+    assert 'Usage:' in res.stdout
 
-def test_info(basic_runner):
-    res = basic_runner(['info'])
+def test_info(local_runner: CLIRunner):
+    res = local_runner(['info'])
     assert res.code == 0, res.stderr
-    assert 'snk-basic-pipeline' in res.stdout, res.stderr
+    assert 'pipeline' in res.stdout, res.stderr
     assert 'version' in res.stdout
     assert 'pipeline_dir_path' in res.stdout
 
-def test_run_cli(basic_runner):
-    res = basic_runner(['run', '-h'])
+def test_run_cli(local_runner: CLIRunner):
+    res = local_runner(['run', '-h'])
     assert res.code == 0, res.stderr
-    assert 'snk-basic-pipeline' in res.stdout, res.stderr
-    assert 'samples' in res.stdout
-    assert 'genome' in res.stdout
+    assert 'pipeline' in res.stdout, res.stderr
+    assert 'times' in res.stdout
+    assert 'text' in res.stdout
 
 @pytest.mark.parametrize("filetype", ['pdf', 'svg', 'png'])
 def test_dag(local_runner: CLIRunner, tmp_path, filetype):
