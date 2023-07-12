@@ -4,9 +4,7 @@ import typer
 from snk.cli.dynamic_typer import DynamicTyper
 from snk.cli.options.option import Option
 from snk.pipeline import Pipeline
-from rich.console import Console
-from rich.syntax import Syntax
-from snk.cli.config.config import get_config_from_pipeline_dir
+
 
 class ConfigApp(DynamicTyper):
     def __init__(self, pipeline: Pipeline, options: List[Option]):
@@ -15,6 +13,7 @@ class ConfigApp(DynamicTyper):
         Args:
             pipeline (Pipeline): The pipeline to configure.
         """ 
+        self.options = options
         self.pipeline = pipeline
         self.register_default_command(self.show)
         self.register_command(self.show, help="Show the pipeline configuration.")
@@ -30,16 +29,32 @@ class ConfigApp(DynamicTyper):
             >>> ConfigApp.show(pretty=True)
             # Pretty printed configuration
         """
-        config_path = get_config_from_pipeline_dir(self.pipeline.path)
-        if not config_path:
-            typer.secho("Could not find config...", fg="red")
-            raise typer.Exit(1)
-        with open(config_path) as f:
-            code = f.read()
-            if pretty:
-                syntax = Syntax(code, "yaml")
-                console = Console()
-                console.print(syntax)
-            else:
-                typer.echo(code)
-    
+        import yaml 
+        from collections import defaultdict
+        from rich.console import Console
+        from rich.syntax import Syntax
+        from snk.cli.utils import convert_key_to_snakemake_format
+        
+        def deep_update(source, overrides):
+            for key, value in overrides.items():
+                if isinstance(value, dict):
+                    if not isinstance(source.get(key), dict):
+                        # If the existing value is not a dictionary, replace it with one
+                        source[key] = {}
+                    # Now we are sure that source[key] is a dictionary, so we can update it
+                    deep_update(source[key], value)
+                else:
+                    source[key] = value
+            return source
+
+        collapsed_data = defaultdict(dict)
+        config_dict = [convert_key_to_snakemake_format(option.original_key, option.default) for option in self.options]
+        for d in config_dict:
+            deep_update(collapsed_data, d)
+        yaml_str = yaml.dump(dict(collapsed_data))
+        if pretty:
+            syntax = Syntax(yaml_str, "yaml")
+            console = Console()
+            console.print(syntax)
+        else:
+            typer.echo(yaml_str)

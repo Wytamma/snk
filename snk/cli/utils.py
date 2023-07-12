@@ -38,12 +38,12 @@ def flatten(d, parent_key="", sep=":"):
     return dict(items)
 
 
-def convert_key_to_snakemake_format(key, value):
+def convert_key_to_snakemake_format(key, value, sep=":"):
     """
     Convert key to a format that can be passed over the cli to snakemake
     """
     result_dict = {}
-    parts = key.split(":")
+    parts = key.split(sep)
     current_dict = result_dict
 
     for part in parts[:-1]:
