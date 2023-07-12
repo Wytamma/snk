@@ -54,7 +54,7 @@ class Pipeline:
         Returns:
             Path: The path to the pipeline executable.
         """
-        pipeline_bin_dir = self.path / "bin"
+        pipeline_bin_dir = self.path.parent.parent / "bin"
         name = self.name
         if sys.platform.startswith("win"):
             name += ".exe"
