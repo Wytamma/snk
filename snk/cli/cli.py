@@ -430,7 +430,8 @@ class CLI(DynamicTyper):
             args.extend(["--config", *configs])
         if verbose:
             typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
-
+        if not keep_snakemake and Path(".snakemake").exists():
+            keep_snakemake = True
         try:
             self.snk_config.add_resources(resource, self.pipeline.path)
         except FileNotFoundError as e:
