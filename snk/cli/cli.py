@@ -74,10 +74,11 @@ class CLI(DynamicTyper):
             os.environ["CONDA_SUBDIR"] = "osx-64"
 
         # dynamically create the logo
-        tagline: str = self.snk_config.tagline
-        font: str = self.snk_config.font
-        self.logo = self.create_logo(tagline=tagline, font=font)
-        callback = self.create_callback()
+        self.logo = self._create_logo(
+            tagline=self.snk_config.tagline, 
+            font=self.snk_config.font
+        )
+        callback = self._create_callback()
         callback.__doc__ = self.logo
 
         # registration
@@ -87,22 +88,24 @@ class CLI(DynamicTyper):
             context_settings={"help_option_names": ["-h", "--help"]},
         )
         self.register_command(self.info, help="Display information about the pipeline.")
-        config_app = ConfigApp(
-            pipeline=self.pipeline,
-            options=self.options,
-        )
         self.register_group(
-            config_app, name="config", help="Access the pipeline configuration."
+            ConfigApp(
+                pipeline=self.pipeline,
+                options=self.options,
+            ), 
+            name="config", 
+            help="Access the pipeline configuration."
         )
         if self.pipeline.environments:
-            env_app = EnvApp(
-                pipeline=self.pipeline,
-                conda_prefix_dir=self.conda_prefix_dir,
-                snakemake_config=self.snakemake_config,
-                snakefile=self.snakefile,
-            )
             self.register_group(
-                env_app, name="env", help="Access the pipeline conda environments."
+                EnvApp(
+                    pipeline=self.pipeline,
+                    conda_prefix_dir=self.conda_prefix_dir,
+                    snakemake_config=self.snakemake_config,
+                    snakefile=self.snakefile,
+                ), 
+                name="env", 
+                help="Access the pipeline conda environments."
             )
         if self.pipeline.profiles:
             self.register_command(self.profile, help="Access the pipeline profiles.")
@@ -128,7 +131,7 @@ class CLI(DynamicTyper):
             typer.echo(self.pipeline.path)
             raise typer.Exit()
 
-    def create_callback(self):
+    def _create_callback(self):
         def callback(
             ctx: typer.Context,
             version: Optional[bool] = typer.Option(
@@ -154,7 +157,7 @@ class CLI(DynamicTyper):
                 typer.echo(f"{ctx.get_help()}")
         return callback
     
-    def create_logo(
+    def _create_logo(
         self, tagline="A Snakemake pipeline CLI generated with snk", font="small"
     ):
         """
@@ -164,7 +167,7 @@ class CLI(DynamicTyper):
         Returns:
           str: The logo.
         Examples:
-          >>> CLI.create_logo()
+          >>> CLI._create_logo()
         """
         if self.snk_config.art:
             art = self.snk_config.art
