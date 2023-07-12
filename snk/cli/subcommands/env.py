@@ -12,7 +12,7 @@ from snk.pipeline import Pipeline
 from rich.console import Console
 from rich.syntax import Syntax
 from snakemake.deployment.conda import Conda, Env, CreateCondaEnvironmentException
-from snk.cli.config import get_config_from_pipeline_dir
+from snk.cli.config.config import get_config_from_pipeline_dir
 
 class EnvApp(DynamicTyper):
     def __init__(self, pipeline: Pipeline, conda_prefix_dir: Path, snakemake_config, snakefile: Path):

@@ -2,113 +2,16 @@ from typing import List, Callable
 from inspect import signature, Parameter
 from makefun import wraps
 from pathlib import Path
-from .config import SnkConfig
+from .config.config import SnkConfig
 from datetime import datetime
 import typer
 import sys
 import collections  # MutableMapping import hack
-
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     from collections.abc import MutableMapping
 else:
     from collections import MutableMapping
-
 from snk.cli.options import Option
-
-types = {
-    "int": int,
-    "integer": int,
-    "str": str,
-    "string": str,
-    "path": Path,
-    "bool": bool,
-    "boolean": bool,
-    "list": List[str],
-    "list[str]": List[str],
-    "list[path]": List[Path],
-    "list[int]": List[int],
-}
-
-
-def create_cli_parameter(option: Option):
-    """
-    Creates a parameter for a CLI option.
-    Args:
-      option (Option): An Option object containing the option's name, type, required status, default value, and help message.
-    Returns:
-      Parameter: A parameter object for the CLI option.
-    Examples:
-      >>> option = Option(name='foo', type='int', required=True, default=0, help='A number')
-      >>> create_cli_parameter(option)
-      Parameter('foo', kind=Parameter.POSITIONAL_OR_KEYWORD, default=typer.Option(..., help='[CONFIG] A number'), annotation=int)
-    """
-    # If option type is not in type mapping, fallback to 'str'
-    type_annotation = types.get(
-        option.type.lower(), 
-        List[str] if 'list' in option.type.lower() else str)
-
-    return Parameter(
-        option.name,
-        kind=Parameter.POSITIONAL_OR_KEYWORD,
-        default=typer.Option(
-            ... if option.required else option.default,
-            help=f"[CONFIG] {option.help}",
-        ),
-        annotation=type_annotation,
-    )
-
-
-def add_dynamic_options(options: List[Option]):
-    """
-    Decorator to add dynamic options to a function.
-    Args:
-      options (List[dict]): A list of dictionaries containing the option's name, type, required status, default value, and help message.
-    Returns:
-      Callable: A decorated function with the dynamic options added.
-    Examples:
-      >>> @add_dynamic_options([{'name': 'foo', 'type': 'int', 'required': True, 'default': 0, 'help': 'A number'}])
-      ... def my_func(ctx):
-      ...     pass
-      >>> my_func
-      <function my_func at 0x7f8f9f9f9f90>
-    """
-
-    def inner(func: Callable):
-        """
-        Wraps a function with dynamic options.
-        """
-        func_sig = signature(func)
-        params = list(func_sig.parameters.values())
-        for op in options[::-1]:
-            params.insert(1, create_cli_parameter(op))
-        new_sig = func_sig.replace(parameters=params)
-
-        @wraps(func, new_sig=new_sig)
-        def func_wrapper(*args, **kwargs):
-            """
-            Wraps a function with dynamic options.
-            Args:
-                *args: Variable length argument list.
-                **kwargs: Arbitrary keyword arguments.
-            Returns:
-                Callable: A wrapped function with the dynamic options added.
-            Notes:
-                This function is used as an inner function in the `add_dynamic_options` decorator.
-            """
-            # if kwargs["configfile"]:
-            #     # need to check if kwargs in options have changed
-            #     # parse the new configfile and update the defautls
-            #     raise NotImplementedError
-            for op in options:
-                kwargs["ctx"].args.extend([f"--{op.name}", kwargs[op.name]])
-            kwargs = {
-                k: v for k, v in kwargs.items() if k in func_sig.parameters.keys()
-            }
-            return func(*args, **kwargs)
-
-        return func_wrapper
-
-    return inner
 
 
 def flatten(d, parent_key="", sep=":"):

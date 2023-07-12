@@ -4,7 +4,7 @@ from snk.cli.dynamic_typer import DynamicTyper
 from snk.pipeline import Pipeline
 from rich.console import Console
 from rich.syntax import Syntax
-from snk.cli.config import get_config_from_pipeline_dir
+from snk.cli.config.config import get_config_from_pipeline_dir
 
 class ConfigApp(DynamicTyper):
     def __init__(self, pipeline: Pipeline):

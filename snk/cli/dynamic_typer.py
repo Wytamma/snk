@@ -1,5 +1,12 @@
 from typing import Callable
 import typer
+from typing import List, Callable
+from inspect import signature, Parameter
+from makefun import with_signature
+import typer
+
+from snk.cli.options import Option
+
 
 class DynamicTyper:
     app: typer.Typer
@@ -52,7 +59,7 @@ class DynamicTyper:
   
         self.register_callback(wrapper, invoke_without_command=True, **command_kwargs)
 
-    def register_command(self, command: Callable, **command_kwargs) -> None:
+    def register_command(self, command: Callable, dynamic_options=None, **command_kwargs) -> None:
         """
         Register a command to the CLI.
         Args:
@@ -62,6 +69,8 @@ class DynamicTyper:
         Examples:
           >>> CLI.register_command(my_command)
         """
+        if dynamic_options is not None:
+            command = self.add_dynamic_options(command, dynamic_options)
         self.app.command(**command_kwargs)(command)
 
     def register_callback(self, command: Callable, **command_kwargs) -> None:
@@ -87,7 +96,72 @@ class DynamicTyper:
           >>> CLI.register_app(my_group)
         """
         self.app.add_typer(group.app, **command_kwargs)
-    
+
+
+    def _create_cli_parameter(self, option: Option):
+        """
+        Creates a parameter for a CLI option.
+        Args:
+          option (Option): An Option object containing the option's name, type, required status, default value, and help message.
+        Returns:
+          Parameter: A parameter object for the CLI option.
+        Examples:
+          >>> option = Option(name='foo', type='int', required=True, default=0, help='A number')
+          >>> create_cli_parameter(option)
+          Parameter('foo', kind=Parameter.POSITIONAL_OR_KEYWORD, default=typer.Option(..., help='[CONFIG] A number'), annotation=int)
+        """        
+        return Parameter(
+            option.name,
+            kind=Parameter.POSITIONAL_OR_KEYWORD,
+            default=typer.Option(
+                ... if option.required else option.default,
+                help=f"[CONFIG] {option.help}",
+            ),
+            annotation=option.type,
+        )
+
+
+    def add_dynamic_options(self, func: Callable, options: List[Option]):
+        """
+        Function to add dynamic options to a command.
+        Args:
+          command (Callable): The command to which the dynamic options should be added.
+          options (List[dict]): A list of dictionaries containing the option's name, type, required status, default value, and help message.
+        Returns:
+          Callable: A function with the dynamic options added.
+        Examples:
+          >>> my_func = add_dynamic_options_to_function(my_func, [{'name': 'foo', 'type': 'int', 'required': True, 'default': 0, 'help': 'A number'}])
+          >>> my_func
+          <function my_func at 0x7f8f9f9f9f90>
+        """
+        func_sig = signature(func)
+        params = list(func_sig.parameters.values())
+        for op in options[::-1]:
+            params.insert(1, self._create_cli_parameter(op))
+        new_sig = func_sig.replace(parameters=params)
+
+        @with_signature(func_signature=new_sig, func_name=func.__name__)
+        def func_wrapper(*args, **kwargs):
+            """
+            Wraps a function with dynamic options.
+            Args:
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
+            Returns:
+                Callable: A wrapped function with the dynamic options added.
+            Notes:
+                This function is used in the `add_dynamic_options_to_function` function.
+            """
+            for op in options:
+                kwargs["ctx"].args.extend([f"--{op.name}", kwargs[op.name]])
+            kwargs = {
+                k: v for k, v in kwargs.items() if k in func_sig.parameters.keys()
+            }
+            return func(*args, **kwargs)
+
+        return func_wrapper
+
+
     def error(self, msg, exit=True):
         typer.secho(msg, fg="red")
         if exit:

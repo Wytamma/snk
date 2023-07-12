@@ -12,7 +12,7 @@ from .errors import (
     PipelineNotFoundError,
     InvalidPipelineRepositoryError,
 )
-from .cli.config import SnkConfig
+from .cli.config.config import SnkConfig
 from .pipeline import Pipeline
 
 

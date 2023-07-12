@@ -18,13 +18,12 @@ from art import text2art
 from snk.cli.dynamic_typer import DynamicTyper
 from snk.cli.subcommands import EnvApp, ConfigApp
 
-from .config import (
+from .config.config import (
     SnkConfig,
     get_config_from_pipeline_dir,
     load_pipeline_snakemake_config,
 )
 from .utils import (
-    add_dynamic_options,
     parse_config_args,
     dag_filetype_callback,
 )
@@ -139,8 +138,10 @@ class CLI(DynamicTyper):
             )
         if self.pipeline.profiles:
             self.register_command(self.profile, help="Access the pipeline profiles.")
+        
         self.register_command(
-            add_dynamic_options(self.options)(self.run),
+            self.run,
+            dynamic_options=self.options,
             help="Run the Snakemake pipeline.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
                 "allow_extra_args": True,
@@ -269,7 +270,7 @@ class CLI(DynamicTyper):
                             fg=typer.colors.YELLOW,
                         )
                     remove_resource(copied_resource)
-
+    
     def run(
         self,
         ctx: typer.Context,

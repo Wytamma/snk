@@ -1,8 +1,22 @@
 from typing import List
-from ..config import SnkConfig
+from ..config.config import SnkConfig
 from ..utils import get_default_type, flatten
 from .option import Option
+from pathlib import Path
  
+types = {
+    "int": int,
+    "integer": int,
+    "str": str,
+    "string": str,
+    "path": Path,
+    "bool": bool,
+    "boolean": bool,
+    "list": List[str],
+    "list[str]": List[str],
+    "list[path]": List[Path],
+    "list[int]": List[int],
+}
 
 def create_option_from_annotation(
         annotation_key: str, 
@@ -23,6 +37,9 @@ def create_option_from_annotation(
     updated = False
     if default != config_default:
         updated = True
+    type = annotation_values.get(f"{annotation_key}:type", get_default_type(default))
+    annotation_type = types.get(
+            type.lower(), List[str] if 'list' in type.lower() else str)
     return Option(
         name=annotation_values.get(
             f"{annotation_key}:name",
@@ -32,7 +49,7 @@ def create_option_from_annotation(
         default=annotation_values.get(f"{annotation_key}:default", default),
         updated=updated,
         help=annotation_values.get(f"{annotation_key}:help", ""),
-        type=annotation_values.get(f"{annotation_key}:type", get_default_type(default)),
+        type=annotation_type,
         required=annotation_values.get(f"{annotation_key}:required", False),
     )
 
