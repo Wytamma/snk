@@ -1,5 +1,6 @@
 annotations:
   times: 
+    default: 1
     type: int
     help: Number of times to repeat the message
   text:

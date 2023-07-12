@@ -18,7 +18,11 @@ def create_option_from_annotation(
     Returns:
       An Option object.
     """
-    default = default_values.get(annotation_key, None)
+    config_default = default_values.get(annotation_key, None)
+    default  = annotation_values.get(f"{annotation_key}:default", config_default)
+    updated = False
+    if default != config_default:
+        updated = True
     return Option(
         name=annotation_values.get(
             f"{annotation_key}:name",
@@ -26,7 +30,7 @@ def create_option_from_annotation(
         ).replace("-", "_"),
         original_key=annotation_key,
         default=annotation_values.get(f"{annotation_key}:default", default),
-        updated=default is not None,
+        updated=updated,
         help=annotation_values.get(f"{annotation_key}:help", ""),
         type=annotation_values.get(f"{annotation_key}:type", get_default_type(default)),
         required=annotation_values.get(f"{annotation_key}:required", False),
