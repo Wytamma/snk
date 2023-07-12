@@ -14,7 +14,6 @@ class ConfigApp(DynamicTyper):
             pipeline (Pipeline): The pipeline to configure.
         """ 
         self.pipeline = pipeline
-        self.app = typer.Typer()
         self.register_default_command(self.show)
         self.register_command(self.show, help="Show the pipeline configuration.")
 

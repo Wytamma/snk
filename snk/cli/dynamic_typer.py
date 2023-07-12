@@ -4,6 +4,10 @@ import typer
 class DynamicTyper:
     app: typer.Typer
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.app = typer.Typer()
+
     def __call__(self):
         """
         Invoke the CLI.

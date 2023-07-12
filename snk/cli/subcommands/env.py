@@ -20,7 +20,6 @@ class EnvApp(DynamicTyper):
         self.conda_prefix_dir = conda_prefix_dir
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
-        self.app = typer.Typer()
         self.workflow = create_workflow(
             self.snakefile,
             config=self.snakemake_config,
