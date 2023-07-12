@@ -73,44 +73,11 @@ class CLI(DynamicTyper):
         ):
             os.environ["CONDA_SUBDIR"] = "osx-64"
 
-        def _print_pipline_version(ctx: typer.Context, value: bool):
-            if value:
-                typer.echo(self.version)
-                raise typer.Exit()
-
-        def _print_pipline_path(ctx: typer.Context, value: bool):
-            if value:
-                typer.echo(self.pipeline.path)
-                raise typer.Exit()
-
-        def callback(
-            ctx: typer.Context,
-            version: Optional[bool] = typer.Option(
-                None,
-                "-v",
-                "--version",
-                help="Show the pipeline version.",
-                is_eager=True,
-                callback=_print_pipline_version,
-                show_default=False,
-            ),
-            path: Optional[bool] = typer.Option(
-                None,
-                "-p",
-                "--path",
-                help="Show the pipeline path.",
-                is_eager=True,
-                callback=_print_pipline_path,
-                show_default=False,
-            ),
-        ):
-            if ctx.invoked_subcommand is None:
-                typer.echo(f"{ctx.get_help()}")
-
         # dynamically create the logo
         tagline: str = self.snk_config.tagline
         font: str = self.snk_config.font
         self.logo = self.create_logo(tagline=tagline, font=font)
+        callback = self.create_callback()
         callback.__doc__ = self.logo
 
         # registration
@@ -122,6 +89,7 @@ class CLI(DynamicTyper):
         self.register_command(self.info, help="Display information about the pipeline.")
         config_app = ConfigApp(
             pipeline=self.pipeline,
+            options=self.options,
         )
         self.register_group(
             config_app, name="config", help="Access the pipeline configuration."
@@ -149,7 +117,43 @@ class CLI(DynamicTyper):
                 "help_option_names": ["-h", "--help"],
             },
         )
+    
+    def _print_pipline_version(self, ctx: typer.Context, value: bool):
+        if value:
+            typer.echo(self.version)
+            raise typer.Exit()
 
+    def _print_pipline_path(self, ctx: typer.Context, value: bool):
+        if value:
+            typer.echo(self.pipeline.path)
+            raise typer.Exit()
+
+    def create_callback(self):
+        def callback(
+            ctx: typer.Context,
+            version: Optional[bool] = typer.Option(
+                None,
+                "-v",
+                "--version",
+                help="Show the pipeline version.",
+                is_eager=True,
+                callback=self._print_pipline_version,
+                show_default=False,
+            ),
+            path: Optional[bool] = typer.Option(
+                None,
+                "-p",
+                "--path",
+                help="Show the pipeline path.",
+                is_eager=True,
+                callback=self._print_pipline_path,
+                show_default=False,
+            ),
+        ):
+            if ctx.invoked_subcommand is None:
+                typer.echo(f"{ctx.get_help()}")
+        return callback
+    
     def create_logo(
         self, tagline="A Snakemake pipeline CLI generated with snk", font="small"
     ):

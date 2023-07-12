@@ -1,13 +1,15 @@
+from typing import List
 import typer
 
 from snk.cli.dynamic_typer import DynamicTyper
+from snk.cli.options.option import Option
 from snk.pipeline import Pipeline
 from rich.console import Console
 from rich.syntax import Syntax
 from snk.cli.config.config import get_config_from_pipeline_dir
 
 class ConfigApp(DynamicTyper):
-    def __init__(self, pipeline: Pipeline):
+    def __init__(self, pipeline: Pipeline, options: List[Option]):
         """
         Initializes the ConfigApp class.
         Args:
