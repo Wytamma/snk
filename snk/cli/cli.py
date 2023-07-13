@@ -390,7 +390,8 @@ class CLI(DynamicTyper):
 
         if not configfile:
             configfile = get_config_from_pipeline_dir(self.pipeline.path)
-        args.append(f"--configfile={configfile}")
+        if configfile:
+            args.append(f"--configfile={configfile}")
 
         if profile:
             found_profile = [p for p in self.pipeline.profiles if profile == p.name]
