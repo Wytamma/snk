@@ -477,27 +477,6 @@ class CLI(DynamicTyper):
         info_dict["pipeline_dir_path"] = str(self.pipeline.path)
         typer.echo(json.dumps(info_dict, indent=2))
 
-    def config(self, pretty: bool = typer.Option(False, "--pretty", "-p")):
-        """
-        Access the pipeline configuration.
-        Side Effects:
-          Prints the pipeline configuration.
-        Examples:
-          >>> CLI.config()
-        """
-        config_path = get_config_from_pipeline_dir(self.pipeline.path)
-        if not config_path:
-            typer.secho("Could not find config...", fg="red")
-            raise typer.Exit(1)
-        with open(config_path) as f:
-            code = f.read()
-            if pretty:
-                syntax = Syntax(code, "yaml")
-                console = Console()
-                console.print(syntax)
-            else:
-                typer.echo(code)
-
     def env(
         self,
         name: str = typer.Argument(None, help="The name of the environment."),

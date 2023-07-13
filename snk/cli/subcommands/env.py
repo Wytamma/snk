@@ -20,10 +20,11 @@ class EnvApp(DynamicTyper):
         self.conda_prefix_dir = conda_prefix_dir
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
+        self.configfile = get_config_from_pipeline_dir(self.pipeline.path)
         self.workflow = create_workflow(
             self.snakefile,
             config=self.snakemake_config,
-            configfiles=[get_config_from_pipeline_dir(self.pipeline.path)],
+            configfiles=[self.configfile] if self.configfile else None,
             use_conda = True,
             conda_prefix=self.conda_prefix_dir.resolve(),
         )
