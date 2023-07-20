@@ -2,7 +2,7 @@ from pathlib import Path
 from snk.cli.utils import flatten, convert_key_to_snakemake_format
 import snakemake
 import pytest
-from .utils import CLIRunner
+from ..utils import CLIRunner
 
 def test_flatten(example_config: Path):
     config = snakemake.load_configfile(example_config)
