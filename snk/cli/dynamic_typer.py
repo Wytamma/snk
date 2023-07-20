@@ -152,8 +152,23 @@ class DynamicTyper:
             Notes:
                 This function is used in the `add_dynamic_options_to_function` function.
             """
-            for op in options:
-                kwargs["ctx"].args.extend([f"--{op.name}", kwargs[op.name]])
+            flat_config = None
+
+            if kwargs.get("configfile"):
+                import snakemake
+                from .utils import flatten
+
+                snakemake_config = snakemake.load_configfile(kwargs['configfile'])
+                flat_config = flatten(snakemake_config)
+
+            for option in options:
+                # If no config file provided, or an option is updated, add it to the arguments
+                if kwargs.get("configfile") is None or kwargs[option.name] != option.default:
+                    kwargs["ctx"].args.extend([f"--{option.name}", kwargs[option.name]])
+                # If a config file is provided and the option key isn't in it, add the option to the arguments
+                elif flat_config and option.original_key not in flat_config:
+                    kwargs["ctx"].args.extend([f"--{option.name}", kwargs[option.name]])
+
             kwargs = {
                 k: v for k, v in kwargs.items() if k in func_sig.parameters.keys()
             }

@@ -1,2 +1,3 @@
-text: "hello world!"
+text: "Hi from config.yaml!"
 output: "hello.txt"
+threads: 8

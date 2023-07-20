@@ -4,7 +4,7 @@ annotations:
     type: int
     help: Number of times to repeat the message
   text:
-    default: "Hi from snk.yaml"
+    default: "Hi from snk.yaml!"
     type: str
     help: "A string to save to a file"
 symlink_resources: true

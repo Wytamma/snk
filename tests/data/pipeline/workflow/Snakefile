@@ -4,5 +4,10 @@ rule hello_world:
     output: config['output']
     params:
         text=config['text'],
-    threads: config['times'] if config['times'] else 1
-    shell: "for i in {{1..{threads}}}; do echo {params.text} >> {output}; done"
+        times=config['times']
+    threads: config['threads'] if config['threads'] else 1
+    shell: 
+        """
+        for i in {{1..{params.times}}}; do echo {params.text}; done
+        for i in {{1..{params.times}}}; do echo {params.text} >> {output}; done
+        """
