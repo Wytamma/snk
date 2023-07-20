@@ -1,7 +1,5 @@
 from snk import Nest
 from pathlib import Path
-import subprocess
-from ..utils import CLIRunner
 
 def test_init(bin_dir, snk_home):
     nest = Nest(snk_home, bin_dir=bin_dir)
