@@ -9,3 +9,9 @@ def test_config_override(local_runner: CLIRunner):
     assert res.code == 0, res.stderr
     assert 'pipeline' in res.stdout, res.stderr
     assert 'test' in res.stdout
+
+def test_exit_on_fail(local_runner: CLIRunner):
+    res = local_runner(['run', '-f', 'hello.txt'])
+    assert res.code == 1, res.stderr
+    assert 'pipeline' in res.stdout, res.stderr
+    assert 'test' in res.stdout
