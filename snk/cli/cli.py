@@ -94,7 +94,6 @@ class CLI(DynamicTyper):
                 dynamic_run_options=self.options,
             ), 
             name="run", 
-            help="Run the pipeline."
         )
         self.register_group(
             ConfigApp(
