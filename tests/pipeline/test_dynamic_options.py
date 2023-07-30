@@ -31,6 +31,13 @@ def test_create_option_from_annotation(default_annotation_values, default_defaul
     assert option.type == str
     assert option.required == True
 
+
+# @pytest.mark.parametrize("annotation_values, default_values, expected_type", [
+#     ({"test:type": "str"}, {}, str),
+# ])
+# def test_nested_option():
+#     pass
+
 @pytest.fixture
 def default_snakemake_config():
     return {

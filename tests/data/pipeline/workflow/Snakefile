@@ -11,3 +11,7 @@ rule hello_world:
         for i in {{1..{params.times}}}; do echo {params.text}; done
         for i in {{1..{params.times}}}; do echo {params.text} >> {output}; done
         """
+
+rule error:
+    output: 'error'
+    shell: "exit 1"

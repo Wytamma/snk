@@ -28,10 +28,6 @@ annotations:
         - 3
       type: list
       help: "A list to test"
-    test_dict:
-      default: {"test": "test"}
-      type: dict
-      help: "A dict to test"
     test_null:
       default: null
       help: "A null to test"
