@@ -35,7 +35,7 @@ def create_option_from_annotation(
     config_default = default_values.get(annotation_key, None)
     default  = annotation_values.get(f"{annotation_key}:default", config_default)
     updated = False
-    if default != config_default:
+    if config_default is None or default != config_default:
         updated = True
     type = annotation_values.get(f"{annotation_key}:type", get_default_type(default))
     assert type is not None, f"Type for {annotation_key} should be one of {', '.join(types.keys())}." 
