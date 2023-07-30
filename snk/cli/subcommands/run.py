@@ -220,10 +220,11 @@ class RunApp(DynamicTyper):
         )
 
         args.extend(targets_and_or_snakemake)
+        configs = []
+        for config_dict in config_dict_list:
+            for key, value in config_dict.items():
+                configs.append(f"{key}={value}")
 
-        configs = [
-            f"{list(c.keys())[0]}={list(c.values())[0]}" for c in config_dict_list
-        ]
         if configs:
             args.extend(["--config", *configs])
         if verbose:
@@ -242,6 +243,7 @@ class RunApp(DynamicTyper):
             if dag:
                 return self._save_dag(snakemake_args=args, filename=dag)
             try:
+                snakemake.parse_config = parse_config_monkeypatch
                 snakemake.main(args)
             except SystemExit as e:
                 status = int(str(e))
@@ -365,3 +367,43 @@ class RunApp(DynamicTyper):
                             fg=typer.colors.YELLOW,
                         )
                     remove_resource(copied_resource)
+
+
+def parse_config_monkeypatch(args):
+    """Monkeypatch the parse_config function from snakemake."""
+    import yaml
+    import snakemake
+    import re
+
+    def yaml_safe_load(s):
+        """Load yaml string safely."""
+        return yaml.load(s, Loader=yaml.SafeLoader)
+    
+    parsers = [int, float, snakemake._bool_parser, yaml_safe_load, str]
+    config = dict()
+    if args.config is not None:
+        valid = re.compile(r"[a-zA-Z_]\w*$")
+        for entry in args.config:
+            key, val = snakemake.parse_key_value_arg(
+                entry,
+                errmsg="Invalid config definition: Config entries have to be defined as name=value pairs.",
+            )
+            if not valid.match(key):
+                raise ValueError(
+                    "Invalid config definition: Config entry must start with a valid identifier."
+                )
+            v = None
+            if val == "":
+                snakemake.update_config(config, {key: v})
+                continue
+            for parser in parsers:
+                try:
+                    v = parser(val)
+                    # avoid accidental interpretation as function
+                    if not callable(v):
+                        break
+                except:
+                    pass
+            assert v is not None
+            snakemake.update_config(config, {key: v})
+    return config

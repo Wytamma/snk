@@ -38,6 +38,7 @@ def create_option_from_annotation(
     if default != config_default:
         updated = True
     type = annotation_values.get(f"{annotation_key}:type", get_default_type(default))
+    assert type is not None, f"Type for {annotation_key} should be one of {', '.join(types.keys())}." 
     annotation_type = types.get(
             type.lower(), List[str] if 'list' in type.lower() else str)
     return Option(
