@@ -270,6 +270,7 @@ class RunApp(DynamicTyper):
         with redirect_stdout(snakemake_output):
             # Capture the output of snakemake.main(args) using a try-except block
             try:
+                snakemake.parse_config = parse_config_monkeypatch
                 snakemake.main(snakemake_args)
             except SystemExit:  # Catch SystemExit exception to prevent termination
                 pass
