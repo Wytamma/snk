@@ -1,4 +1,6 @@
 annotations:
+  null_annotation:
+    default: null
   times: 
     default: 1
     type: int

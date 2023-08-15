@@ -375,11 +375,12 @@ def parse_config_monkeypatch(args):
     import snakemake
     import re
 
-    def yaml_safe_load(s):
+    def _yaml_safe_load(s):
         """Load yaml string safely."""
+        s = s.replace(": None", ": null")
         return yaml.load(s, Loader=yaml.SafeLoader)
     
-    parsers = [int, float, snakemake._bool_parser, yaml_safe_load, str]
+    parsers = [int, float, snakemake._bool_parser, _yaml_safe_load, str]
     config = dict()
     if args.config is not None:
         valid = re.compile(r"[a-zA-Z_]\w*$")
@@ -393,7 +394,7 @@ def parse_config_monkeypatch(args):
                     "Invalid config definition: Config entry must start with a valid identifier."
                 )
             v = None
-            if val == "":
+            if val == "" or val == 'None':
                 snakemake.update_config(config, {key: v})
                 continue
             for parser in parsers:
