@@ -3,7 +3,7 @@ from ..config.config import SnkConfig
 from ..utils import get_default_type, flatten
 from .option import Option
 from pathlib import Path
- 
+
 types = {
     "int": int,
     "integer": int,
@@ -18,11 +18,10 @@ types = {
     "list[int]": List[int],
 }
 
+
 def create_option_from_annotation(
-        annotation_key: str, 
-        annotation_values: dict, 
-        default_values: dict
-    ) -> Option:
+    annotation_key: str, annotation_values: dict, default_values: dict
+) -> Option:
     """
     Create an Option object from a given annotation.
     Args:
@@ -33,18 +32,20 @@ def create_option_from_annotation(
       An Option object.
     """
     config_default = default_values.get(annotation_key, None)
-    default  = annotation_values.get(f"{annotation_key}:default", config_default)
+    default = annotation_values.get(f"{annotation_key}:default", config_default)
     updated = False
     if config_default is None or default != config_default:
         updated = True
     type = annotation_values.get(f"{annotation_key}:type", get_default_type(default))
-    assert type is not None, f"Type for {annotation_key} should be one of {', '.join(types.keys())}." 
+    assert (
+        type is not None
+    ), f"Type for {annotation_key} should be one of {', '.join(types.keys())}."
     annotation_type = types.get(
-            type.lower(), List[str] if 'list' in type.lower() else str)
+        type.lower(), List[str] if "list" in type.lower() else str
+    )
     return Option(
         name=annotation_values.get(
-            f"{annotation_key}:name",
-            annotation_key.replace(":", "_")
+            f"{annotation_key}:name", annotation_key.replace(":", "_")
         ).replace("-", "_"),
         original_key=annotation_key,
         default=annotation_values.get(f"{annotation_key}:default", default),
@@ -56,9 +57,8 @@ def create_option_from_annotation(
 
 
 def build_dynamic_cli_options(
-        snakemake_config: dict, 
-        snk_config: SnkConfig
-    ) -> List[dict]:
+    snakemake_config: dict, snk_config: SnkConfig
+) -> List[dict]:
     """
     Builds a list of options from a snakemake config and a snk config.
     Args:
@@ -74,9 +74,7 @@ def build_dynamic_cli_options(
     # For every parameter in the config, create an option from the corresponding annotation
     for parameter in flat_config:
         options[parameter] = create_option_from_annotation(
-            parameter, 
-            flat_annotations, 
-            flat_config
+            parameter, flat_annotations, flat_config
         )
 
     # For every annotation not in config, create an option with default values

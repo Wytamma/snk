@@ -2,11 +2,13 @@ from dataclasses import dataclass
 import subprocess
 from typing import List
 
+
 @dataclass
 class Result:
     stdout: str
     stderr: str
     code: int
+
 
 @dataclass
 class CLIRunner:

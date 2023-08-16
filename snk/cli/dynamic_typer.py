@@ -40,13 +40,15 @@ class DynamicTyper:
 
         command_signature = signature(command)
         params = list(command_signature.parameters.values())
-        has_ctx = any([p.name == 'ctx' for p in params])
+        has_ctx = any([p.name == "ctx" for p in params])
         if not has_ctx:
-            params.insert(0, Parameter(
-                'ctx', 
-                kind=Parameter.POSITIONAL_OR_KEYWORD,
-                annotation=typer.Context
-              )
+            params.insert(
+                0,
+                Parameter(
+                    "ctx",
+                    kind=Parameter.POSITIONAL_OR_KEYWORD,
+                    annotation=typer.Context,
+                ),
             )
             command_signature = command_signature.replace(parameters=params)
 
@@ -56,10 +58,12 @@ class DynamicTyper:
                 if has_ctx:
                     return command(ctx, *args, **kwargs)
                 return command(*args, **kwargs)
-  
+
         self.register_callback(wrapper, invoke_without_command=True, **command_kwargs)
 
-    def register_command(self, command: Callable, dynamic_options=None, **command_kwargs) -> None:
+    def register_command(
+        self, command: Callable, dynamic_options=None, **command_kwargs
+    ) -> None:
         """
         Register a command to the CLI.
         Args:
@@ -100,7 +104,6 @@ class DynamicTyper:
         """
         self.app.add_typer(group.app, **command_kwargs)
 
-
     def _create_cli_parameter(self, option: Option):
         """
         Creates a parameter for a CLI option.
@@ -112,7 +115,7 @@ class DynamicTyper:
           >>> option = Option(name='foo', type='int', required=True, default=0, help='A number')
           >>> create_cli_parameter(option)
           Parameter('foo', kind=Parameter.POSITIONAL_OR_KEYWORD, default=typer.Option(..., help='[CONFIG] A number'), annotation=int)
-        """        
+        """
         return Parameter(
             option.name,
             kind=Parameter.POSITIONAL_OR_KEYWORD,
@@ -122,7 +125,6 @@ class DynamicTyper:
             ),
             annotation=option.type,
         )
-
 
     def add_dynamic_options(self, func: Callable, options: List[Option]):
         """
@@ -161,12 +163,15 @@ class DynamicTyper:
                 import snakemake
                 from .utils import flatten
 
-                snakemake_config = snakemake.load_configfile(kwargs['configfile'])
+                snakemake_config = snakemake.load_configfile(kwargs["configfile"])
                 flat_config = flatten(snakemake_config)
 
             for option in options:
                 # If no config file provided, or an option is updated, add it to the arguments
-                if kwargs.get("configfile") is None or kwargs[option.name] != option.default:
+                if (
+                    kwargs.get("configfile") is None
+                    or kwargs[option.name] != option.default
+                ):
                     kwargs["ctx"].args.extend([f"--{option.name}", kwargs[option.name]])
                 # If a config file is provided and the option key isn't in it, add the option to the arguments
                 elif flat_config and option.original_key not in flat_config:
@@ -179,11 +184,10 @@ class DynamicTyper:
 
         return func_wrapper
 
-
     def error(self, msg, exit=True):
         typer.secho(msg, fg="red")
         if exit:
-          raise typer.Exit(1)
-    
+            raise typer.Exit(1)
+
     def log(self, msg):
         typer.secho(msg, fg="yellow")

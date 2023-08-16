@@ -65,8 +65,7 @@ class CLI(DynamicTyper):
 
         # dynamically create the logo
         self.logo = self._create_logo(
-            tagline=self.snk_config.tagline, 
-            font=self.snk_config.font
+            tagline=self.snk_config.tagline, font=self.snk_config.font
         )
         callback = self._create_callback()
         callback.__doc__ = self.logo
@@ -82,27 +81,27 @@ class CLI(DynamicTyper):
             self.register_command(self.profile, help="Access the pipeline profiles.")
 
         run_app = RunApp(
-                conda_prefix_dir=self.conda_prefix_dir,
-                snk_config=self.snk_config,
-                singularity_prefix_dir=self.singularity_prefix_dir,
-                snakefile=self.snakefile,
-                pipeline=self.pipeline,
-                verbose=self.verbose,
-                logo=self.logo,
-                dynamic_run_options=self.options,
-            )
-        # Subcommands 
+            conda_prefix_dir=self.conda_prefix_dir,
+            snk_config=self.snk_config,
+            singularity_prefix_dir=self.singularity_prefix_dir,
+            snakefile=self.snakefile,
+            pipeline=self.pipeline,
+            verbose=self.verbose,
+            logo=self.logo,
+            dynamic_run_options=self.options,
+        )
+        # Subcommands
         self.register_command(
-            run_app, 
+            run_app,
             name="run",
         )
         self.register_group(
             ConfigApp(
                 pipeline=self.pipeline,
                 options=self.options,
-            ), 
-            name="config", 
-            help="Access the pipeline configuration."
+            ),
+            name="config",
+            help="Access the pipeline configuration.",
         )
         if self.pipeline.environments:
             self.register_group(
@@ -111,11 +110,11 @@ class CLI(DynamicTyper):
                     conda_prefix_dir=self.conda_prefix_dir,
                     snakemake_config=self.snakemake_config,
                     snakefile=self.snakefile,
-                ), 
-                name="env", 
-                help="Access the pipeline conda environments."
+                ),
+                name="env",
+                help="Access the pipeline conda environments.",
             )
-    
+
     def _print_pipline_version(self, ctx: typer.Context, value: bool):
         if value:
             typer.echo(self.version)
@@ -150,8 +149,9 @@ class CLI(DynamicTyper):
         ):
             if ctx.invoked_subcommand is None:
                 typer.echo(f"{ctx.get_help()}")
+
         return callback
-    
+
     def _create_logo(
         self, tagline="A Snakemake pipeline CLI generated with snk", font="small"
     ):
@@ -185,7 +185,6 @@ class CLI(DynamicTyper):
                 return self.pipeline.path / path
         raise FileNotFoundError("Snakefile not found!")
 
-
     def info(self):
         """
         Display information about current pipeline install.
@@ -214,5 +213,3 @@ class CLI(DynamicTyper):
         )
         for profile in self.pipeline.profiles:
             typer.echo(f"- {profile.name}")
-
- 

@@ -4,6 +4,7 @@ from datetime import datetime
 import typer
 import sys
 import collections  # MutableMapping import hack
+
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     from collections.abc import MutableMapping
 else:
@@ -116,6 +117,7 @@ def parse_config_args(args: List[str], options: List[Option]):
     parsed.sort()
     return parsed, config
 
+
 def get_default_type(v):
     default_type = type(v)
     if default_type == list and len(v) > 0:
@@ -124,7 +126,7 @@ def get_default_type(v):
 
 
 def dag_filetype_callback(ctx: typer.Context, file: Path):
-    allowed=[".pdf", ".png", ".svg"]
+    allowed = [".pdf", ".png", ".svg"]
     if ctx.resilient_parsing or not file:
         return
     if file.suffix not in allowed:

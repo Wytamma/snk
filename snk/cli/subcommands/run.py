@@ -41,7 +41,7 @@ class RunApp(DynamicTyper):
 
         self.register_command(
             self.run,
-            dynamic_options=self.options, 
+            dynamic_options=self.options,
             help="Run the Snakemake pipeline.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
                 "allow_extra_args": True,
@@ -219,7 +219,9 @@ class RunApp(DynamicTyper):
         targets_and_or_snakemake, config_dict_list = parse_config_args(
             ctx.args, options=self.options
         )
-        targets_and_or_snakemake = [t.replace('--snake-', '-') for t in targets_and_or_snakemake]
+        targets_and_or_snakemake = [
+            t.replace("--snake-", "-") for t in targets_and_or_snakemake
+        ]
         args.extend(targets_and_or_snakemake)
         configs = []
         for config_dict in config_dict_list:
@@ -381,7 +383,7 @@ def parse_config_monkeypatch(args):
         """Load yaml string safely."""
         s = s.replace(": None", ": null")
         return yaml.load(s, Loader=yaml.SafeLoader)
-    
+
     parsers = [int, float, snakemake._bool_parser, _yaml_safe_load, str]
     config = dict()
     if args.config is not None:
@@ -396,7 +398,7 @@ def parse_config_monkeypatch(args):
                     "Invalid config definition: Config entry must start with a valid identifier."
                 )
             v = None
-            if val == "" or val == 'None':
+            if val == "" or val == "None":
                 snakemake.update_config(config, {key: v})
                 continue
             for parser in parsers:

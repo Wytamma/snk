@@ -59,10 +59,10 @@ def install(
         ..., help="Path, URL or Github name (user/repo) of the pipeline to install."
     ),
     name: Optional[str] = typer.Option(
-        None, 
+        None,
         "--name",
         "-n",
-        help="Rename the pipeline (this name will be used to call the CLI.)"
+        help="Rename the pipeline (this name will be used to call the CLI.)",
     ),
     tag: Optional[str] = typer.Option(
         None,
@@ -81,7 +81,10 @@ def install(
         False, "--force", "-f", help="Force install (overwrites existing installs)."
     ),
     editable: Optional[bool] = typer.Option(
-        False, "--editable", "-e", help="Whether to install the pipeline in editable mode."
+        False,
+        "--editable",
+        "-e",
+        help="Whether to install the pipeline in editable mode.",
     ),
 ):
     """
@@ -101,7 +104,7 @@ def install(
             tag=tag,
             config=config,
             additional_resources=resource,
-            force=force
+            force=force,
         )
     except PipelineExistsError as e:
         typer.secho(e, fg="red")
@@ -161,7 +164,9 @@ def list(
     typer.echo(f"Found {len(pipelines)} pipelines in {pipeline_dir_yellow}")
     for pipeline in pipelines:
         if pipeline.editable:
-            print(f'- {pipeline.name} ([bold green]editable[/bold green]) -> "{pipeline.path}"')
+            print(
+                f'- {pipeline.name} ([bold green]editable[/bold green]) -> "{pipeline.path}"'
+            )
             continue
         v = pipeline.version
         v = v if v else "latest"
