@@ -39,8 +39,9 @@ class RunApp(DynamicTyper):
         self.logo = logo
         self.options = dynamic_run_options
 
-        self.register_default_command(
-            self.add_dynamic_options(self.run, self.options), 
+        self.register_command(
+            self.run,
+            dynamic_options=self.options, 
             help="Run the Snakemake pipeline.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
                 "allow_extra_args": True,
@@ -68,7 +69,7 @@ class RunApp(DynamicTyper):
         self,
         ctx: typer.Context,
         target: str = typer.Argument(
-            None, help="File to generate. If None will run the pipeline 'all' rule."
+            None, help="File(s) to generate. If None will run the pipeline 'all' rule."
         ),
         configfile: Path = typer.Option(
             None,
@@ -214,11 +215,10 @@ class RunApp(DynamicTyper):
             args.append("--nolock")
 
         if target:
-            args.append(target)
+            ctx.args.append(target)
         targets_and_or_snakemake, config_dict_list = parse_config_args(
             ctx.args, options=self.options
         )
-
         args.extend(targets_and_or_snakemake)
         configs = []
         for config_dict in config_dict_list:

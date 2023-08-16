@@ -81,9 +81,7 @@ class CLI(DynamicTyper):
         if self.pipeline.profiles:
             self.register_command(self.profile, help="Access the pipeline profiles.")
 
-        # Subcommands 
-        self.register_group(
-            RunApp(
+        run_app = RunApp(
                 conda_prefix_dir=self.conda_prefix_dir,
                 snk_config=self.snk_config,
                 singularity_prefix_dir=self.singularity_prefix_dir,
@@ -92,8 +90,11 @@ class CLI(DynamicTyper):
                 verbose=self.verbose,
                 logo=self.logo,
                 dynamic_run_options=self.options,
-            ), 
-            name="run", 
+            )
+        # Subcommands 
+        self.register_command(
+            run_app, 
+            name="run",
         )
         self.register_group(
             ConfigApp(

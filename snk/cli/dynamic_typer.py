@@ -71,7 +71,10 @@ class DynamicTyper:
         """
         if dynamic_options is not None:
             command = self.add_dynamic_options(command, dynamic_options)
-        self.app.command(**command_kwargs)(command)
+        if isinstance(command, DynamicTyper):
+            self.app.registered_commands.extend(command.app.registered_commands)
+        else:
+            self.app.command(**command_kwargs)(command)
 
     def register_callback(self, command: Callable, **command_kwargs) -> None:
         """

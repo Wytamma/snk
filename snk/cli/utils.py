@@ -90,7 +90,7 @@ def parse_config_args(args: List[str], options: List[Option]):
     """
     names = [op.name for op in options]
     config = []
-    parsed = []
+    parsed: List[str] = []
     flag = None
     for arg in args:
         if flag:
@@ -113,6 +113,7 @@ def parse_config_args(args: List[str], options: List[Option]):
             flag = arg
             continue
         parsed.append(arg)
+    parsed.sort()
     return parsed, config
 
 def get_default_type(v):
