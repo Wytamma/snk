@@ -219,6 +219,7 @@ class RunApp(DynamicTyper):
         targets_and_or_snakemake, config_dict_list = parse_config_args(
             ctx.args, options=self.options
         )
+        targets_and_or_snakemake = [t.replace('--snake-', '-') for t in targets_and_or_snakemake]
         args.extend(targets_and_or_snakemake)
         configs = []
         for config_dict in config_dict_list:
