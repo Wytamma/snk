@@ -96,6 +96,12 @@ class RunApp(DynamicTyper):
             "-f",
             help="Force the execution of pipeline regardless of already created output.",
         ),
+        dry: bool = typer.Option(
+            False,
+            "--dry",
+            "-n",
+            help="Do not execute anything, and display what would be done. If you have a very large workflow, use --dry --quiet to just print a summary of the DAG of jobs",
+        ),
         lock: bool = typer.Option(
             False, "--lock", "-l", help="Lock the working directory."
         ),
@@ -210,12 +216,16 @@ class RunApp(DynamicTyper):
 
         if force:
             args.append("--forceall")
+        
+        if dry:
+            args.append("--dryrun")
 
         if not lock:
             args.append("--nolock")
 
         if target:
             ctx.args.append(target)
+
         targets_and_or_snakemake, config_dict_list = parse_config_args(
             ctx.args, options=self.options
         )
