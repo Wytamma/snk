@@ -73,7 +73,7 @@ variant-calling config > config.yml # save the config
 variant-calling run --config config.yml # run with config 
 ```
 
-Read the [documentation](https://snk.wytamma.com") for more information.
+Read the [documentation](https://snk.wytamma.com) for more information.
 
 ## License
 
