@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List
 import snakemake
 from dataclasses import dataclass, field
-
+from snk.errors import InvalidSnkConfigError, MissingSnkConfigError
 import yaml
 
 
@@ -35,20 +35,23 @@ class SnkConfig:
           >>> SnkConfig.from_path(Path("snk.yaml"))
           SnkConfig(art=None, logo=None, tagline='A Snakemake pipeline CLI generated with Snk', font='small', resources=[], annotations={}, symlink_resources=False, _snk_config_path=PosixPath('snk.yaml'))
         """
-        if snk_config_path.exists():
-            snk_config_dict = snakemake.load_configfile(snk_config_path)
-            snk_config = cls(**snk_config_dict)
-            snk_config.resources = [
-                snk_config_path.parent / resource for resource in snk_config.resources
-            ]
-            snk_config.validate_resources(snk_config.resources)
-            snk_config._snk_config_path = snk_config_path
-            return snk_config
-        else:
-            raise FileNotFoundError(
+        if not snk_config_path.exists():
+            raise MissingSnkConfigError(
                 f"Could not find SNK config file: {snk_config_path}"
-            )
+            ) from FileNotFoundError
+        # raise error if file is empty
+        if snk_config_path.stat().st_size == 0:
+            raise InvalidSnkConfigError(f"SNK config file is empty: {snk_config_path}") from ValueError
 
+        snk_config_dict = snakemake.load_configfile(snk_config_path)
+        snk_config = cls(**snk_config_dict)
+        snk_config.resources = [
+            snk_config_path.parent / resource for resource in snk_config.resources
+        ]
+        snk_config.validate_resources(snk_config.resources)
+        snk_config._snk_config_path = snk_config_path
+        return snk_config
+  
     @classmethod
     def from_pipeline_dir(
         cls, pipeline_dir_path: Path, create_if_not_exists: bool = False

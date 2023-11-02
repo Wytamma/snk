@@ -44,6 +44,23 @@ def test_from_path_with_existing_file(tmp_path):
     snk_config = SnkConfig.from_path(config_file)
     assert snk_config._snk_config_path == config_file
 
+def test_missing_file(tmp_path):
+    config_file = tmp_path / "snk.yaml"
+    with pytest.raises(FileNotFoundError):
+        SnkConfig.from_path(config_file)
+
+def test_empty_file(tmp_path):
+    config_file = tmp_path / "snk.yaml"
+    config_file.touch()
+    with pytest.raises(ValueError):
+        SnkConfig.from_path(config_file)
+
+def test_invalid_yaml(tmp_path):
+    config_file = tmp_path / "snk.yaml"
+    config_file.touch()
+    config_file.write_text("logo: test_logo\ninvalid_yaml")
+    with pytest.raises(Exception):
+        SnkConfig.from_path(config_file)
 
 def test_from_dir_with_existing_file(tmp_path):
     config_file = tmp_path / ".snk"
