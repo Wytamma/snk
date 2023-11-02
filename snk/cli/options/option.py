@@ -11,3 +11,4 @@ class Option:
     help: str
     type: Any
     required: bool
+    short: str

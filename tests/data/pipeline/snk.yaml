@@ -1,4 +1,9 @@
 annotations:
+  no_run:
+    default: False
+    type: bool
+    help: "A boolean to test"
+    short: b
   null_annotation:
     default: null
   times: 

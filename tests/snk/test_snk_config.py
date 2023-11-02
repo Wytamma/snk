@@ -9,6 +9,7 @@ def test_snk_config_creation():
     assert snk_config.resources == []
     assert snk_config.cli == {}
     assert snk_config.symlink_resources == False
+    assert snk_config.version == None
 
 
 def test_validate_resources_with_existing_files(tmp_path):

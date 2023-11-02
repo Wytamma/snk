@@ -1,5 +1,7 @@
 configfile: "config.yaml"
 
+print(config)
+
 rule hello_world:
     output: config['output']
     params:

@@ -1,9 +1,7 @@
-from typing import Callable
 import typer
 from typing import List, Callable
 from inspect import signature, Parameter
 from makefun import with_signature
-import typer
 
 from snk.cli.options import Option
 
@@ -121,6 +119,7 @@ class DynamicTyper:
             kind=Parameter.POSITIONAL_OR_KEYWORD,
             default=typer.Option(
                 ... if option.required else option.default,
+                *[f"--{option.name.replace('_', '-')}", f"-{option.short}"] if option.short else [],
                 help=f"[CONFIG] {option.help}",
             ),
             annotation=option.type,

@@ -53,6 +53,7 @@ def create_option_from_annotation(
         help=annotation_values.get(f"{annotation_key}:help", ""),
         type=annotation_type,
         required=annotation_values.get(f"{annotation_key}:required", False),
+        short=annotation_values.get(f"{annotation_key}:short", None),
     )
 
 
