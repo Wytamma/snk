@@ -68,7 +68,7 @@ def build_dynamic_cli_options(
       List[dict]: A list of options.
     """
     flat_config = flatten(snakemake_config)
-    flat_annotations = flatten(snk_config.annotations)
+    flat_annotations = flatten(snk_config.cli)
     options = {}
 
     # For every parameter in the config, create an option from the corresponding annotation

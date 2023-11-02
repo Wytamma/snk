@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional
 import snakemake
 from dataclasses import dataclass, field
 from snk.cli.config.utils import get_version_from_config
 from snk.errors import InvalidSnkConfigError, MissingSnkConfigError
 import yaml
-
 
 @dataclass
 class SnkConfig:
@@ -19,7 +18,7 @@ class SnkConfig:
     font: str = "small"
     version: Optional[str] = None
     resources: List[Path] = field(default_factory=list)
-    annotations: dict = field(default_factory=dict)
+    cli: dict = field(default_factory=dict)
     symlink_resources: bool = False
     _snk_config_path: Path = None
 
@@ -47,6 +46,10 @@ class SnkConfig:
 
         snk_config_dict = snakemake.load_configfile(snk_config_path)
         snk_config_dict["version"] = get_version_from_config(snk_config_path, snk_config_dict)
+        if "annotations" in snk_config_dict:
+            # TODO: remove annotations in the future
+            snk_config_dict["cli"] = snk_config_dict["annotations"]
+            del snk_config_dict["annotations"]
         snk_config = cls(**snk_config_dict)
         snk_config.resources = [
             snk_config_path.parent / resource for resource in snk_config.resources

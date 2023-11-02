@@ -15,7 +15,7 @@ The following options are available for configuration in `snk.yaml`:
 - `tagline`: A string representing the tagline displayed in the CLI.
 - `font`: A string representing the font used in the CLI.
 - `resources`: A list of resource files required for the pipeline.
-- `annotations`: Annotations for the pipeline parameters.
+- `cli`: Annotations for the pipeline cli parameters.
 - `symlink_resources`: A boolean that controls whether symbolic links are created for resources.
 
 ## Example `snk.yaml` File
@@ -29,7 +29,7 @@ font: "cybermedium"
 resources:
   - "data/input1.txt"
   - "data/input2.txt"
-annotations:
+cli:
   input:
     type: Path
     help: "Path to the input file"
@@ -44,25 +44,27 @@ In this example:
 - Two resource files, "data/input1.txt" and "data/input2.txt", are required for the pipeline.
 - An annotation is provided for the `input` parameter, which is of type `str` and comes with a help message "Path to the input file".
 
-## Annotations
+## CLI
 
 Annotations play a crucial role in configuring the dynamic Snk CLI. They provide metadata about the configuration parameters used in your Snakemake pipeline and can dictate how the CLI will prompt users for these parameters. The `snk.yaml` file supports the following fields under `annotations`:
 
 - `type`: Determines the datatype of the configuration parameter. It can be one of the following: `int`, `str`, `path`, `bool`, `list`, `list[str]`, `list[path]`, or `list[int]`.
 - `help`: This is a descriptive text that provides users with information or guidance on what the parameter is used for.
 - `required`: A boolean value (either `True` or `False`) that indicates whether the parameter is mandatory. If a parameter is marked as `required: True`, the Snk CLI will insist that a user provides a value for it.
+- `default`: A default value for the parameter. If a user does not provide a value for the parameter, the Snk CLI will use this default value instead.
 
-### Example `snk.yaml` File with Annotations
+### Example `snk.yaml` File with CLI Annotations
 
 Here's an example of a `snk.yaml` file that includes annotations for several configuration parameters:
 
 ```yaml
-annotations:
+cli:
   input:
     type: path
     help: "Path to the input file"
     required: True
   text:
+    default: "Hello, world!"
     type: str
     help: "A string to save to a file"
     required: False

@@ -7,7 +7,7 @@ def test_snk_config_creation():
     assert snk_config.tagline == "A Snakemake pipeline CLI generated with Snk"
     assert snk_config.font == "small"
     assert snk_config.resources == []
-    assert snk_config.annotations == {}
+    assert snk_config.cli == {}
     assert snk_config.symlink_resources == False
 
 
