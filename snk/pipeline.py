@@ -3,6 +3,8 @@ import sys
 from typing import Optional
 from git import Repo, InvalidGitRepositoryError
 
+from snk.cli.config.utils import get_version_from_config
+
 
 class Pipeline:
     """
@@ -34,18 +36,31 @@ class Pipeline:
         self.name = self.path.name
 
     @property
+    def tag(self):
+        """
+        Gets the tag of the pipeline.
+        Returns:
+            str: The tag of the pipeline, or None if no tag is found.
+        """
+        try:
+            # TODO: default to commit
+            tag = self.repo.git.describe(["--tags", "--exact-match"])
+        except Exception:
+            tag = None
+        return tag
+    
+    @property
     def version(self):
         """
         Gets the version of the pipeline.
         Returns:
             str: The version of the pipeline, or None if no version is found.
         """
-        try:
-            # TODO: default to commit
-            version = self.repo.git.describe(["--tags", "--exact-match"])
-        except Exception:
-            version = None
-        return version
+        if (self.path / "snk.yaml").exists():
+            version = get_version_from_config(self.path / "snk.yaml")
+        else:
+            version = self.tag
+        return version if version else "latest"
 
     @property
     def executable(self):

@@ -91,3 +91,20 @@ def test_save(tmp_path):
     snk_config.save()
     saved_snk_config = SnkConfig.from_path(config_file)
     assert saved_snk_config.art == "new_art"
+
+
+def test_version_from_about_file(tmp_path):
+    config_file = tmp_path / "snk.yaml"
+    about_file = tmp_path / "__about__.py"
+    about_file.touch()
+    about_file.write_text("__version__ = '0.0.1'")
+    config_file.write_text("version: __about__.py")
+    snk_config = SnkConfig.from_path(config_file)
+    assert snk_config.version == "0.0.1"
+
+def test_version_from_about_file_with_missing_file(tmp_path):
+    config_file = tmp_path / "snk.yaml"
+    about_file = tmp_path / "__about__.py"
+    config_file.write_text("version: __about__.py")
+    with pytest.raises(FileNotFoundError):
+        SnkConfig.from_path(config_file)

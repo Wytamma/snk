@@ -112,9 +112,7 @@ def install(
     except PipelineNotFoundError as e:
         typer.secho(e, fg="red")
         raise typer.Exit()
-    v = installed_pipeline.version
-    v = v if v else "latest"
-    typer.secho(f"Successfully installed {installed_pipeline.name} ({v})!", fg="green")
+    typer.secho(f"Successfully installed {installed_pipeline.name} ({installed_pipeline.version})!", fg="green")
 
 
 @app.command()
@@ -168,9 +166,7 @@ def list(
                 f'- {pipeline.name} ([bold green]editable[/bold green]) -> "{pipeline.path}"'
             )
             continue
-        v = pipeline.version
-        v = v if v else "latest"
-        print(f"- {pipeline.name} ([bold green]{v}[/bold green])")
+        print(f"- {pipeline.name} ([bold green]{pipeline.version}[/bold green])")
 
 
 # @app.command()

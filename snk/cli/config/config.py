@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 import snakemake
 from dataclasses import dataclass, field
+from snk.cli.config.utils import get_version_from_config
 from snk.errors import InvalidSnkConfigError, MissingSnkConfigError
 import yaml
 
@@ -16,6 +17,7 @@ class SnkConfig:
     logo: str = None
     tagline: str = "A Snakemake pipeline CLI generated with Snk"
     font: str = "small"
+    version: Optional[str] = None
     resources: List[Path] = field(default_factory=list)
     annotations: dict = field(default_factory=dict)
     symlink_resources: bool = False
@@ -44,6 +46,7 @@ class SnkConfig:
             raise InvalidSnkConfigError(f"SNK config file is empty: {snk_config_path}") from ValueError
 
         snk_config_dict = snakemake.load_configfile(snk_config_path)
+        snk_config_dict["version"] = get_version_from_config(snk_config_path, snk_config_dict)
         snk_config = cls(**snk_config_dict)
         snk_config.resources = [
             snk_config_path.parent / resource for resource in snk_config.resources
