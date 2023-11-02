@@ -185,6 +185,12 @@ class DynamicTyper:
         return func_wrapper
 
     def error(self, msg, exit=True):
+        """
+        Logs an error message and exits.
+        Args:
+          msg (str): The error message to log.
+          exit (bool): Whether to exit after logging the error message.
+        """
         typer.secho(msg, fg="red")
         if exit:
             raise typer.Exit(1)
