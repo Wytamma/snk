@@ -53,8 +53,9 @@ class EnvApp(DynamicTyper):
         environments_dir_yellow = typer.style(
             self.pipeline.path / "envs", fg=typer.colors.YELLOW
         )
+        number_of_environments = len(self.pipeline.environments)
         typer.echo(
-            f"Found {len(self.pipeline.environments)} environments in {environments_dir_yellow}"
+            f"Found {len(self.pipeline.environments)} environment{'s' if number_of_environments > 1 else ''} in {environments_dir_yellow}"
         )
         for env in self.pipeline.environments:
             typer.echo(f"- {env.stem}")
