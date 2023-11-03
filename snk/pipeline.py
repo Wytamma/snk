@@ -103,3 +103,10 @@ class Pipeline:
                 e for e in pipeline_environments_dir.glob("*.yml")
             ]
         return []
+
+    @property
+    def scripts(self):
+        pipeline_environments_dir = self._find_folder("scripts")
+        if pipeline_environments_dir:
+            return [s for s in pipeline_environments_dir.iterdir() if s.is_file()]
+        return []

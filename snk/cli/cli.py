@@ -11,7 +11,7 @@ from snakemake import SNAKEFILE_CHOICES
 from art import text2art
 
 from snk.cli.dynamic_typer import DynamicTyper
-from snk.cli.subcommands import EnvApp, ConfigApp, RunApp
+from snk.cli.subcommands import EnvApp, ConfigApp, RunApp, ScriptApp
 
 from .config.config import (
     SnkConfig,
@@ -116,6 +116,17 @@ class CLI(DynamicTyper):
                 ),
                 name="env",
                 help="Access the pipeline conda environments.",
+            )
+        if self.pipeline.scripts:
+            self.register_group(
+                ScriptApp(
+                    pipeline=self.pipeline,
+                    conda_prefix_dir=self.conda_prefix_dir,
+                    snakemake_config=self.snakemake_config,
+                    snakefile=self.snakefile,
+                ),
+                name="script",
+                help="Access the pipeline scripts.",
             )
 
     def _print_pipline_version(self, ctx: typer.Context, value: bool):
