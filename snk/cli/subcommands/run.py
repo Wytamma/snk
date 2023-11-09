@@ -173,6 +173,7 @@ class RunApp(DynamicTyper):
         args.extend(
             [
                 "--use-conda",
+                "--rerun-incomplete",
                 f"--conda-prefix={self.conda_prefix_dir}",
                 f"--cores={cores}",
             ]
