@@ -17,6 +17,7 @@ class SnkConfig:
     tagline: str = "A Snakemake pipeline CLI generated with Snk"
     font: str = "small"
     version: Optional[str] = None
+    require_conda: bool = False
     resources: List[Path] = field(default_factory=list)
     cli: dict = field(default_factory=dict)
     symlink_resources: bool = False

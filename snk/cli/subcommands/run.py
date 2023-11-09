@@ -1,7 +1,6 @@
 from typing import List, Optional
 from pathlib import Path
 import typer
-import subprocess
 from contextlib import contextmanager
 
 from snk.cli.dynamic_typer import DynamicTyper
@@ -172,9 +171,7 @@ class RunApp(DynamicTyper):
             cores = "all"
         args.extend(
             [
-                "--use-conda",
                 "--rerun-incomplete",
-                f"--conda-prefix={self.conda_prefix_dir}",
                 f"--cores={cores}",
             ]
         )
@@ -198,19 +195,28 @@ class RunApp(DynamicTyper):
             args.append(f"--profile={profile}")
 
         # Set up conda frontend
-        mamba_found = True
-        try:
-            subprocess.run(["mamba", "--version"], capture_output=True, check=True)
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        conda_found = check_command_available("conda")
+        if not conda_found and verbose:
             typer.secho(
-                "Mamba not found! Install for speed up.", fg=typer.colors.YELLOW
+                "Conda not found! Install conda to use environments.\n",
+                fg=typer.colors.MAGENTA,
             )
-            mamba_found = False
-        if not mamba_found:
-            args.append("--conda-frontend=conda")
 
-        typer.echo(self.logo)
-        typer.echo()
+        if conda_found or self.snk_config.require_conda:
+            args.extend([
+                    "--use-conda",
+                    f"--conda-prefix={self.conda_prefix_dir}",
+                ]
+            )
+            if not check_command_available("mamba"):
+                if verbose:
+                    typer.secho(
+                        "Could not find mamba, using conda instead...",
+                        fg=typer.colors.MAGENTA,
+                    )
+                args.append("--conda-frontend=conda")
+            else:
+                args.append("--conda-frontend=mamba")
 
         if verbose:
             args.insert(0, "--verbose")
@@ -265,7 +271,7 @@ class RunApp(DynamicTyper):
                     sys.exit(status)
         if not keep_snakemake and Path(".snakemake").exists():
             if verbose:
-                typer.secho("Deleting '.snakemake' folder...", fg="yellow")
+                typer.secho("Deleting '.snakemake' folder...", fg=typer.colors.MAGENTA)
             shutil.rmtree(".snakemake")
 
     def _save_dag(self, snakemake_args: List[str], filename: Path):
@@ -304,7 +310,7 @@ class RunApp(DynamicTyper):
             )
             with open(filename, "w") as output_file:
                 if self.verbose:
-                    typer.secho(f"Saving dag to {filename}", fg=typer.colors.YELLOW)
+                    typer.secho(f"Saving dag to {filename}", fg=typer.colors.MAGENTA)
                 subprocess.run(["cat"], stdin=dot_process.stdout, stdout=output_file)
         except (subprocess.CalledProcessError, FileNotFoundError):
             typer.echo("dot command not found!", fg=typer.colors.RED, err=True)
@@ -336,7 +342,7 @@ class RunApp(DynamicTyper):
             if self.verbose:
                 typer.secho(
                     f"  - Copying resource '{src}' to '{dst}'",
-                    fg=typer.colors.YELLOW,
+                    fg=typer.colors.MAGENTA,
                 )
             target_is_directory = src.is_dir()
             if symlink:
@@ -357,10 +363,10 @@ class RunApp(DynamicTyper):
         resources_folder = self.pipeline.path / "resources"
         if resources_folder.exists():
             resources.insert(0, Path("resources"))
-        if self.verbose:
+        if self.verbose and resources:
             typer.secho(
                 f"Copying {len(resources)} resources to working directory...",
-                fg=typer.colors.YELLOW,
+                fg=typer.colors.MAGENTA,
             )
         try:
             for resource in resources:
@@ -373,7 +379,7 @@ class RunApp(DynamicTyper):
                 elif self.verbose:
                     typer.secho(
                         f"  - Resource '{resource.name}' already exists! Skipping...",
-                        fg=typer.colors.YELLOW,
+                        fg=typer.colors.MAGENTA,
                     )
             yield
         finally:
@@ -384,10 +390,23 @@ class RunApp(DynamicTyper):
                     if self.verbose:
                         typer.secho(
                             f"Deleting '{copied_resource.name}' resource...",
-                            fg=typer.colors.YELLOW,
+                            fg=typer.colors.MAGENTA,
                         )
                     remove_resource(copied_resource)
 
+def check_command_available(command: str):
+    """
+    Check if a command is available.
+    Args:
+      command (str): The command to check.
+    Returns:
+      bool: True if the command is available, False otherwise.
+    Examples:
+      >>> CLI.check_command_available('ls')
+    """
+    import shutil
+
+    return shutil.which(command) is not None
 
 def parse_config_monkeypatch(args):
     """Monkeypatch the parse_config function from snakemake."""
