@@ -5,11 +5,11 @@ from ..utils import CLIRunner
 
 def test_config_override(local_runner: CLIRunner):
     res = local_runner(
-        ["run", "--text", "test", "--config", "tests/data/pipeline/config.yaml", "-f"]
+        ["run", "--text", "passed from the cli to overwrite config", "--config", "tests/data/pipeline/config.yaml", "-f"]
     )
     assert res.code == 0, res.stderr
-    assert "pipeline" in res.stdout, res.stderr
-    assert "test" in res.stdout
+    assert "hello_world" in res.stderr
+    assert "passed from the cli to overwrite config" in res.stdout
 
 
 def test_exit_on_fail(local_runner: CLIRunner):

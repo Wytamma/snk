@@ -35,7 +35,7 @@ def basic_runner(tmp_path_factory):
     return runner
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def local_pipeline(tmp_path_factory):
     path = Path(tmp_path_factory.mktemp("snk"))
     (path / "home").mkdir()
@@ -43,18 +43,18 @@ def local_pipeline(tmp_path_factory):
     nest = Nest(path / "home", path / "bin")
     print(nest.bin_dir)
     print(nest.snk_home)
-    local_pipeline = nest.install("tests/data/pipeline")
+    local_pipeline = nest.install("tests/data/pipeline", editable=True)
     expected = nest.snk_pipelines_dir / "pipeline"
     assert expected.exists()
     return local_pipeline
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def local_runner(tmp_path_factory):
     path = Path(tmp_path_factory.mktemp("snk"))
     (path / "home").mkdir()
     (path / "bin").mkdir()
     nest = Nest(path / "home", path / "bin")
-    local_pipeline = nest.install("tests/data/pipeline")
+    local_pipeline = nest.install("tests/data/pipeline", editable=True)
     runner = CLIRunner([local_pipeline.executable])
     return runner
