@@ -43,3 +43,4 @@ logo: "MyPipeline"
 tagline: "\nA pipeline to test the pipeline logo and tagline"
 font: "cybermedium"
 version: "things/__about__.py"
+require_conda: false
