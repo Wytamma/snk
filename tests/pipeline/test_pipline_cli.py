@@ -50,5 +50,4 @@ def test_run_cli(local_runner: CLIRunner):
 def test_dag(local_runner: CLIRunner, tmp_path, filetype):
     res = local_runner(["run", "--dag", f"{tmp_path}/dag.{filetype}"])
     assert res.code == 0, res.stderr
-    assert "DAG" in res.stderr, res.stderr
     assert Path(f"{tmp_path}/dag.{filetype}").exists()

@@ -288,8 +288,10 @@ class RunApp(DynamicTyper):
             except SystemExit:  # Catch SystemExit exception to prevent termination
                 pass
         try:
+            # discard everything before digraph snakemake_dag
+            filtered_lines = "digraph snakemake_dag" + snakemake_output.getvalue().split("snakemake_dag")[1]
             echo_process = subprocess.Popen(
-                ["echo", snakemake_output.getvalue()], stdout=subprocess.PIPE
+                ["echo", filtered_lines], stdout=subprocess.PIPE
             )
             dot_process = subprocess.Popen(
                 ["dot", f"-T{fileType}"],
