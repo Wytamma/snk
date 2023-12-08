@@ -180,6 +180,8 @@ class RunApp(DynamicTyper):
         if self.singularity_prefix_dir and "--use-singularity" in ctx.args:
             # only set prefix if --use-singularity is explicitly called
             args.append(f"--singularity-prefix={self.singularity_prefix_dir}")
+            if verbose:
+                self.log(f"Using singularity prefix: {self.singularity_prefix_dir}")
         if not self.snakefile.exists():
             raise ValueError("Could not find Snakefile")  # this should occur at install
         else:
