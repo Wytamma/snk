@@ -175,6 +175,8 @@ class RunApp(DynamicTyper):
                 f"--cores={cores}",
             ]
         )
+        if target:
+            ctx.args.append(target)
         if self.singularity_prefix_dir and "--use-singularity" in ctx.args:
             # only set prefix if --use-singularity is explicitly called
             args.append(f"--singularity-prefix={self.singularity_prefix_dir}")
@@ -229,9 +231,6 @@ class RunApp(DynamicTyper):
 
         if not lock:
             args.append("--nolock")
-
-        if target:
-            ctx.args.append(target)
 
         targets_and_or_snakemake, config_dict_list = parse_config_args(
             ctx.args, options=self.options
