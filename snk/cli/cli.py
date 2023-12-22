@@ -48,7 +48,10 @@ class CLI(DynamicTyper):
         if self.snk_config.version:
             self.version = self.snk_config.version
         else: 
-            self.version = self.pipeline.tag # git tag or null
+            if self.pipeline.tag:
+               self.version = self.pipeline.tag
+            else:
+                self.version = self.pipeline.commit
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
         self.conda_prefix_dir = pipeline_dir_path / ".conda"

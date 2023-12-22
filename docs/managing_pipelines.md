@@ -68,6 +68,11 @@ Use `--tag` to specify the tag (version) of the pipeline to install. You can spe
 snk install --tag v1.0 Wytamma/snk-basic-pipeline && my-pipeline -v
 ```
 
+Use `--commit` to specify the commit (SHA) of the pipeline to install. If not specified, the latest commit will be installed.
+```bash
+snk install --commit a725d3a4 Wytamma/snk-basic-pipeline && snk-basic-pipeline -v
+```
+
 Use `--config` to install a pipeline with a non-standard config location. This is useful for installing a pipeline that does not follow Snakemake best practices. 
 ```bash
 snk install --config /path/to/config Wytamma/snk-basic-pipeline
