@@ -93,6 +93,7 @@ class Nest:
         editable=False,
         name=None,
         tag=None,
+        commit=None,
         config: Path = None,
         force=False,
         additional_resources=[],
@@ -104,6 +105,7 @@ class Nest:
           editable (bool, optional): Whether to install the pipeline in editable mode. Defaults to False.
           name (str, optional): The name of the pipeline. Defaults to None.
           tag (str, optional): The tag of the pipeline. Defaults to None.
+          commit (str, optional): The commit SHA of the pipeline. Defaults to None.
           config (Path, optional): The path to the config file. Defaults to None.
           force (bool, optional): Whether to force the installation. Defaults to False.
           additional_resources (list, optional): A list of resources additional to the resources folder to copy. Defaults to [].
@@ -112,6 +114,7 @@ class Nest:
           Pipeline: The installed pipeline.
         Examples:
           >>> nest.install('https://github.com/example/repo.git', name='example', tag='v1.0.0')
+          >>> nest.install('https://github.com/example/repo.git', name='example', commit='0123456')
         """
 
         def handle_force_installation(name: str):
@@ -129,7 +132,7 @@ class Nest:
                 self._check_pipeline_name_available(name)
             else:
                 handle_force_installation(name)
-            pipeline_path = self.download(pipeline, name, tag_name=tag)
+            pipeline_path = self.download(pipeline, name, tag_name=tag, commit=commit)
         except InvalidPipelineRepositoryError:
             pipeline_local_path = Path(pipeline)
             if not name:
@@ -348,7 +351,7 @@ class Nest:
             for pipeline_dir in self.snk_pipelines_dir.glob("*")
         ]
 
-    def download(self, repo_url: str, name: str, tag_name: str = None) -> Path:
+    def download(self, repo_url: str, name: str, tag_name: str = None, commit: str = None) -> Path:
         """
         Downloads a file from a given URL.
         Args:
@@ -362,12 +365,18 @@ class Nest:
           None
         """
         location = self.snk_pipelines_dir / name
-        options = ["--depth 1", "--single-branch"]
+        options = []
+        if not commit:
+            options.append(f"--depth 1")
         if tag_name:
+            options.append(f"--single-branch")
             options.append(f"--branch {tag_name}")
         try:
             repo = Repo.clone_from(repo_url, location, multi_options=options)
-            repo.git.checkout(tag_name)
+            if commit:
+                repo.git.checkout(commit)
+            else:
+                repo.git.checkout(tag_name)
         except GitCommandError as e:
             if "destination path" in e.stderr:
                 raise PipelineExistsError(
@@ -375,6 +384,11 @@ class Nest:
                 )
             elif f"Remote branch {tag_name}" in e.stderr:
                 raise PipelineNotFoundError(f"Pipeline tag '{tag_name}' not found")
+            elif f"pathspec '{commit}' did not match" in e.stderr:
+                if tag_name:
+                    raise PipelineNotFoundError(f"Pipeline commit '{commit}' not found on branch {tag_name}")
+                else:
+                    raise PipelineNotFoundError(f"Pipeline commit '{commit}' not found")
             elif "not found" in e.stderr:
                 raise PipelineNotFoundError(
                     f"Pipeline repository '{repo_url}' not found"

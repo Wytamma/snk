@@ -50,6 +50,20 @@ class Pipeline:
         return tag
     
     @property
+    def commit(self):
+        """
+        Gets the commit SHA of the pipeline.
+        Returns:
+            str: The commit SHA of the pipeline.
+        """
+        try:
+            sha = self.repo.head.object.hexsha
+            commit = self.repo.git.rev_parse(sha, short=8)
+        except Exception:
+           commit = None
+        return commit
+
+    @property
     def version(self):
         """
         Gets the version of the pipeline.
@@ -58,6 +72,8 @@ class Pipeline:
         """
         if (self.path / "snk.yaml").exists():
             version = get_version_from_config(self.path / "snk.yaml")
+        elif not self.tag:
+            version = self.commit
         else:
             version = self.tag
         return version if version else "latest"
