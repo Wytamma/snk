@@ -70,6 +70,12 @@ def install(
         "-t",
         help="Tag (version) of the pipeline to install. Can specify a branch name, or tag. If None the latest commit will be installed.",
     ),
+    commit: Optional[str] = typer.Option(
+        None,
+        "--commit",
+        "-c",
+        help="Commit (SHA) of the pipeline to install. If None the latest commit will be installed.",
+    ),
     config: Optional[Path] = typer.Option(
         None, help="Specify a non-standard config location."
     ),
@@ -102,6 +108,7 @@ def install(
             editable=editable,
             name=name,
             tag=tag,
+            commit=commit,
             config=config,
             additional_resources=resource,
             force=force,
