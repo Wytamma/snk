@@ -200,7 +200,7 @@ class Nest:
           >>> nest.copy_nonstandard_config(Path('/path/to/pipeline'), Path('/path/to/config.yaml'))
         """
         config_dir = pipeline_dir / "config"
-        config_dir.mkdir()
+        config_dir.mkdir(exist_ok=True)
         shutil.copyfile(pipeline_dir / config_path, config_dir / "config.yaml")
 
     def get_paths_to_delete(self, pipeline_name: str) -> List[Path]:
