@@ -53,6 +53,7 @@ Annotations play a crucial role in configuring the dynamic Snk CLI. They provide
 - `help`: This is a descriptive text that provides users with information or guidance on what the parameter is used for.
 - `required`: A boolean value (either `True` or `False`) that indicates whether the parameter is mandatory. If a parameter is marked as `required: True`, the Snk CLI will insist that a user provides a value for it.
 - `default`: A default value for the parameter. If a user does not provide a value for the parameter, the Snk CLI will use this default value instead.
+- `short`: A short (-) flag to use with the option.
 
 ### Example `snk.yaml` File with CLI Annotations
 
@@ -64,6 +65,7 @@ cli:
     type: path
     help: "Path to the input file"
     required: True
+    short: i
   text:
     default: "Hello, world!"
     type: str
@@ -79,7 +81,7 @@ cli:
     required: False
 ```
 
-In this example, the `input` and `count` parameters are required, while the `text` and `flag` parameters are optional. The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
+In this example, the `input` and `count` parameters are required, while the `text` and `flag` parameters are optional. the flas `-i` can be used as shorthand for `--input`. The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
 
 ## Resources
 
