@@ -27,7 +27,6 @@ class ScriptApp(DynamicTyper):
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
         self.configfile = get_config_from_pipeline_dir(self.pipeline.path)
-        self.register_default_command(self.list)
         self.register_command(self.list, help="List the scripts in the pipeline.")
         self.register_command(
             self.show, help="Show the script file contents."
@@ -41,16 +40,19 @@ class ScriptApp(DynamicTyper):
             context_settings={"ignore_unknown_options": True, "allow_extra_args": True},
         )
 
-    def list(self):
-        scripts_dir_yellow = typer.style(
-            self.pipeline.path / "scripts", fg=typer.colors.YELLOW
-        )
+    def list(
+            self, 
+            verbose: bool = typer.Option(False, "--verbose", "-v", help="Show profiles as paths."), 
+        ):
         number_of_scripts = len(self.pipeline.scripts)  
         typer.echo(
-            f"Found {number_of_scripts} script{'s' if number_of_scripts > 1 else ''} in {scripts_dir_yellow}"
+            f"Found {number_of_scripts} script{'' if number_of_scripts == 1 else 's'}:"
         )
-        for env in self.pipeline.scripts:
-            typer.echo(f"- {env.stem} ({env.name})")
+        for script in self.pipeline.scripts:
+            filename = typer.style(script.name, fg=typer.colors.GREEN)
+            if verbose:
+                filename = typer.style(script, fg=typer.colors.YELLOW)
+            typer.echo(f"- {script.stem} ({filename})")
 
     def _get_script_path(self, name: str) -> Path:
         env = [e for e in self.pipeline.scripts if e.name == name or e.stem == name]
@@ -76,15 +78,14 @@ class ScriptApp(DynamicTyper):
             False, "--pretty", "-p", help="Pretty print the script."
         ),
     ):
-        env_path = self._get_script_path(name)
-        with open(env_path) as f:
-            code = f.read()
-            if pretty:
-                code = Syntax(code, env_path.suffix[1:])
-                console = Console()
-                console.print(code)
-            else:
-                typer.echo(code)
+        script_path = self._get_script_path(name)
+        code = script_path.read_text()
+        if pretty:
+            code = Syntax(code, script_path.suffix[1:])
+            console = Console()
+            console.print(code)
+        else:
+            typer.echo(code)
 
     def _get_executor(self, suffix: str) -> str:
         if suffix == "py":

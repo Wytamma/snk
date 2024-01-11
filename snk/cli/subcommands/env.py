@@ -35,7 +35,6 @@ class EnvApp(DynamicTyper):
             use_conda=True,
             conda_prefix=self.conda_prefix_dir.resolve(),
         )
-        self.register_default_command(self.list)
         self.register_command(self.list, help="List the environments in the pipeline.")
         self.register_command(
             self.show, help="Show the environments config file contents."
@@ -49,16 +48,19 @@ class EnvApp(DynamicTyper):
         self.register_command(self.prune, help="Delete all conda environments.")
         self.register_command(self.create, help="Create all conda environments.")
 
-    def list(self):
-        environments_dir_yellow = typer.style(
-            self.pipeline.path / "envs", fg=typer.colors.YELLOW
-        )
+    def list(
+            self,
+            verbose: bool = typer.Option(False, "--verbose", "-v", help="Show profiles as paths."), 
+        ):
         number_of_environments = len(self.pipeline.environments)
         typer.echo(
-            f"Found {len(self.pipeline.environments)} environment{'s' if number_of_environments > 1 else ''} in {environments_dir_yellow}"
+            f"Found {number_of_environments} environment{'' if number_of_environments == 1 else 's'}:"
         )
         for env in self.pipeline.environments:
-            typer.echo(f"- {env.stem}")
+            if verbose:
+                typer.echo(f"- {typer.style(env, fg=typer.colors.YELLOW)}")
+            else:
+                typer.echo(f"- {env.stem}")
 
     def _get_conda_env_path(self, name: str) -> Path:
         env = [e for e in self.pipeline.environments if e.stem == name]
@@ -72,14 +74,20 @@ class EnvApp(DynamicTyper):
         return Conda().shellcmd(env_address, cmd)
 
     def show(
-        self, name: str = typer.Argument(..., help="The name of the environment.")
+        self, 
+        name: str = typer.Argument(..., help="The name of the environment."),
+        pretty: bool = typer.Option(
+            False, "--pretty", "-p", help="Pretty print the environment."
+        ),
     ):
         env_path = self._get_conda_env_path(name)
-        with open(env_path) as f:
-            code = f.read()
-            syntax = Syntax(code, "yaml")
+        env_file_text = env_path.read_text()
+        if pretty:
+            syntax = Syntax(env_file_text, "yaml")
             console = Console()
             console.print(syntax)
+        else:
+            typer.echo(env_file_text)
 
     def run(
         self,
