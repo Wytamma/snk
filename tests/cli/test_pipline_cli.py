@@ -29,6 +29,21 @@ def test_help(local_runner: CLIRunner):
     assert res.code == 0, res.stderr
     assert "Usage:" in res.stdout
 
+def test_version(local_runner: CLIRunner):
+    res = local_runner(["--version"])
+    assert res.code == 0, res.stderr
+    assert "0.13.0" in res.stdout
+
+def test_path(local_runner: CLIRunner):
+    res = local_runner(["--path"])
+    assert res.code == 0, res.stderr
+    assert "/pipeline" in res.stdout
+
+def test_profile(local_runner: CLIRunner):
+    res = local_runner(["profile", "-h"])
+    assert res.code == 0, res.stderr
+    assert "list" in res.stdout, res.stderr
+    assert "show" in res.stdout, res.stderr
 
 def test_info(local_runner: CLIRunner):
     res = local_runner(["info"])
@@ -37,6 +52,10 @@ def test_info(local_runner: CLIRunner):
     assert "version" in res.stdout
     assert "pipeline_dir_path" in res.stdout
 
+def test_config(local_runner: CLIRunner):
+    res = local_runner(["config"])
+    assert res.code == 0, res.stderr
+    assert "output: hello.txt" in res.stdout
 
 def test_run_cli(local_runner: CLIRunner):
     res = local_runner(["run", "-h"])
