@@ -55,10 +55,10 @@ class ScriptApp(DynamicTyper):
             typer.echo(f"- {script.stem} ({filename})")
 
     def _get_script_path(self, name: str) -> Path:
-        env = [e for e in self.pipeline.scripts if e.name == name or e.stem == name]
-        if not env:
+        script = [e for e in self.pipeline.scripts if e.name == name or e.stem == name]
+        if not script:
             self.error(f"Script {name} not found!")
-        return env[0]
+        return script[0]
 
     def _get_conda_env_path(self, name: str) -> Path:
         env = [e for e in self.pipeline.environments if e.stem == name]
