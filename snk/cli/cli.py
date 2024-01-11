@@ -11,7 +11,7 @@ from snakemake import SNAKEFILE_CHOICES
 from art import text2art
 
 from snk.cli.dynamic_typer import DynamicTyper
-from snk.cli.subcommands import EnvApp, ConfigApp, RunApp, ScriptApp
+from snk.cli.subcommands import EnvApp, ConfigApp, RunApp, ScriptApp, ProfileApp
 
 from .config.config import (
     SnkConfig,
@@ -83,8 +83,6 @@ class CLI(DynamicTyper):
             context_settings={"help_option_names": ["-h", "--help"]},
         )
         self.register_command(self.info, help="Display information about the pipeline.")
-        if self.pipeline.profiles:
-            self.register_command(self.profile, help="Access the pipeline profiles.")
 
         run_app = RunApp(
             conda_prefix_dir=self.conda_prefix_dir,
@@ -130,6 +128,14 @@ class CLI(DynamicTyper):
                 ),
                 name="script",
                 help="Access the pipeline scripts.",
+            )
+        if self.pipeline.profiles:
+            self.register_group(
+                ProfileApp(
+                    pipeline=self.pipeline,
+                ),
+                name="profile",
+                help="Access the pipeline profiles.",
             )
 
     def _print_pipline_version(self, ctx: typer.Context, value: bool):
@@ -218,15 +224,3 @@ class CLI(DynamicTyper):
         info_dict["pipeline_dir_path"] = str(self.pipeline.path)
         typer.echo(json.dumps(info_dict, indent=2))
 
-    def profile(
-        self,
-        name: str = typer.Argument(None, help="The name of the profile."),
-    ):
-        profiles_dir_yellow = typer.style(
-            self.pipeline.path / "profiles", fg=typer.colors.YELLOW
-        )
-        typer.echo(
-            f"Found {len(self.pipeline.profiles)} profiles in {profiles_dir_yellow}"
-        )
-        for profile in self.pipeline.profiles:
-            typer.echo(f"- {profile.name}")
