@@ -82,7 +82,7 @@ class CLI(DynamicTyper):
             invoke_without_command=True,
             context_settings={"help_option_names": ["-h", "--help"]},
         )
-        self.register_command(self.info, help="Display information about the pipeline.")
+        self.register_command(self.info, help="Show information about the pipeline.")
 
         run_app = RunApp(
             conda_prefix_dir=self.conda_prefix_dir,
@@ -99,13 +99,12 @@ class CLI(DynamicTyper):
             run_app,
             name="run",
         )
-        self.register_group(
+        self.register_command(
             ConfigApp(
                 pipeline=self.pipeline,
                 options=self.options,
             ),
             name="config",
-            help="Access the pipeline configuration.",
         )
         if self.pipeline.environments:
             self.register_group(

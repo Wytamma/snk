@@ -41,7 +41,7 @@ class RunApp(DynamicTyper):
         self.register_command(
             self.run,
             dynamic_options=self.options,
-            help="Run the Snakemake pipeline.\n\nAll unrecognized arguments are passed onto Snakemake.",
+            help="Run the pipeline.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
                 "allow_extra_args": True,
                 "ignore_unknown_options": True,
