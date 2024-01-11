@@ -5,11 +5,18 @@ from typing import Optional, List
 from rich import print
 from .nest import Nest
 from .errors import PipelineExistsError, PipelineNotFoundError
+from .__about__ import __version__
+
 
 app = typer.Typer()
 
 SNK_HOME = None
 SNK_BIN = None
+
+def _print_snk_version(self, ctx: typer.Context, value: bool):
+    if value:
+        typer.echo(__version__)
+        raise typer.Exit()
 
 # fmt: off
 @app.callback(context_settings={"help_option_names": ["-h", "--help"]})
@@ -30,7 +37,16 @@ def callback(
             file_okay=False, 
             exists=True, 
             help="Overrides location of pipeline installations. Pipelines are symlinked here."
-        )
+        ),
+    version: Optional[bool] = typer.Option(
+        None,
+        "-v",
+        "--version",
+        help="Show the version and exit.",
+        is_eager=True,
+        callback=_print_snk_version,
+        show_default=False,
+        ),
     ):
     """\b
         _            _             _        
