@@ -29,7 +29,7 @@ class ScriptApp(DynamicTyper):
         self.configfile = get_config_from_pipeline_dir(self.pipeline.path)
         self.register_command(self.list, help="List the scripts in the pipeline.")
         self.register_command(
-            self.show, help="Show the script file contents."
+            self.show, help="Show the contents of a script."
         )
         self.register_command(
             self.run, 

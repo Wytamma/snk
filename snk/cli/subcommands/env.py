@@ -37,7 +37,7 @@ class EnvApp(DynamicTyper):
         )
         self.register_command(self.list, help="List the environments in the pipeline.")
         self.register_command(
-            self.show, help="Show the environments config file contents."
+            self.show, help="Show the contents of an environment."
         )
         self.register_command(
             self.run, help="Run a command in one of the pipeline environments."
