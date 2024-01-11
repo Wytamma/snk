@@ -16,7 +16,6 @@ class ConfigApp(DynamicTyper):
         self.options = options
         self.pipeline = pipeline
         self.register_default_command(self.show)
-        self.register_command(self.show, help="Show the pipeline configuration.")
 
     def show(
         self, ctx: typer.Context, pretty: bool = typer.Option(False, "--pretty", "-p")
