@@ -33,10 +33,11 @@ class ScriptApp(DynamicTyper):
         )
         self.register_command(
             self.run, 
-            help="""
+            help=f"""
             Run a script from the pipeline.
             \n\nThe executor for the script is inferred from the suffix.
-            \n\nExample: snk script run --env=python script.py""",
+            \n\nExample: {self.pipeline.name} script run --env=python script.py
+            \n\nTo pass help to the script, use `-- --help`.""",
             context_settings={"ignore_unknown_options": True, "allow_extra_args": True},
         )
 
