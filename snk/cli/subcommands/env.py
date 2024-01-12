@@ -130,5 +130,6 @@ class EnvApp(DynamicTyper):
         env.create()
         user_shell = os.environ.get("SHELL", "/bin/sh")
         activate_cmd = self._shellcmd(env.address, user_shell)
+        self.log(activate_cmd)
         subprocess.run(activate_cmd, shell=True, env=os.environ.copy())
         self.log(f"Exiting {name} environment...")
