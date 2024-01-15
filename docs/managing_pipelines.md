@@ -119,7 +119,7 @@ Proceed (Y/n)? y
 !!! Note
     Use `--force` to force uninstall without asking.
 
-# Ejecting pipelines
+## Ejecting pipelines
 
 The `cp -r $(pipeline-name -p) .` command is used to eject the pipeline from the package. This will copy the pipeline files to the current working directory. This will allow you to modify the pipeline and run it with the standard `snakemake` command.
 
