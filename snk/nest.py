@@ -72,7 +72,7 @@ class Nest:
         path_dirs = os.environ["PATH"].split(os.pathsep)
         return str(self.bin_dir) in path_dirs
 
-    def _check_repo_url_format(self, repo: str):
+    def _format_repo_url(self, repo: str):
         """
         Checks that the given repo URL is valid.
         Args:
@@ -82,10 +82,11 @@ class Nest:
         Examples:
           >>> nest._check_repo_url_format('https://github.com/example/repo.git')
         """
+        if not repo.endswith(".git"):
+            repo += ".git"
         if not repo.startswith("http"):
             raise InvalidPipelineRepositoryError("Repo url must start with http")
-        if not repo.endswith(".git"):
-            raise InvalidPipelineRepositoryError("Repo url must end in .git")
+        return repo
 
     def install(
         self,
@@ -126,7 +127,7 @@ class Nest:
 
         self._check_pipeline_name_available(name)
         try:
-            self._check_repo_url_format(pipeline)
+            pipeline = self._format_repo_url(pipeline)
             if not name:
                 name = self._get_name_from_git_url(pipeline)
             if not force:
@@ -172,9 +173,13 @@ class Nest:
         snk_config = SnkConfig.from_pipeline_dir(
             pipeline_path, create_if_not_exists=True
         )
+        modified = False
         for key, value in kwargs.items():
-            setattr(snk_config, key, value)
-        snk_config.save()
+            if getattr(snk_config, key) != value:
+                modified = True
+                setattr(snk_config, key, value)
+        if modified:
+            snk_config.save()
 
     def additional_resources(self, pipeline_path: Path, resources: List[Path]):
         """
@@ -355,7 +360,7 @@ class Nest:
 
     def download(self, repo_url: str, name: str, tag_name: str = None, commit: str = None) -> Path:
         """
-        Downloads a file from a given URL.
+        Clone a pipeline from a git repository.
         Args:
           url (str): The URL of the file to download.
         Returns:
