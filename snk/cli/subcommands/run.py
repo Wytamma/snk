@@ -206,7 +206,7 @@ class RunApp(DynamicTyper):
                 fg=typer.colors.MAGENTA,
             )
 
-        if conda_found or self.snk_config.require_conda:
+        if conda_found and self.snk_config.conda:
             args.extend([
                     "--use-conda",
                     f"--conda-prefix={self.conda_prefix_dir}",

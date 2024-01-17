@@ -33,7 +33,7 @@ annotations:
         - 1
         - 2
         - 3
-      type: list
+      type: list[int]
       help: "A list to test"
     test_null:
       default: null
@@ -43,4 +43,4 @@ logo: "MyPipeline"
 tagline: "\nA pipeline to test the pipeline logo and tagline"
 font: "cybermedium"
 version: "things/__about__.py"
-require_conda: false
+conda: false
