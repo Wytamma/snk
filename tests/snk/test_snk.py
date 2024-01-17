@@ -24,6 +24,22 @@ def test_snk_install(snk_home: Path, bin_dir: Path):
     assert (bin_dir / "pipeline").is_symlink()
 
 
+def test_snk_install_no_conda(snk_home: Path, bin_dir: Path):
+    result = runner.invoke(
+        app, ["--home", snk_home, "--bin", bin_dir, "install", "tests/data/pipeline", "--no-conda"]
+
+    )
+    assert result.exit_code == 0
+    assert "Successfully installed" in result.stdout
+    snk_config = snk_home / "pipelines" / "pipeline"/ "snk.yaml"
+    assert snk_config.exists()
+    # read the snk.yaml file as dict
+    import yaml
+    with open(snk_config) as f:
+        snk_config_dict = yaml.safe_load(f)
+    assert snk_config_dict["conda"] is False
+
+
 def test_snk_list(local_pipeline: Pipeline):
     snk_home = local_pipeline.path.parent.parent
     bin_dir = local_pipeline.path.parent.parent.parent / "bin"
