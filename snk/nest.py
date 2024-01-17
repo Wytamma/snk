@@ -97,6 +97,7 @@ class Nest:
         config: Path = None,
         force=False,
         additional_resources=[],
+        conda: bool = None,
     ) -> Pipeline:
         """
         Installs a Snakemake pipeline as a CLI.
@@ -109,7 +110,7 @@ class Nest:
           config (Path, optional): The path to the config file. Defaults to None.
           force (bool, optional): Whether to force the installation. Defaults to False.
           additional_resources (list, optional): A list of resources additional to the resources folder to copy. Defaults to [].
-          symlink_resources_folder (bool, optional): Whether to symlink the resources folder instead of copying it. Defaults to False.
+          conda (bool, optional): Modify the snk config file to control conda use. If None, will not modify the config file. Defaults to None.
         Returns:
           Pipeline: The installed pipeline.
         Examples:
@@ -150,6 +151,8 @@ class Nest:
                 self.copy_nonstandard_config(pipeline_path, config)
             if additional_resources:
                 self.additional_resources(pipeline_path, additional_resources)
+            if conda is not None:
+                self.modify_snk_config(pipeline_path, conda=conda)
             self._confirm_installation(name)
         except Exception as e:
             # remove any half completed steps
@@ -163,9 +166,8 @@ class Nest:
         Modify the snk config file.
         Args:
           pipeline_path (Path): The path to the pipeline directory.
-          name (str): The name of the pipeline.
         Examples:
-          >>> nest.modify_snk_config(Path('/path/to/pipeline'), 'example')
+          >>> nest.modify_snk_config(Path('/path/to/pipeline'), logo=example)
         """
         snk_config = SnkConfig.from_pipeline_dir(
             pipeline_path, create_if_not_exists=True

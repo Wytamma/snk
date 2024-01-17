@@ -17,7 +17,7 @@ The following options are available for configuration in `snk.yaml`:
 - `resources`: A list of resource files required for the pipeline.
 - `cli`: Annotations for the pipeline cli parameters.
 - `symlink_resources`: A boolean that controls whether symbolic links are created for resources.
-- `conda`: A boolean that controls whether the pipeline requires conda.
+- `conda`: A boolean that controls whether the pipeline should use conda.
 
 ## Example `snk.yaml` File
 

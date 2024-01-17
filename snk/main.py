@@ -99,6 +99,11 @@ def install(
         [],
         help="Specify resources additional to the resources folder required by the pipeline (copied to working dir at runtime).",
     ),
+    no_conda: bool = typer.Option(
+        False,
+        "--no-conda",
+        help="Do not use conda environments by default.",
+    ),
     force: Optional[bool] = typer.Option(
         False, "--force", "-f", help="Force install (overwrites existing installs)."
     ),
@@ -128,6 +133,7 @@ def install(
             config=config,
             additional_resources=resource,
             force=force,
+            conda=not no_conda,
         )
     except PipelineExistsError as e:
         typer.secho(e, fg="red")

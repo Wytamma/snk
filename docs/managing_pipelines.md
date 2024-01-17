@@ -84,6 +84,11 @@ Use `--resource` specify a resource that is required at run time. Resources will
 snk install --resource path/to/resource Wytamma/snk-basic-pipeline
 ```
 
+If the the pipeline should not use conda environments, use `--no-conda`. This will prevent the pipeline from creating a conda environment and will not use the `--use-conda` flag when running the pipeline. 
+```bash
+snk install --no-conda Wytamma/snk-basic-pipeline
+```
+
 Installation can be forced with the `--force` flag. This can be used to overwrite existing pipelines.
 ```bash
 snk install --force Wytamma/snk-basic-pipeline
