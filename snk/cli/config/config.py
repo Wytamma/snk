@@ -51,6 +51,10 @@ class SnkConfig:
             # TODO: remove annotations in the future
             snk_config_dict["cli"] = snk_config_dict["annotations"]
             del snk_config_dict["annotations"]
+        if "conda_required" in snk_config_dict:
+            # TODO: remove conda_required in the future
+            snk_config_dict["conda"] = snk_config_dict["conda_required"]
+            del snk_config_dict["conda_required"]
         snk_config = cls(**snk_config_dict)
         snk_config.resources = [
             snk_config_path.parent / resource for resource in snk_config.resources
