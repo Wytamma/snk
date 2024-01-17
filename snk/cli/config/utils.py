@@ -20,7 +20,8 @@ def get_version_from_config(config_path: Path, config_dict: dict = None) -> str:
     
     if "version" not in config_dict:
         return None 
-    
+    if config_dict["version"] is None:
+        return None
     version = str(config_dict["version"])
     if "__about__.py" in version:
         # load version from __about__.py

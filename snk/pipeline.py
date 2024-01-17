@@ -72,7 +72,7 @@ class Pipeline:
         """
         if (self.path / "snk.yaml").exists():
             version = get_version_from_config(self.path / "snk.yaml")
-        elif not self.tag:
+        if version is None and not self.tag:
             version = self.commit
         else:
             version = self.tag
