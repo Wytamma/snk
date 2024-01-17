@@ -70,6 +70,7 @@ class Pipeline:
         Returns:
             str: The version of the pipeline, or None if no version is found.
         """
+        version = None
         if (self.path / "snk.yaml").exists():
             version = get_version_from_config(self.path / "snk.yaml")
         if version is None and not self.tag:
