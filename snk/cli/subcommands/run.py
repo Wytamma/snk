@@ -409,16 +409,40 @@ def check_command_available(command: str):
 
     return shutil.which(command) is not None
 
+
+
 def parse_config_monkeypatch(args):
     """Monkeypatch the parse_config function from snakemake."""
     import yaml
     import snakemake
     import re
+    
+    class NoDatesSafeLoader(yaml.SafeLoader):
+        @classmethod
+        def remove_implicit_resolver(cls, tag_to_remove):
+            """
+            Remove implicit resolvers for a particular tag
 
+            Takes care not to modify resolvers in super classes.
+
+            We want to load datetimes as strings, not dates, because we
+            go on to serialise as json which doesn't have the advanced types
+            of yaml, and leads to incompatibilities down the track.
+            """
+            if 'yaml_implicit_resolvers' not in cls.__dict__:
+                cls.yaml_implicit_resolvers = cls.yaml_implicit_resolvers.copy()
+
+            for first_letter, mappings in cls.yaml_implicit_resolvers.items():
+                cls.yaml_implicit_resolvers[first_letter] = [(tag, regexp) 
+                                                            for tag, regexp in mappings
+                                                            if tag != tag_to_remove]
+
+    NoDatesSafeLoader.remove_implicit_resolver('tag:yaml.org,2002:timestamp')
+    
     def _yaml_safe_load(s):
         """Load yaml string safely."""
         s = s.replace(": None", ": null")
-        return yaml.load(s, Loader=yaml.SafeLoader)
+        return yaml.load(s, Loader=NoDatesSafeLoader)
 
     parsers = [int, float, snakemake._bool_parser, _yaml_safe_load, str]
     config = dict()
