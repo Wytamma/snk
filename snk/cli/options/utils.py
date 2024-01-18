@@ -43,17 +43,22 @@ def create_option_from_annotation(
     annotation_type = types.get(
         type.lower(), List[str] if "list" in type.lower() else str
     )
-    return Option(
-        name=annotation_values.get(
+    name = annotation_values.get(
             f"{annotation_key}:name", annotation_key.replace(":", "_")
-        ).replace("-", "_"),
+        ).replace("-", "_")
+    
+    short = annotation_values.get(f"{annotation_key}:short", None)
+    return Option(
+        name=name,
         original_key=annotation_key,
         default=annotation_values.get(f"{annotation_key}:default", default),
         updated=updated,
         help=annotation_values.get(f"{annotation_key}:help", ""),
         type=annotation_type,
         required=annotation_values.get(f"{annotation_key}:required", False),
-        short=annotation_values.get(f"{annotation_key}:short", None),
+        short=short,
+        flag=f"--{name.replace('_', '-')}",
+        short_flag=f"-{short}" if short else None,
     )
 
 

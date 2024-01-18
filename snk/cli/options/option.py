@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
@@ -11,4 +11,6 @@ class Option:
     help: str
     type: Any
     required: bool
-    short: str
+    short: Optional[str]
+    flag: str
+    short_flag: Optional[str]

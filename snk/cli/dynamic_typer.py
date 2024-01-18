@@ -4,6 +4,7 @@ from inspect import signature, Parameter
 from makefun import with_signature
 
 from snk.cli.options import Option
+import sys
 
 
 class DynamicTyper:
@@ -119,11 +120,25 @@ class DynamicTyper:
             kind=Parameter.POSITIONAL_OR_KEYWORD,
             default=typer.Option(
                 ... if option.required else option.default,
-                *[f"--{option.name.replace('_', '-')}", f"-{option.short}"] if option.short else [],
+                *[option.flag, option.short_flag] if option.short else [],
                 help=f"[CONFIG] {option.help}",
             ),
             annotation=option.type,
         )
+
+    def check_if_option_passed_via_command_line(self, option: Option):
+        """
+        Check if an option is passed via the command line.
+        Args:
+          option (Option): An Option object containing the option's name, type, required status, default value, and help message.
+        Returns:
+          bool: Whether the option is passed via the command line.
+        """
+        if option.flag in sys.argv:
+            return True
+        elif option.short and option.short_flag in sys.argv:
+            return True
+        return False
 
     def add_dynamic_options(self, func: Callable, options: List[Option]):
         """
@@ -166,15 +181,20 @@ class DynamicTyper:
                 flat_config = flatten(snakemake_config)
 
             for option in options:
-                # If no config file provided, or an option is updated, add it to the arguments
-                if (
-                    kwargs.get("configfile") is None
-                    or kwargs[option.name] != option.default
-                ):
+
+                def add_option_to_args():
                     kwargs["ctx"].args.extend([f"--{option.name}", kwargs[option.name]])
+
+                passed_via_command_line = self.check_if_option_passed_via_command_line(
+                    option
+                )
+
+                # If no config file provided, or an option is passed, add it to the arguments
+                if flat_config is None or passed_via_command_line:
+                    add_option_to_args()
                 # If a config file is provided and the option key isn't in it, add the option to the arguments
                 elif flat_config and option.original_key not in flat_config:
-                    kwargs["ctx"].args.extend([f"--{option.name}", kwargs[option.name]])
+                    add_option_to_args()
 
             kwargs = {
                 k: v for k, v in kwargs.items() if k in func_sig.parameters.keys()
@@ -185,7 +205,7 @@ class DynamicTyper:
 
     def error(self, msg, exit=True):
         """
-        Logs an error message and exits.
+        Logs an error message (red) and exits (optional).
         Args:
           msg (str): The error message to log.
           exit (bool): Whether to exit after logging the error message.
@@ -195,4 +215,17 @@ class DynamicTyper:
             raise typer.Exit(1)
 
     def log(self, msg):
+        """
+        Logs a message (yellow).
+        Args:
+          msg (str): The message to log.
+        """
         typer.secho(msg, fg="yellow")
+
+    def echo(self, msg):
+        """
+        Prints a message.
+        Args:
+          msg (str): The message to print.
+        """
+        typer.echo(msg)
