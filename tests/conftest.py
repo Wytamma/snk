@@ -58,3 +58,13 @@ def local_runner(tmp_path_factory):
     local_pipeline = nest.install("tests/data/pipeline", editable=True)
     runner = CLIRunner([local_pipeline.executable])
     return runner
+
+@pytest.fixture(scope="session")
+def print_config_runner(tmp_path_factory):
+    path = Path(tmp_path_factory.mktemp("snk"))
+    (path / "home").mkdir()
+    (path / "bin").mkdir()
+    nest = Nest(path / "home", path / "bin")
+    local_pipeline = nest.install("tests/data/print_value", editable=True)
+    runner = CLIRunner([local_pipeline.executable])
+    return runner
