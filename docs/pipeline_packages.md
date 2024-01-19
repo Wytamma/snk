@@ -207,7 +207,7 @@ from snk.cli import CLI
 
 pipeline_name = CLI(pipeline_dir_path = Path(__file__).parent.parent)
 
-@pipeline.app.command()
+@pipeline_name.app.command()
 def hello(name: str):
     print(f"Hello {name}!")
 ```
