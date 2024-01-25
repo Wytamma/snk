@@ -126,6 +126,7 @@ class Nest:
                 pass
 
         self._check_pipeline_name_available(name)
+        pipeline = str(pipeline) # ensure it is a string
         try:
             pipeline = self._format_repo_url(pipeline)
             if not name:

@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 import subprocess
 from typing import List
-
+import pytest
+from snk.cli.config import SnkConfig
 
 @dataclass
 class Result:
@@ -24,3 +25,6 @@ class CLIRunner:
         )
         out, err = (output.decode("utf-8") for output in proc.communicate())
         return Result(out, err, proc.returncode)
+
+def gen_dynamic_runner_fixture(config: dict = dict, snk: SnkConfig = SnkConfig()) -> CLIRunner:
+    return pytest.mark.parametrize('dynamic_runner', [(config, snk)], indirect=["dynamic_runner"])

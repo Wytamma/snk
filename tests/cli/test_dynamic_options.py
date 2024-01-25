@@ -33,10 +33,10 @@ def test_create_option_from_annotation(
     assert isinstance(option, Option)
     assert option.name == "Test"
     assert option.default == "default_value"
-    assert option.updated == False
+    assert option.updated is False
     assert option.help == "Test help"
     assert option.type == str
-    assert option.required == True
+    assert option.required is True
 
 
 # @pytest.mark.parametrize("annotation_values, default_values, expected_type", [

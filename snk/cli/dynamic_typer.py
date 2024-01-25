@@ -123,6 +123,7 @@ class DynamicTyper:
                 *[option.flag, option.short_flag] if option.short else [],
                 help=f"{option.help}",
                 rich_help_panel="Workflow Configuration",
+                hidden=option.hidden,
             ),
             annotation=option.type,
         )
