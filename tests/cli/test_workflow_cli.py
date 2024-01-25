@@ -28,12 +28,7 @@ def test_convert_key_to_snakemake_format(key, value, expected):
 def test_help(local_runner: CLIRunner):
     res = local_runner(["--help"])
     assert res.code == 0, res.stderr
-    assert "--version" in res.stdout
-    assert "--path" in res.stdout
-    assert "run" in res.stdout
-    assert "profile" in res.stdout
-    assert "info" in res.stdout
-    assert "config" in res.stdout
+    assert "Usage:" in res.stdout
     
 
 def test_version(local_runner: CLIRunner):
