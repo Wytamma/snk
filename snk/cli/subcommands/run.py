@@ -70,7 +70,7 @@ class RunApp(DynamicTyper):
         configfile: Path = typer.Option(
             None,
             "--config",
-            help="Path to snakemake config file. Overrides existing config and defaults.",
+            help="Path to snakemake config file. Overrides existing workflow configuration.",
             exists=True,
             dir_okay=False,
         ),
@@ -78,7 +78,7 @@ class RunApp(DynamicTyper):
             [],
             "--resource",
             "-r",
-            help="Additional resources to copy to workdir at run time (relative to pipeline directory).",
+            help="Additional resources to copy from workflow directory at run time.",
         ),
         profile: Optional[str] = typer.Option(
             None,
@@ -96,7 +96,7 @@ class RunApp(DynamicTyper):
             False,
             "--dry",
             "-n",
-            help="Do not execute anything, and display what would be done. If you have a very large workflow, use --dry --quiet to just print a summary of the DAG of jobs",
+            help="Do not execute anything, and display what would be done.",
         ),
         lock: bool = typer.Option(
             False, "--lock", "-l", help="Lock the working directory."
