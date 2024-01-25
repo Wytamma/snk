@@ -196,6 +196,29 @@ pipeline-name
     └── __init__.py
 ```
 
+## Add additional commands to the pipeline
+
+To add commands to the pipeline cli you can access the underlying typer app:
+
+```python
+from pathlib import Path
+
+from snk.cli import CLI
+
+pipeline_name = CLI(pipeline_dir_path = Path(__file__).parent.parent)
+
+@pipeline_name.app.command()
+def hello(name: str):
+    print(f"Hello {name}!")
+```
+
+You can now access the hello command from the pipeline cli e.g.
+
+```bash
+❯ pipeline-name hello Wytamma
+Hello Wytamma!
+```
+
 ## Publishing the pipeline
 
 You can use hatch to build and publish your pipeline to PYPI (requires PYPI account).
