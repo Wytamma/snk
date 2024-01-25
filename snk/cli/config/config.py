@@ -9,12 +9,12 @@ import yaml
 @dataclass
 class SnkConfig:
     """
-    A dataclass for storing Snakemake pipeline configuration.
+    A dataclass for storing Snakemake workflow configuration.
     """
 
     art: str = None
     logo: str = None
-    tagline: str = "A Snakemake pipeline CLI generated with Snk"
+    tagline: str = "A Snakemake workflow CLI generated with Snk"
     font: str = "small"
     version: Optional[str] = None
     conda: bool = True
@@ -35,7 +35,7 @@ class SnkConfig:
           FileNotFoundError: If the SNK config file is not found.
         Examples:
           >>> SnkConfig.from_path(Path("snk.yaml"))
-          SnkConfig(art=None, logo=None, tagline='A Snakemake pipeline CLI generated with Snk', font='small', resources=[], annotations={}, symlink_resources=False, _snk_config_path=PosixPath('snk.yaml'))
+          SnkConfig(art=None, logo=None, tagline='A Snakemake workflow CLI generated with Snk', font='small', resources=[], annotations={}, symlink_resources=False, _snk_config_path=PosixPath('snk.yaml'))
         """
         if not snk_config_path.exists():
             raise MissingSnkConfigError(
@@ -64,38 +64,38 @@ class SnkConfig:
         return snk_config
   
     @classmethod
-    def from_pipeline_dir(
-        cls, pipeline_dir_path: Path, create_if_not_exists: bool = False
+    def from_workflow_dir(
+        cls, workflow_dir_path: Path, create_if_not_exists: bool = False
     ):
         """
-        Load and validate SNK config from pipeline directory.
+        Load and validate SNK config from workflow directory.
         Args:
-          pipeline_dir_path (Path): Path to the pipeline directory.
+          workflow_dir_path (Path): Path to the workflow directory.
           create_if_not_exists (bool): Whether to create a SNK config file if one does not exist.
         Returns:
           SnkConfig: A SnkConfig object.
         Raises:
           FileNotFoundError: If the SNK config file is not found.
         Examples:
-          >>> SnkConfig.from_pipeline_dir(Path("pipeline"))
-          SnkConfig(art=None, logo=None, tagline='A Snakemake pipeline CLI generated with Snk', font='small', resources=[], annotations={}, symlink_resources=False, _snk_config_path=PosixPath('pipeline/snk.yaml'))
+          >>> SnkConfig.from_workflow_dir(Path("workflow"))
+          SnkConfig(art=None, logo=None, tagline='A Snakemake workflow CLI generated with Snk', font='small', resources=[], annotations={}, symlink_resources=False, _snk_config_path=PosixPath('workflow/snk.yaml'))
         """
-        if (pipeline_dir_path / "snk.yaml").exists():
-            return cls.from_path(pipeline_dir_path / "snk.yaml")
-        elif (pipeline_dir_path / ".snk").exists():
+        if (workflow_dir_path / "snk.yaml").exists():
+            return cls.from_path(workflow_dir_path / "snk.yaml")
+        elif (workflow_dir_path / ".snk").exists():
             import warnings
 
             warnings.warn(
                 "Use of .snk will be deprecated in the future. Please use snk.yaml instead.",
                 DeprecationWarning,
             )
-            return cls.from_path(pipeline_dir_path / ".snk")
+            return cls.from_path(workflow_dir_path / ".snk")
         elif create_if_not_exists:
-            snk_config = cls(_snk_config_path=pipeline_dir_path / "snk.yaml")
+            snk_config = cls(_snk_config_path=workflow_dir_path / "snk.yaml")
             return snk_config
         else:
             raise FileNotFoundError(
-                f"Could not find SNK config file in pipeline directory: {pipeline_dir_path}"
+                f"Could not find SNK config file in workflow directory: {workflow_dir_path}"
             )
 
     def validate_resources(self, resources):
@@ -114,24 +114,24 @@ class SnkConfig:
             if not resource.exists():
                 raise FileNotFoundError(f"Could not find resource: {resource}")
 
-    def add_resources(self, resources: List[Path], pipeline_dir_path: Path = None):
+    def add_resources(self, resources: List[Path], workflow_dir_path: Path = None):
         """
         Add resources to the SNK config.
         Args:
           resources (List[Path]): List of resources to add.
-          pipeline_dir_path (Path): Path to the pipeline directory.
+          workflow_dir_path (Path): Path to the workflow directory.
         Returns:
           None
         Side Effects:
           Adds the resources to the SNK config.
         Examples:
           >>> snk_config = SnkConfig()
-          >>> snk_config.add_resources([Path("resource1.txt"), Path("resource2.txt")], Path("pipeline"))
+          >>> snk_config.add_resources([Path("resource1.txt"), Path("resource2.txt")], Path("workflow"))
         """
         processed = []
         for resource in resources:
-            if pipeline_dir_path and not resource.is_absolute():
-                resource = pipeline_dir_path / resource
+            if workflow_dir_path and not resource.is_absolute():
+                resource = workflow_dir_path / resource
             processed.append(resource)
         self.validate_resources(processed)
         self.resources.extend(processed)
@@ -169,16 +169,16 @@ class SnkConfig:
         self.to_yaml(self._snk_config_path)
 
 
-def get_config_from_pipeline_dir(pipeline_dir_path: Path):
+def get_config_from_workflow_dir(workflow_dir_path: Path):
     """
-    Get the config file from a pipeline directory.
+    Get the config file from a workflow directory.
     Args:
-      pipeline_dir_path (Path): Path to the pipeline directory.
+      workflow_dir_path (Path): Path to the workflow directory.
     Returns:
       Path: Path to the config file, or None if not found.
     Examples:
-      >>> get_config_from_pipeline_dir(Path("pipeline"))
-      PosixPath('pipeline/config.yaml')
+      >>> get_config_from_workflow_dir(Path("workflow"))
+      PosixPath('workflow/config.yaml')
     """
     for path in [
         Path("config") / "config.yaml",
@@ -186,23 +186,23 @@ def get_config_from_pipeline_dir(pipeline_dir_path: Path):
         "config.yaml",
         "config.yml",
     ]:
-        if (pipeline_dir_path / path).exists():
-            return pipeline_dir_path / path
+        if (workflow_dir_path / path).exists():
+            return workflow_dir_path / path
     return None
 
 
-def load_pipeline_snakemake_config(pipeline_dir_path: Path):
+def load_workflow_snakemake_config(workflow_dir_path: Path):
     """
-    Load the Snakemake config from a pipeline directory.
+    Load the Snakemake config from a workflow directory.
     Args:
-      pipeline_dir_path (Path): Path to the pipeline directory.
+      workflow_dir_path (Path): Path to the workflow directory.
     Returns:
       dict: The Snakemake config.
     Examples:
-      >>> load_pipeline_snakemake_config(Path("pipeline"))
+      >>> load_workflow_snakemake_config(Path("workflow"))
       {'inputs': {'data': 'data.txt'}, 'outputs': {'results': 'results.txt'}}
     """
-    pipeline_config_path = get_config_from_pipeline_dir(pipeline_dir_path)
-    if not pipeline_config_path or not pipeline_config_path.exists():
+    workflow_config_path = get_config_from_workflow_dir(workflow_dir_path)
+    if not workflow_config_path or not workflow_config_path.exists():
         return {}
-    return snakemake.load_configfile(pipeline_config_path)
+    return snakemake.load_configfile(workflow_config_path)

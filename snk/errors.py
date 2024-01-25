@@ -1,16 +1,16 @@
 class NestError(Exception):
-    """Base class for all pipeline exceptions"""
+    """Base class for all workflow exceptions"""
 
 
-class PipelineExistsError(NestError):
-    """Thrown if the given pipeline is already installed"""
+class WorkflowExistsError(NestError):
+    """Thrown if the given workflow is already installed"""
 
 
-class PipelineNotFoundError(NestError):
-    """Thrown if the given pipeline cannot be found"""
+class WorkflowNotFoundError(NestError):
+    """Thrown if the given workflow cannot be found"""
 
 
-class InvalidPipelineRepositoryError(NestError):
+class InvalidWorkflowRepositoryError(NestError):
     """Thrown if the given repository appears to have an invalid format."""
 
 

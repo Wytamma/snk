@@ -15,52 +15,52 @@ from snk.cli.subcommands import EnvApp, ConfigApp, RunApp, ScriptApp, ProfileApp
 
 from .config.config import (
     SnkConfig,
-    load_pipeline_snakemake_config,
+    load_workflow_snakemake_config,
 )
 from .options.utils import build_dynamic_cli_options
-from snk.pipeline import Pipeline
+from snk.workflow import Workflow
 
 
 class CLI(DynamicTyper):
     """
     Constructor for the dynamic Snk CLI class.
     Args:
-      pipeline_dir_path (Path): Path to the pipeline directory.
+      workflow_dir_path (Path): Path to the workflow directory.
     Side Effects:
       Initializes the CLI class.
     Examples:
-      >>> CLI(Path('/path/to/pipeline'))
+      >>> CLI(Path('/path/to/workflow'))
     """
 
-    def __init__(self, pipeline_dir_path: Path = None) -> None:
-        if not pipeline_dir_path:
+    def __init__(self, workflow_dir_path: Path = None) -> None:
+        if not workflow_dir_path:
             # get the calling frame (the frame of the function that called this function)
             calling_frame = inspect.currentframe().f_back
             # get the file path from the calling frame
-            pipeline_dir_path = Path(calling_frame.f_globals["__file__"])
-        if pipeline_dir_path.is_file():
-            pipeline_dir_path = pipeline_dir_path.parent
-        self.pipeline = Pipeline(path=pipeline_dir_path)
-        self.snakemake_config = load_pipeline_snakemake_config(pipeline_dir_path)
-        self.snk_config = SnkConfig.from_pipeline_dir(
-            pipeline_dir_path, create_if_not_exists=True
+            workflow_dir_path = Path(calling_frame.f_globals["__file__"])
+        if workflow_dir_path.is_file():
+            workflow_dir_path = workflow_dir_path.parent
+        self.workflow = Workflow(path=workflow_dir_path)
+        self.snakemake_config = load_workflow_snakemake_config(workflow_dir_path)
+        self.snk_config = SnkConfig.from_workflow_dir(
+            workflow_dir_path, create_if_not_exists=True
         )
         if self.snk_config.version:
             self.version = self.snk_config.version
         else: 
-            if self.pipeline.tag:
-               self.version = self.pipeline.tag
+            if self.workflow.tag:
+               self.version = self.workflow.tag
             else:
-                self.version = self.pipeline.commit
+                self.version = self.workflow.commit
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
-        self.conda_prefix_dir = pipeline_dir_path / ".conda"
-        if " " in str(pipeline_dir_path):
+        self.conda_prefix_dir = workflow_dir_path / ".conda"
+        if " " in str(workflow_dir_path):
             # cannot have spaces!
             self.singularity_prefix_dir = None
         else:
-            self.singularity_prefix_dir = pipeline_dir_path / ".singularity"
-        self.name = self.pipeline.name
+            self.singularity_prefix_dir = workflow_dir_path / ".singularity"
+        self.name = self.workflow.name
         self.verbose = False
         if (
             platform.system() == "Darwin"
@@ -82,14 +82,14 @@ class CLI(DynamicTyper):
             invoke_without_command=True,
             context_settings={"help_option_names": ["-h", "--help"]},
         )
-        self.register_command(self.info, help="Show information about the pipeline.")
+        self.register_command(self.info, help="Show information about the workflow.")
 
         run_app = RunApp(
             conda_prefix_dir=self.conda_prefix_dir,
             snk_config=self.snk_config,
             singularity_prefix_dir=self.singularity_prefix_dir,
             snakefile=self.snakefile,
-            pipeline=self.pipeline,
+            workflow=self.workflow,
             verbose=self.verbose,
             logo=self.logo,
             dynamic_run_options=self.options,
@@ -101,40 +101,40 @@ class CLI(DynamicTyper):
         )
         self.register_command(
             ConfigApp(
-                pipeline=self.pipeline,
+                workflow=self.workflow,
                 options=self.options,
             ),
             name="config",
         )
-        if self.pipeline.environments:
+        if self.workflow.environments:
             self.register_group(
                 EnvApp(
-                    pipeline=self.pipeline,
+                    workflow=self.workflow,
                     conda_prefix_dir=self.conda_prefix_dir,
                     snakemake_config=self.snakemake_config,
                     snakefile=self.snakefile,
                 ),
                 name="env",
-                help="Access the pipeline conda environments.",
+                help="Access the workflow conda environments.",
             )
-        if self.pipeline.scripts:
+        if self.workflow.scripts:
             self.register_group(
                 ScriptApp(
-                    pipeline=self.pipeline,
+                    workflow=self.workflow,
                     conda_prefix_dir=self.conda_prefix_dir,
                     snakemake_config=self.snakemake_config,
                     snakefile=self.snakefile,
                 ),
                 name="script",
-                help="Access the pipeline scripts.",
+                help="Access the workflow scripts.",
             )
-        if self.pipeline.profiles:
+        if self.workflow.profiles:
             self.register_group(
                 ProfileApp(
-                    pipeline=self.pipeline,
+                    workflow=self.workflow,
                 ),
                 name="profile",
-                help="Access the pipeline profiles.",
+                help="Access the workflow profiles.",
             )
 
     def _print_pipline_version(self, ctx: typer.Context, value: bool):
@@ -144,7 +144,7 @@ class CLI(DynamicTyper):
 
     def _print_pipline_path(self, ctx: typer.Context, value: bool):
         if value:
-            typer.echo(self.pipeline.path)
+            typer.echo(self.workflow.path)
             raise typer.Exit()
 
     def _create_callback(self):
@@ -154,7 +154,7 @@ class CLI(DynamicTyper):
                 None,
                 "-v",
                 "--version",
-                help="Show the pipeline version and exit.",
+                help="Show the workflow version and exit.",
                 is_eager=True,
                 callback=self._print_pipline_version,
                 show_default=False,
@@ -163,7 +163,7 @@ class CLI(DynamicTyper):
                 None,
                 "-p",
                 "--path",
-                help="Show the pipeline path and exit.",
+                help="Show the workflow path and exit.",
                 is_eager=True,
                 callback=self._print_pipline_path,
                 show_default=False,
@@ -175,7 +175,7 @@ class CLI(DynamicTyper):
         return callback
 
     def _create_logo(
-        self, tagline="A Snakemake pipeline CLI generated with snk", font="small"
+        self, tagline="A Snakemake workflow CLI generated with snk", font="small"
     ):
         """
         Create a logo for the CLI.
@@ -203,23 +203,23 @@ class CLI(DynamicTyper):
           >>> CLI._find_snakefile()
         """
         for path in SNAKEFILE_CHOICES:
-            if (self.pipeline.path / path).exists():
-                return self.pipeline.path / path
+            if (self.workflow.path / path).exists():
+                return self.workflow.path / path
         raise FileNotFoundError("Snakefile not found!")
 
     def info(self):
         """
-        Display information about current pipeline install.
+        Display information about current workflow install.
         Returns:
-          str: A JSON string containing information about the current pipeline install.
+          str: A JSON string containing information about the current workflow install.
         Examples:
           >>> CLI.info()
         """
         import json
 
         info_dict = {}
-        info_dict["name"] = self.pipeline.path.name
+        info_dict["name"] = self.workflow.path.name
         info_dict["version"] = self.version
-        info_dict["pipeline_dir_path"] = str(self.pipeline.path)
+        info_dict["workflow_dir_path"] = str(self.workflow.path)
         typer.echo(json.dumps(info_dict, indent=2))
 

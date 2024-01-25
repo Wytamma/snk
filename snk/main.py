@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, List
 from rich import print
 from .nest import Nest
-from .errors import PipelineExistsError, PipelineNotFoundError
+from .errors import WorkflowExistsError, WorkflowNotFoundError
 from .__about__ import __version__
 
 
@@ -28,7 +28,7 @@ def callback(
             dir_okay=True, 
             file_okay=False, 
             exists=True, 
-            help="Overrides default snk location. Pipelines will be installed in $SNK_HOME/pipelines."
+            help="Overrides default snk location. Workflows will be installed in $SNK_HOME/workflows."
         ),
     bin: Optional[Path] = typer.Option(
             None, 
@@ -36,7 +36,7 @@ def callback(
             dir_okay=True, 
             file_okay=False, 
             exists=True, 
-            help="Overrides location of pipeline installations. Pipelines are symlinked here."
+            help="Overrides location of workflow installations. Workflows are symlinked here."
         ),
     version: Optional[bool] = typer.Option(
         None,
@@ -62,7 +62,7 @@ def callback(
  \_____\/   \/_/     \/_/ \/_/      \_\_\   
  \b
  \n
- Snakemake pipeline management system
+ Snakemake workflow management system
     """
     ctx.obj = SimpleNamespace(snk_home = home, snk_bin = bin)
 # fmt: on
@@ -71,33 +71,33 @@ def callback(
 @app.command()
 def install(
     ctx: typer.Context,
-    pipeline: str = typer.Argument(
-        ..., help="Path, URL or Github name (user/repo) of the pipeline to install."
+    workflow: str = typer.Argument(
+        ..., help="Path, URL or Github name (user/repo) of the workflow to install."
     ),
     name: Optional[str] = typer.Option(
         None,
         "--name",
         "-n",
-        help="Rename the pipeline (this name will be used to call the CLI.)",
+        help="Rename the workflow (this name will be used to call the CLI.)",
     ),
     tag: Optional[str] = typer.Option(
         None,
         "--tag",
         "-t",
-        help="Tag (version) of the pipeline to install. Can specify a branch name, or tag. If None the latest commit will be installed.",
+        help="Tag (version) of the workflow to install. Can specify a branch name, or tag. If None the latest commit will be installed.",
     ),
     commit: Optional[str] = typer.Option(
         None,
         "--commit",
         "-c",
-        help="Commit (SHA) of the pipeline to install. If None the latest commit will be installed.",
+        help="Commit (SHA) of the workflow to install. If None the latest commit will be installed.",
     ),
     config: Optional[Path] = typer.Option(
         None, help="Specify a non-standard config location."
     ),
     resource: Optional[List[Path]] = typer.Option(
         [],
-        help="Specify resources additional to the resources folder required by the pipeline (copied to working dir at runtime).",
+        help="Specify resources additional to the resources folder required by the workflow (copied to working dir at runtime).",
     ),
     no_conda: bool = typer.Option(
         False,
@@ -111,21 +111,21 @@ def install(
         False,
         "--editable",
         "-e",
-        help="Whether to install the pipeline in editable mode.",
+        help="Whether to install the workflow in editable mode.",
     ),
 ):
     """
-    Install a pipeline.
+    Install a workflow.
     """
     nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
     if not nest.bin_dir_in_path():
         bin_dir_yellow = typer.style(nest.bin_dir, fg=typer.colors.YELLOW, bold=False)
         typer.echo(f"Please add SNK_BIN to your $PATH: {bin_dir_yellow}")
-    if not Path(pipeline).exists() and not pipeline.startswith("http"):
-        pipeline = f"https://github.com/{pipeline}.git"
+    if not Path(workflow).exists() and not workflow.startswith("http"):
+        workflow = f"https://github.com/{workflow}.git"
     try:
-        installed_pipeline = nest.install(
-            pipeline,
+        installed_workflow = nest.install(
+            workflow,
             editable=editable,
             name=name,
             tag=tag,
@@ -135,30 +135,30 @@ def install(
             force=force,
             conda=not no_conda,
         )
-    except PipelineExistsError as e:
+    except WorkflowExistsError as e:
         typer.secho(e, fg="red")
         raise typer.Exit()
-    except PipelineNotFoundError as e:
+    except WorkflowNotFoundError as e:
         typer.secho(e, fg="red")
         raise typer.Exit()
-    typer.secho(f"Successfully installed {installed_pipeline.name} ({installed_pipeline.version})!", fg="green")
+    typer.secho(f"Successfully installed {installed_workflow.name} ({installed_workflow.version})!", fg="green")
 
 
 @app.command()
 def uninstall(
     ctx: typer.Context,
-    name: str = typer.Argument(..., help="Name of the pipeline to uninstall."),
+    name: str = typer.Argument(..., help="Name of the workflow to uninstall."),
     force: Optional[bool] = typer.Option(
         False, "--force", "-f", help="Force uninstall without asking."
     ),
 ):
     """
-    Uninstall a pipeline.
+    Uninstall a workflow.
     """
     nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
     try:
         uninstalled = nest.uninstall(name, force=force)
-    except PipelineNotFoundError as e:
+    except WorkflowNotFoundError as e:
         typer.secho(e, fg="red")
         raise typer.Exit(1)
     if uninstalled:
@@ -168,7 +168,7 @@ def uninstall(
 # @app.command()
 # def update():
 #     """
-#     Update a pipeline.
+#     Update a workflow.
 #     """
 #     raise NotImplementedError
 
@@ -178,34 +178,34 @@ def list(
     ctx: typer.Context,
 ):
     """
-    List the installed pipelines.
+    List the installed workflows.
     """
     nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
     try:
-        pipelines = nest.pipelines
+        workflows = nest.workflows
     except FileNotFoundError:
-        pipelines = []
-    pipeline_dir_yellow = typer.style(
-        nest.snk_pipelines_dir, fg=typer.colors.YELLOW, bold=False
+        workflows = []
+    workflow_dir_yellow = typer.style(
+        nest.snk_workflows_dir, fg=typer.colors.YELLOW, bold=False
     )
-    typer.echo(f"Found {len(pipelines)} pipelines in {pipeline_dir_yellow}")
-    for pipeline in pipelines:
-        if pipeline.editable:
+    typer.echo(f"Found {len(workflows)} workflows in {workflow_dir_yellow}")
+    for workflow in workflows:
+        if workflow.editable:
             print(
-                f'- {pipeline.name} ([bold green]editable[/bold green]) -> "{pipeline.path}"'
+                f'- {workflow.name} ([bold green]editable[/bold green]) -> "{workflow.path}"'
             )
             continue
-        print(f"- {pipeline.name} ([bold green]{pipeline.version}[/bold green])")
+        print(f"- {workflow.name} ([bold green]{workflow.version}[/bold green])")
 
 
 # @app.command()
 # def run(
-#         pipeline: str = typer.Argument(
-#             ..., help="URL or Github name (user/repo) of the pipeline to install."
+#         workflow: str = typer.Argument(
+#             ..., help="URL or Github name (user/repo) of the workflow to install."
 #         ),
 #     ):
 #     """
-#     Run the pipeline in a temporary environment.
+#     Run the workflow in a temporary environment.
 #     """
 #     raise NotImplementedError
 

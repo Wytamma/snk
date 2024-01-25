@@ -1,2 +1,2 @@
-::: snk.pipeline
+::: snk.workflow
 

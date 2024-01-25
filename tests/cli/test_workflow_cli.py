@@ -27,7 +27,7 @@ def test_convert_key_to_snakemake_format(key, value, expected):
 def test_help(local_runner: CLIRunner):
     res = local_runner(["--help"])
     assert res.code == 0, res.stderr
-    assert "Usage: pipeline [OPTIONS] COMMAND [ARGS]..." in res.stdout
+    assert "Usage: workflow [OPTIONS] COMMAND [ARGS]..." in res.stdout
 
 def test_version(local_runner: CLIRunner):
     res = local_runner(["--version"])
@@ -37,7 +37,7 @@ def test_version(local_runner: CLIRunner):
 def test_path(local_runner: CLIRunner):
     res = local_runner(["--path"])
     assert res.code == 0, res.stderr
-    assert "/pipeline" in res.stdout
+    assert "/workflow" in res.stdout
 
 def test_profile(local_runner: CLIRunner):
     res = local_runner(["profile", "-h"])
@@ -48,9 +48,9 @@ def test_profile(local_runner: CLIRunner):
 def test_info(local_runner: CLIRunner):
     res = local_runner(["info"])
     assert res.code == 0, res.stderr
-    assert "pipeline" in res.stdout, res.stderr
+    assert "workflow" in res.stdout, res.stderr
     assert "version" in res.stdout
-    assert "pipeline_dir_path" in res.stdout
+    assert "workflow_dir_path" in res.stdout
 
 def test_config(local_runner: CLIRunner):
     res = local_runner(["config"])
@@ -60,7 +60,7 @@ def test_config(local_runner: CLIRunner):
 def test_run_cli(local_runner: CLIRunner):
     res = local_runner(["run", "-h"])
     assert res.code == 0, res.stderr
-    assert "pipeline" in res.stdout, res.stderr
+    assert "workflow" in res.stdout, res.stderr
     assert "times" in res.stdout
     assert "text" in res.stdout
 

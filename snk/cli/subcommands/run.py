@@ -5,7 +5,7 @@ from contextlib import contextmanager
 
 from snk.cli.dynamic_typer import DynamicTyper
 from snk.cli.options.option import Option
-from snk.pipeline import Pipeline
+from snk.workflow import Workflow
 from snk.cli.utils import (
     parse_config_args,
     dag_filetype_callback,
@@ -13,7 +13,7 @@ from snk.cli.utils import (
 
 from snk.cli.config.config import (
     SnkConfig,
-    get_config_from_pipeline_dir,
+    get_config_from_workflow_dir,
 )
 
 
@@ -24,7 +24,7 @@ class RunApp(DynamicTyper):
         snk_config: SnkConfig,
         singularity_prefix_dir: Path,
         snakefile: Path,
-        pipeline: Pipeline,
+        workflow: Workflow,
         logo: str,
         verbose: bool,
         dynamic_run_options: List[Option],
@@ -33,7 +33,7 @@ class RunApp(DynamicTyper):
         self.singularity_prefix_dir = singularity_prefix_dir
         self.snk_config = snk_config
         self.snakefile = snakefile
-        self.pipeline = pipeline
+        self.workflow = workflow
         self.verbose = verbose
         self.logo = logo
         self.options = dynamic_run_options
@@ -41,7 +41,7 @@ class RunApp(DynamicTyper):
         self.register_command(
             self.run,
             dynamic_options=self.options,
-            help="Run the pipeline.\n\nAll unrecognized arguments are passed onto Snakemake.",
+            help="Run the workflow.\n\nAll unrecognized arguments are passed onto Snakemake.",
             context_settings={
                 "allow_extra_args": True,
                 "ignore_unknown_options": True,
@@ -68,7 +68,7 @@ class RunApp(DynamicTyper):
         self,
         ctx: typer.Context,
         target: str = typer.Argument(
-            None, help="File(s) to generate. If None will run the pipeline 'all' rule."
+            None, help="File(s) to generate. If None will run the workflow 'all' rule."
         ),
         configfile: Path = typer.Option(
             None,
@@ -81,7 +81,7 @@ class RunApp(DynamicTyper):
             [],
             "--resource",
             "-r",
-            help="Additional resources to copy to workdir at run time (relative to pipeline directory).",
+            help="Additional resources to copy to workdir at run time (relative to workflow directory).",
         ),
         profile: Optional[str] = typer.Option(
             None,
@@ -93,7 +93,7 @@ class RunApp(DynamicTyper):
             False,
             "--force",
             "-f",
-            help="Force the execution of pipeline regardless of already created output.",
+            help="Force the execution of workflow regardless of already created output.",
         ),
         dry: bool = typer.Option(
             False,
@@ -108,13 +108,13 @@ class RunApp(DynamicTyper):
             False,
             "--keep-resources",
             "-R",
-            help="Keep resources after pipeline completes.",
+            help="Keep resources after workflow completes.",
         ),
         keep_snakemake: bool = typer.Option(
             False,
             "--keep-snakemake",
             "-S",
-            help="Keep .snakemake folder after pipeline completes.",
+            help="Keep .snakemake folder after workflow completes.",
         ),
         dag: Optional[Path] = typer.Option(
             None,
@@ -133,7 +133,7 @@ class RunApp(DynamicTyper):
             False,
             "--verbose",
             "-v",
-            help="Run pipeline in verbose mode.",
+            help="Run workflow in verbose mode.",
         ),
         help_snakemake: Optional[bool] = typer.Option(
             False,
@@ -146,18 +146,18 @@ class RunApp(DynamicTyper):
         ),
     ):
         """
-        Run the pipeline.
+        Run the workflow.
         Args:
-          target (str): File to generate. If None will run the pipeline 'all' rule.
+          target (str): File to generate. If None will run the workflow 'all' rule.
           configfile (Path): Path to snakemake config file. Overrides existing config and defaults.
           resource (List[Path]): Additional resources to copy to workdir at run time.
           keep_resources (bool): Keep resources.
           cleanup_snakemake (bool): Keep .snakemake folder.
           cores (int): Set the number of cores to use. If None will use all cores.
-          verbose (bool): Run pipeline in verbose mode.
+          verbose (bool): Run workflow in verbose mode.
           help_snakemake (bool): Print the snakemake help and exit.
         Side Effects:
-          Runs the pipeline.
+          Runs the workflow.
         Examples:
           >>> CLI.run(target='my_target', configfile=Path('/path/to/config.yaml'), resource=[Path('/path/to/resource')], verbose=True)
         """
@@ -188,12 +188,12 @@ class RunApp(DynamicTyper):
             args.append(f"--snakefile={self.snakefile}")
 
         if not configfile:
-            configfile = get_config_from_pipeline_dir(self.pipeline.path)
+            configfile = get_config_from_workflow_dir(self.workflow.path)
         if configfile:
             args.append(f"--configfile={configfile}")
 
         if profile:
-            found_profile = [p for p in self.pipeline.profiles if profile == p.name]
+            found_profile = [p for p in self.workflow.profiles if profile == p.name]
             if found_profile:
                 profile = found_profile[0]
             args.append(f"--profile={profile}")
@@ -253,7 +253,7 @@ class RunApp(DynamicTyper):
         if not keep_snakemake and Path(".snakemake").exists():
             keep_snakemake = True
         try:
-            self.snk_config.add_resources(resource, self.pipeline.path)
+            self.snk_config.add_resources(resource, self.workflow.path)
         except FileNotFoundError as e:
             self.error(str(e))
         with self._copy_resources(
@@ -361,7 +361,7 @@ class RunApp(DynamicTyper):
             else:
                 os.remove(resource)
 
-        resources_folder = self.pipeline.path / "resources"
+        resources_folder = self.workflow.path / "resources"
         if resources_folder.exists():
             resources.insert(0, Path("resources"))
         if self.verbose and resources:
@@ -371,7 +371,7 @@ class RunApp(DynamicTyper):
             )
         try:
             for resource in resources:
-                abs_path = self.pipeline.path / resource
+                abs_path = self.workflow.path / resource
                 destination = Path(".") / resource.name
                 if not destination.exists():
                     # make sure you don't delete files that are already there...

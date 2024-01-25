@@ -20,7 +20,7 @@ class DynamicTyper:
         Side Effects:
           Invokes the CLI.
         Examples:
-          >>> CLI(Path('/path/to/pipeline'))()
+          >>> CLI(Path('/path/to/workflow'))()
         """
         self.app()
 

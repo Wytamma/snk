@@ -4,7 +4,7 @@ title: ENV
 
 # The CLI ENV command 
 
-The `env` subcommand in the `pipeline` tool allows you to access and manage the conda environments used within the pipeline. This guide provides an overview of the available options and commands for working with pipeline environments.
+The `env` subcommand in the `workflow` tool allows you to access and manage the conda environments used within the workflow. This guide provides an overview of the available options and commands for working with workflow environments.
 
 ## Options
 
@@ -12,53 +12,53 @@ The `env` subcommand in the `pipeline` tool allows you to access and manage the 
 
 ## Commands
 
-The `env` subcommand provides several commands to manage the pipelines conda environments.
+The `env` subcommand provides several commands to manage the workflows conda environments.
 
 ### `activate`
 
-Activate a pipeline conda environment.
+Activate a workflow conda environment.
 
 ```bash
-pipeline env activate [OPTIONS] ENV_NAME
+workflow env activate [OPTIONS] ENV_NAME
 ```
 
 - `ENV_NAME`: Name of the environment to activate.
 
-This command activates the specified conda environment within the pipeline.
+This command activates the specified conda environment within the workflow.
 
 ### `create`
 
 Create all conda environments.
 
 ```bash
-pipeline env create [OPTIONS]
+workflow env create [OPTIONS]
 ```
 
 This command creates all the conda environments specified in the `envs` dir.
 
 ### `list`
 
-List the environments in the pipeline.
+List the environments in the workflow.
 
 ```bash
-pipeline env list [OPTIONS]
+workflow env list [OPTIONS]
 ```
 
-This command lists all the conda environments present in the pipeline.
+This command lists all the conda environments present in the workflow.
 
 ### `prune`
 
 Delete all conda environments.
 
 ```bash
-pipeline env prune [OPTIONS]
+workflow env prune [OPTIONS]
 ```
 
-This command deletes all the conda environments in the pipeline.
+This command deletes all the conda environments in the workflow.
 
 ### `run`
 
-The `env run` command in the `pipeline` tool allows you to run a command within one of the pipeline environments. This guide provides an overview of the available options and arguments for the `env run` command.
+The `env run` command in the `workflow` tool allows you to run a command within one of the workflow environments. This guide provides an overview of the available options and arguments for the `env run` command.
 
 #### Arguments
 
@@ -71,10 +71,10 @@ The `env run` command in the `pipeline` tool allows you to run a command within 
 
 #### Usage
 
-To run a command in one of the pipeline environments, use the following command format:
+To run a command in one of the workflow environments, use the following command format:
 
 ```bash
-pipeline env run --env ENV_NAME CMD...
+workflow env run --env ENV_NAME CMD...
 ```
 
 - `CMD...`: The command and its arguments to execute within the specified environment.
@@ -83,26 +83,26 @@ Make sure to replace `ENV_NAME` with the actual name of the desired environment,
 
 #### Example
 
-Here's an example command that demonstrates the usage of `pipeline env run`:
+Here's an example command that demonstrates the usage of `workflow env run`:
 
 ```bash
-pipeline env run -e my_environment "python script.py --input input_file.txt --output output_file.txt"
+workflow env run -e my_environment "python script.py --input input_file.txt --output output_file.txt"
 ```
 
-This command runs the `python script.py --input input_file.txt --output output_file.txt` command within the `my_environment` environment in the pipeline. Adjust the command and environment name according to your specific use case.
+This command runs the `python script.py --input input_file.txt --output output_file.txt` command within the `my_environment` environment in the workflow. Adjust the command and environment name according to your specific use case.
 
 
 - `ENV_NAME`: Name of the environment in which to run the command.
 - `COMMAND [ARGS]...`: The command and its arguments to execute within the specified environment.
 
-This command runs the provided command within the specified conda environment in the pipeline.
+This command runs the provided command within the specified conda environment in the workflow.
 
 ### `show`
 
 Show the environments config file contents.
 
 ```bash
-pipeline env show [OPTIONS]
+workflow env show [OPTIONS]
 ```
 
-This command displays the contents of the environments configuration file used in the pipeline.
+This command displays the contents of the environments configuration file used in the workflow.
