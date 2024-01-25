@@ -7,36 +7,36 @@ import typer
 
 from snk.cli.dynamic_typer import DynamicTyper
 from snk.cli.workflow import create_workflow
-from snk.pipeline import Pipeline
+from snk.workflow import Workflow
 from rich.console import Console
 from rich.syntax import Syntax
 from snakemake.deployment.conda import Conda, Env
-from snk.cli.config.config import get_config_from_pipeline_dir
+from snk.cli.config.config import get_config_from_workflow_dir
 
 
 class ScriptApp(DynamicTyper):
     def __init__(
         self,
-        pipeline: Pipeline,
+        workflow: Workflow,
         conda_prefix_dir: Path,
         snakemake_config,
         snakefile: Path,
     ):
-        self.pipeline = pipeline
+        self.workflow = workflow
         self.conda_prefix_dir = conda_prefix_dir
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
-        self.configfile = get_config_from_pipeline_dir(self.pipeline.path)
-        self.register_command(self.list, help="List the scripts in the pipeline.")
+        self.configfile = get_config_from_workflow_dir(self.workflow.path)
+        self.register_command(self.list, help="List the scripts in the workflow.")
         self.register_command(
             self.show, help="Show the contents of a script."
         )
         self.register_command(
             self.run, 
             help=f"""
-            Run a script from the pipeline.
+            Run a script from the workflow.
             \n\nThe executor for the script is inferred from the suffix.
-            \n\nExample: {self.pipeline.name} script run --env=python script.py
+            \n\nExample: {self.workflow.name} script run --env=python script.py
             \n\nTo pass help to the script, use `-- --help`.""",
             context_settings={"ignore_unknown_options": True, "allow_extra_args": True},
         )
@@ -45,24 +45,24 @@ class ScriptApp(DynamicTyper):
             self, 
             verbose: bool = typer.Option(False, "--verbose", "-v", help="Show profiles as paths."), 
         ):
-        number_of_scripts = len(self.pipeline.scripts)  
+        number_of_scripts = len(self.workflow.scripts)  
         typer.echo(
             f"Found {number_of_scripts} script{'' if number_of_scripts == 1 else 's'}:"
         )
-        for script in self.pipeline.scripts:
+        for script in self.workflow.scripts:
             filename = typer.style(script.name, fg=typer.colors.GREEN)
             if verbose:
                 filename = typer.style(script, fg=typer.colors.YELLOW)
             typer.echo(f"- {script.stem} ({filename})")
 
     def _get_script_path(self, name: str) -> Path:
-        script = [e for e in self.pipeline.scripts if e.name == name or e.stem == name]
+        script = [e for e in self.workflow.scripts if e.name == name or e.stem == name]
         if not script:
             self.error(f"Script {name} not found!")
         return script[0]
 
     def _get_conda_env_path(self, name: str) -> Path:
-        env = [e for e in self.pipeline.environments if e.stem == name]
+        env = [e for e in self.workflow.environments if e.stem == name]
         if not env:
             self.error(f"Environment {name} not found!")
         return env[0]

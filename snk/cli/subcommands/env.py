@@ -8,26 +8,26 @@ import typer
 
 from snk.cli.dynamic_typer import DynamicTyper
 from snk.cli.workflow import create_workflow
-from snk.pipeline import Pipeline
+from snk.workflow import Workflow
 from rich.console import Console
 from rich.syntax import Syntax
 from snakemake.deployment.conda import Conda, Env, CreateCondaEnvironmentException
-from snk.cli.config.config import get_config_from_pipeline_dir
+from snk.cli.config.config import get_config_from_workflow_dir
 
 
 class EnvApp(DynamicTyper):
     def __init__(
         self,
-        pipeline: Pipeline,
+        workflow: Workflow,
         conda_prefix_dir: Path,
         snakemake_config,
         snakefile: Path,
     ):
-        self.pipeline = pipeline
+        self.workflow = workflow
         self.conda_prefix_dir = conda_prefix_dir
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
-        self.configfile = get_config_from_pipeline_dir(self.pipeline.path)
+        self.configfile = get_config_from_workflow_dir(self.workflow.path)
         self.workflow = create_workflow(
             self.snakefile,
             config=self.snakemake_config,
@@ -35,15 +35,15 @@ class EnvApp(DynamicTyper):
             use_conda=True,
             conda_prefix=self.conda_prefix_dir.resolve(),
         )
-        self.register_command(self.list, help="List the environments in the pipeline.")
+        self.register_command(self.list, help="List the environments in the workflow.")
         self.register_command(
             self.show, help="Show the contents of an environment."
         )
         self.register_command(
-            self.run, help="Run a command in one of the pipeline environments."
+            self.run, help="Run a command in one of the workflow environments."
         )
         self.register_command(
-            self.activate, help="Activate a pipeline conda environment."
+            self.activate, help="Activate a workflow conda environment."
         )
         self.register_command(self.prune, help="Delete all conda environments.")
         self.register_command(self.create, help="Create all conda environments.")
@@ -52,18 +52,18 @@ class EnvApp(DynamicTyper):
             self,
             verbose: bool = typer.Option(False, "--verbose", "-v", help="Show profiles as paths."), 
         ):
-        number_of_environments = len(self.pipeline.environments)
+        number_of_environments = len(self.workflow.environments)
         typer.echo(
             f"Found {number_of_environments} environment{'' if number_of_environments == 1 else 's'}:"
         )
-        for env in self.pipeline.environments:
+        for env in self.workflow.environments:
             if verbose:
                 typer.echo(f"- {typer.style(env, fg=typer.colors.YELLOW)}")
             else:
                 typer.echo(f"- {env.stem}")
 
     def _get_conda_env_path(self, name: str) -> Path:
-        env = [e for e in self.pipeline.environments if e.stem == name]
+        env = [e for e in self.workflow.environments if e.stem == name]
         if not env:
             self.error(f"Environment {name} not found!")
         return env[0]
@@ -112,7 +112,7 @@ class EnvApp(DynamicTyper):
             self.log(f"Deleted {self.conda_prefix_dir}")
 
     def create(self):
-        for env_path in self.pipeline.environments:
+        for env_path in self.workflow.environments:
             env = Env(self.workflow, env_file=env_path.resolve())
             try:
                 env.create()

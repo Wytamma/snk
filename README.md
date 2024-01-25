@@ -13,7 +13,7 @@
 
 ---
 
-Snk (pronounced snek) is a Snakemake workflow management system. Snk allows you to install Snakemake workflows as dynamically generated Command Line Interfaces (CLIs). Using a pipeline as a CLI increases its interoperability and allows complex pipelines to be used as modular components in a larger system.
+Snk (pronounced snek) is a Snakemake workflow management system. Snk allows you to install Snakemake workflows as dynamically generated Command Line Interfaces (CLIs). Using a workflow as a CLI increases its interoperability and allows complex workflows to be used as modular components in a larger system.
 
 ## Installation
 
@@ -23,9 +23,9 @@ pip install snk
 
 ## Basic Use
 
-### Install a pipeline as a CLI
+### Install a workflow as a CLI
 
-Install the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) pipeline (v2.1.1) as `variant-calling`.
+Install the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling`.
 
 ```
 snk install snakemake-workflows/dna-seq-gatk-variant-calling --name variant-calling -t v2.1.1
@@ -49,7 +49,7 @@ variant-calling run -h
 
 ### Create a DAG
 
-Here we use the `.test` resources included in the pipeline to create the DAG.
+Here we use the `.test` resources included in the workflow to create the DAG.
 
 ```
 variant-calling run -r .test/config -r .test/data --dag dag.pdf
@@ -65,7 +65,7 @@ Snk will dynamically generate config options for the CLI. For example if your co
 variant-calling run --fasta example.fa
 ```
 
-You can also configure the pipeline using a config file. 
+You can also configure the workflow using a config file. 
 
 ```
 variant-calling config --pretty # print the config 

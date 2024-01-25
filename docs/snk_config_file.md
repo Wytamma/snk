@@ -4,7 +4,7 @@ title: Snk Config File
 
 # Snk Configuration File
 
-The `snk.yaml` file serves as the main interface for configuring the Snk pipeline CLI. Users can tailor the pipeline's settings, specify required resources, and control the appearance of the command line interface by setting various options in the `snk.yaml` file.
+The `snk.yaml` file serves as the main interface for configuring the Snk workflow CLI. Users can tailor the workflow's settings, specify required resources, and control the appearance of the command line interface by setting various options in the `snk.yaml` file.
 
 ## Available Configuration Options
 
@@ -14,18 +14,18 @@ The following options are available for configuration in `snk.yaml`:
 - `art`: A string representing ASCII art to display in the CLI (overwrites `logo`).
 - `tagline`: A string representing the tagline displayed in the CLI.
 - `font`: A string representing the font used in the CLI.
-- `resources`: A list of resource files required for the pipeline.
-- `cli`: Annotations for the pipeline cli parameters.
+- `resources`: A list of resource files required for the workflow.
+- `cli`: Annotations for the workflow cli parameters.
 - `symlink_resources`: A boolean that controls whether symbolic links are created for resources.
-- `conda`: A boolean that controls whether the pipeline should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available.
+- `conda`: A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available.
 
 ## Example `snk.yaml` File
 
 Below is an example of a `snk.yaml` file illustrating all available options:
 
 ```yaml
-logo: "MyPipeline"
-tagline: "A pipeline to illustrate the use of snk.yaml"
+logo: "MyWorkflow"
+tagline: "A workflow to illustrate the use of snk.yaml"
 font: "cybermedium"
 resources:
   - "data/input1.txt"
@@ -39,15 +39,15 @@ cli:
 
 In this example:
 
-- The pipeline logo is set to "MyPipeline".
-- The tagline is "A pipeline to illustrate the use of snk.yaml".
+- The workflow logo is set to "MyWorkflow".
+- The tagline is "A workflow to illustrate the use of snk.yaml".
 - The font used in the CLI is "cybermedium".
-- Two resource files, "data/input1.txt" and "data/input2.txt", are required for the pipeline.
+- Two resource files, "data/input1.txt" and "data/input2.txt", are required for the workflow.
 - An annotation is provided for the `input` parameter, which is of type `str` and comes with a help message "Path to the input file".
 
 ## CLI
 
-Annotations play a crucial role in configuring the dynamic Snk CLI. They provide metadata about the configuration parameters used in your Snakemake pipeline and can dictate how the CLI will prompt users for these parameters. The `snk.yaml` file supports the following fields under `annotations`:
+Annotations play a crucial role in configuring the dynamic Snk CLI. They provide metadata about the configuration parameters used in your Snakemake workflow and can dictate how the CLI will prompt users for these parameters. The `snk.yaml` file supports the following fields under `annotations`:
 
 - `type`: Determines the datatype of the configuration parameter. It can be one of the following: `int`, `str`, `path`, `bool`, `list`, `list[str]`, `list[path]`, or `list[int]`.
 - `help`: This is a descriptive text that provides users with information or guidance on what the parameter is used for.
@@ -85,16 +85,16 @@ In this example, the `input` and `count` parameters are required, while the `tex
 
 ## Resources
 
-Resources represent files or folders that are essential for the execution of the pipeline. They must be present in the pipeline's working directory at runtime. The `snk.yaml` configuration file allows you to specify these resources.
+Resources represent files or folders that are essential for the execution of the workflow. They must be present in the workflow's working directory at runtime. The `snk.yaml` configuration file allows you to specify these resources.
 
-When the pipeline is invoked with the `run` command, the Snk CLI will ensure that the specified resources are available in the working directory. It accomplishes this by either copying the resource files or creating symbolic links (symlinks) to them. The method used depends on the value of the `symlink_resources` option in the `snk.yaml` file. If `symlink_resources` is set to `true`, symlinks will be used. Otherwise, the files will be copied.
+When the workflow is invoked with the `run` command, the Snk CLI will ensure that the specified resources are available in the working directory. It accomplishes this by either copying the resource files or creating symbolic links (symlinks) to them. The method used depends on the value of the `symlink_resources` option in the `snk.yaml` file. If `symlink_resources` is set to `true`, symlinks will be used. Otherwise, the files will be copied.
 
 !!! warning
 
-    You should only set `symlink_resources` to `true` if the pipeline won't modify these resources. Any modifications to symlinked resources will be system-wide!
+    You should only set `symlink_resources` to `true` if the workflow won't modify these resources. Any modifications to symlinked resources will be system-wide!
 
 
-Once the pipeline has successfully completed, the Snk CLI will clean up the working directory by deleting the copied resources or unlinking the symlinks.
+Once the workflow has successfully completed, the Snk CLI will clean up the working directory by deleting the copied resources or unlinking the symlinks.
 
 ### Example `snk.yaml` File with Resources
 
@@ -107,4 +107,4 @@ resources:
 symlink_resources: true
 ```
 
-In this example, `data/input1.txt` and `data/input2.txt` are listed as required resources for the pipeline. The `symlink_resources` option is set to `true`, meaning that symlinks to these files will be created in the working directory when the pipeline is run. The symlinks will be removed once the pipeline execution has successfully completed.
+In this example, `data/input1.txt` and `data/input2.txt` are listed as required resources for the workflow. The `symlink_resources` option is set to `true`, meaning that symlinks to these files will be created in the working directory when the workflow is run. The symlinks will be removed once the workflow execution has successfully completed.

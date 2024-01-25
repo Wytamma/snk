@@ -3,25 +3,25 @@ import typer
 
 from snk.cli.dynamic_typer import DynamicTyper
 from snk.cli.options.option import Option
-from snk.pipeline import Pipeline
+from snk.workflow import Workflow
 
 
 class ConfigApp(DynamicTyper):
-    def __init__(self, pipeline: Pipeline, options: List[Option]):
+    def __init__(self, workflow: Workflow, options: List[Option]):
         """
         Initializes the ConfigApp class.
         Args:
-            pipeline (Pipeline): The pipeline to configure.
+            workflow (Workflow): The workflow to configure.
         """
         self.options = options
-        self.pipeline = pipeline
-        self.register_command(self.config, help="Show the pipeline configuration.")
+        self.workflow = workflow
+        self.register_command(self.config, help="Show the workflow configuration.")
 
     def config(
         self, ctx: typer.Context, pretty: bool = typer.Option(False, "--pretty", "-p")
     ):
         """
-        Prints the configuration for the pipeline.
+        Prints the configuration for the workflow.
         Args:
             pretty (bool, optional): Whether to print the configuration in a pretty format. Defaults to False.
         Returns:

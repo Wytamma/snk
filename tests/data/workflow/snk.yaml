@@ -43,8 +43,8 @@ annotations:
       default: null
       help: "A null to test"
 symlink_resources: true
-logo: "MyPipeline"
-tagline: "\nA pipeline to test the pipeline logo and tagline"
+logo: "MyWorkflow"
+tagline: "\nA workflow to test the workflow logo and tagline"
 font: "cybermedium"
 version: "things/__about__.py"
 conda: false

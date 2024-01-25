@@ -5,8 +5,8 @@
 .snakemake
 reads
 Note.md
-tests/data/pipeline/bin/pipeline
+tests/data/workflow/bin/workflow
 hello.txt
 __pycache__
-tests/data/pipeline/.conda
+tests/data/workflow/.conda
 .DS_Store

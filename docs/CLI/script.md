@@ -4,11 +4,11 @@ title: SCRIPT
 
 # Script Commands
 
-The script commands allow you to interact with the pipeline scripts. Scripts must be located in the `scripts` directory of the pipeline.
+The script commands allow you to interact with the workflow scripts. Scripts must be located in the `scripts` directory of the workflow.
 
 ## List
 
-The list command will list all scripts in the pipeline.
+The list command will list all scripts in the workflow.
 
 ```bash
 snk script list

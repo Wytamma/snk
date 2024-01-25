@@ -4,7 +4,7 @@ from snk.cli.config.config import SnkConfig
 
 def test_snk_config_creation():
     snk_config = SnkConfig()
-    assert snk_config.tagline == "A Snakemake pipeline CLI generated with Snk"
+    assert snk_config.tagline == "A Snakemake workflow CLI generated with Snk"
     assert snk_config.font == "small"
     assert snk_config.resources == []
     assert snk_config.cli == {}
@@ -68,7 +68,7 @@ def test_from_dir_with_existing_file(tmp_path):
     config_file = tmp_path / ".snk"
     config_file.touch()
     config_file.write_text("logo: test_logo")
-    snk_config = SnkConfig.from_pipeline_dir(tmp_path)
+    snk_config = SnkConfig.from_workflow_dir(tmp_path)
     assert snk_config._snk_config_path == config_file
 
 

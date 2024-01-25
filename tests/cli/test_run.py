@@ -10,7 +10,7 @@ def test_config_override(local_runner: CLIRunner):
             "--text",
             "passed from the cli to overwrite config",
             "--config",
-            "tests/data/pipeline/config.yaml",
+            "tests/data/workflow/config.yaml",
             "-f",
         ]
     )
