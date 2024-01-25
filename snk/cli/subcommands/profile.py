@@ -27,15 +27,15 @@ class ProfileApp(DynamicTyper):
         )
         for profile in self.pipeline.profiles:
             if verbose:
-                typer.echo(f"- {typer.style(profile, fg=typer.colors.YELLOW)}")
+                typer.echo(f"- {typer.style(profile / 'config.yaml', fg=typer.colors.YELLOW)}")
             else:
                 typer.echo(f"- {profile.stem}")
     
     def _get_profile_path(self, name: str) -> Path:
-        profile = [e for e in self.pipeline.profiles if e.name == name or e.stem == name]
+        profile = [p for p in self.pipeline.profiles if p.name == name or p.stem == name]
         if not profile:
             self.error(f"Profile {name} not found!")
-        return profile[0]
+        return profile[0] / "config.yaml"
     
     def show(
         self, 

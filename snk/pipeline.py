@@ -109,7 +109,7 @@ class Pipeline:
     def profiles(self):
         pipeline_profile_dir = self._find_folder("profiles")
         if pipeline_profile_dir:
-            return [p for p in pipeline_profile_dir.glob("*") if p.is_dir()]
+            return [p for p in pipeline_profile_dir.glob("*") if p.is_dir() and (p / "config.yaml").exists()]
         return []
 
     @property
