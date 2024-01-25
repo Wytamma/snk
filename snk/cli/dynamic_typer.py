@@ -121,7 +121,8 @@ class DynamicTyper:
             default=typer.Option(
                 ... if option.required else option.default,
                 *[option.flag, option.short_flag] if option.short else [],
-                help=f"[CONFIG] {option.help}",
+                help=f"{option.help}",
+                rich_help_panel="Workflow Configuration",
             ),
             annotation=option.type,
         )
