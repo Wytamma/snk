@@ -14,3 +14,5 @@ class Option:
     short: Optional[str]
     flag: str
     short_flag: Optional[str]
+    hidden: bool = False
+    from_annotation: bool = False

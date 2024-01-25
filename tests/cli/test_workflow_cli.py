@@ -1,8 +1,9 @@
 from pathlib import Path
+from snk.cli.config.config import SnkConfig
 from snk.cli.utils import flatten, convert_key_to_snakemake_format
 import snakemake
 import pytest
-from ..utils import CLIRunner
+from ..utils import CLIRunner, gen_dynamic_runner_fixture
 
 
 def test_flatten(example_config: Path):
@@ -70,3 +71,17 @@ def test_dag(local_runner: CLIRunner, tmp_path, filetype):
     res = local_runner(["run", "--dag", f"{tmp_path}/dag.{filetype}"])
     assert res.code == 0, res.stderr
     assert Path(f"{tmp_path}/dag.{filetype}").exists()
+
+
+def test_hidden_option(local_runner: CLIRunner):
+    res = local_runner(["run", "--help"])
+    assert res.code == 0, res.stderr
+    assert "hidden" not in res.stdout, res.stderr
+    assert "visible" in res.stdout, res.stderr
+
+@gen_dynamic_runner_fixture({"missing": True}, SnkConfig(skip_missing=True, cli={"visible": {"help": "visible"}}))
+def test_skip_missing(dynamic_runner: CLIRunner):
+    res = dynamic_runner(["run", "--help"])
+    assert res.code == 0, res.stderr
+    assert "missing" not in res.stdout, res.stderr
+    assert "visible" in res.stdout, res.stderr

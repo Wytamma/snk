@@ -1,4 +1,8 @@
 annotations:
+  hidden:
+    hidden: true
+  visible:
+    hidden: false
   no_run:
     default: False
     type: bool

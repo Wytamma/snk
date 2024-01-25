@@ -8,8 +8,9 @@ def test_snk_config_creation():
     assert snk_config.font == "small"
     assert snk_config.resources == []
     assert snk_config.cli == {}
-    assert snk_config.symlink_resources == False
-    assert snk_config.version == None
+    assert snk_config.symlink_resources is False
+    assert snk_config.version is None
+    assert snk_config.skip_missing is False
 
 
 def test_validate_resources_with_existing_files(tmp_path):

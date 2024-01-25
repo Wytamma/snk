@@ -19,6 +19,7 @@ class SnkConfig:
     version: Optional[str] = None
     conda: bool = True
     resources: List[Path] = field(default_factory=list)
+    skip_missing: bool = False # skip any missing cli options (i.e. those not in the snk file)
     cli: dict = field(default_factory=dict)
     symlink_resources: bool = False
     _snk_config_path: Path = None
