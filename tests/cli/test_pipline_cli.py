@@ -27,7 +27,7 @@ def test_convert_key_to_snakemake_format(key, value, expected):
 def test_help(local_runner: CLIRunner):
     res = local_runner(["--help"])
     assert res.code == 0, res.stderr
-    assert "Usage:" in res.stdout
+    assert "Usage: pipeline [OPTIONS] COMMAND [ARGS]..." in res.stdout
 
 def test_version(local_runner: CLIRunner):
     res = local_runner(["--version"])

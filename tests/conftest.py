@@ -65,6 +65,6 @@ def print_config_runner(tmp_path_factory):
     (path / "home").mkdir()
     (path / "bin").mkdir()
     nest = Nest(path / "home", path / "bin")
-    local_pipeline = nest.install("tests/data/print_value", editable=True)
+    local_pipeline = nest.install("tests/data/print_config", editable=True)
     runner = CLIRunner([local_pipeline.executable])
     return runner

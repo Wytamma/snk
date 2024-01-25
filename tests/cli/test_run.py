@@ -28,11 +28,11 @@ def test_config(print_config_runner: CLIRunner):
     res = print_config_runner(["run"])
     assert res.code == 0, res.stderr
     assert "snk" in res.stdout
-    res = print_config_runner(["run", "--config", "tests/data/print_value/config.yaml"])
+    res = print_config_runner(["run", "--config", "tests/data/print_config/config.yaml"])
     assert res.code == 0, res.stderr
     assert "config" in res.stdout
     res = print_config_runner(
-        ["run", "--config", "tests/data/print_value/config.yaml", "--value", "cli"]
+        ["run", "--config", "tests/data/print_config/config.yaml", "--value", "cli"]
     )
     assert res.code == 0, res.stderr
     assert "cli" in res.stdout
