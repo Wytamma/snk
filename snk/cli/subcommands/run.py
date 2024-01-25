@@ -67,9 +67,6 @@ class RunApp(DynamicTyper):
     def run(
         self,
         ctx: typer.Context,
-        target: str = typer.Argument(
-            None, help="File(s) to generate. If None will run the pipeline 'all' rule."
-        ),
         configfile: Path = typer.Option(
             None,
             "--config",
@@ -104,18 +101,6 @@ class RunApp(DynamicTyper):
         lock: bool = typer.Option(
             False, "--lock", "-l", help="Lock the working directory."
         ),
-        keep_resources: bool = typer.Option(
-            False,
-            "--keep-resources",
-            "-R",
-            help="Keep resources after pipeline completes.",
-        ),
-        keep_snakemake: bool = typer.Option(
-            False,
-            "--keep-snakemake",
-            "-S",
-            help="Keep .snakemake folder after pipeline completes.",
-        ),
         dag: Optional[Path] = typer.Option(
             None,
             "--dag",
@@ -135,6 +120,16 @@ class RunApp(DynamicTyper):
             "-v",
             help="Run pipeline in verbose mode.",
         ),
+        keep_resources: bool = typer.Option(
+            False,
+            "--keep-resources",
+            help="Keep resources after pipeline completes.",
+        ),
+        keep_snakemake: bool = typer.Option(
+            False,
+            "--keep-snakemake",
+            help="Keep .snakemake folder after pipeline completes.",
+        ),
         help_snakemake: Optional[bool] = typer.Option(
             False,
             "--help-snakemake",
@@ -148,7 +143,6 @@ class RunApp(DynamicTyper):
         """
         Run the pipeline.
         Args:
-          target (str): File to generate. If None will run the pipeline 'all' rule.
           configfile (Path): Path to snakemake config file. Overrides existing config and defaults.
           resource (List[Path]): Additional resources to copy to workdir at run time.
           keep_resources (bool): Keep resources.
@@ -175,8 +169,6 @@ class RunApp(DynamicTyper):
                 f"--cores={cores}",
             ]
         )
-        if target:
-            ctx.args.append(target)
         if self.singularity_prefix_dir and "--use-singularity" in ctx.args:
             # only set prefix if --use-singularity is explicitly called
             args.append(f"--singularity-prefix={self.singularity_prefix_dir}")
@@ -207,7 +199,8 @@ class RunApp(DynamicTyper):
             )
 
         if conda_found and self.snk_config.conda:
-            args.extend([
+            args.extend(
+                [
                     "--use-conda",
                     f"--conda-prefix={self.conda_prefix_dir}",
                 ]
@@ -227,7 +220,7 @@ class RunApp(DynamicTyper):
 
         if force:
             args.append("--forceall")
-        
+
         if dry:
             args.append("--dryrun")
 
@@ -300,7 +293,9 @@ class RunApp(DynamicTyper):
             if "snakemake_dag" not in snakemake_output:
                 self.error("Could not generate dag!", exit=True)
             # discard everything before digraph snakemake_dag
-            filtered_lines = "digraph snakemake_dag" + snakemake_output.split("snakemake_dag")[1]
+            filtered_lines = (
+                "digraph snakemake_dag" + snakemake_output.split("snakemake_dag")[1]
+            )
             echo_process = subprocess.Popen(
                 ["echo", filtered_lines], stdout=subprocess.PIPE
             )
@@ -395,6 +390,7 @@ class RunApp(DynamicTyper):
                         )
                     remove_resource(copied_resource)
 
+
 def check_command_available(command: str):
     """
     Check if a command is available.
@@ -410,13 +406,12 @@ def check_command_available(command: str):
     return shutil.which(command) is not None
 
 
-
 def parse_config_monkeypatch(args):
     """Monkeypatch the parse_config function from snakemake."""
     import yaml
     import snakemake
     import re
-    
+
     class NoDatesSafeLoader(yaml.SafeLoader):
         @classmethod
         def remove_implicit_resolver(cls, tag_to_remove):
@@ -429,16 +424,16 @@ def parse_config_monkeypatch(args):
             go on to serialise as json which doesn't have the advanced types
             of yaml, and leads to incompatibilities down the track.
             """
-            if 'yaml_implicit_resolvers' not in cls.__dict__:
+            if "yaml_implicit_resolvers" not in cls.__dict__:
                 cls.yaml_implicit_resolvers = cls.yaml_implicit_resolvers.copy()
 
             for first_letter, mappings in cls.yaml_implicit_resolvers.items():
-                cls.yaml_implicit_resolvers[first_letter] = [(tag, regexp) 
-                                                            for tag, regexp in mappings
-                                                            if tag != tag_to_remove]
+                cls.yaml_implicit_resolvers[first_letter] = [
+                    (tag, regexp) for tag, regexp in mappings if tag != tag_to_remove
+                ]
 
-    NoDatesSafeLoader.remove_implicit_resolver('tag:yaml.org,2002:timestamp')
-    
+    NoDatesSafeLoader.remove_implicit_resolver("tag:yaml.org,2002:timestamp")
+
     def _yaml_safe_load(s):
         """Load yaml string safely."""
         s = s.replace(": None", ": null")
