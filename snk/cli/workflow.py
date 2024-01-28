@@ -161,8 +161,12 @@ def create_workflow(
         container_img_path: Path = None
         aux_path: Path = None
 
-    workflow.persistence = PersistenceMock(
+    persistence = PersistenceMock(
         conda_env_path=Path(conda_prefix).resolve() if conda_prefix else None,
         conda_env_archive_path=os.path.join(Path(".snakemake"), "conda-archive"),
     )
+    if hasattr(workflow, "_persistence"):
+        workflow._persistence = persistence
+    else:
+        workflow.persistence = persistence
     return workflow

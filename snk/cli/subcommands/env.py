@@ -3,7 +3,7 @@ import shutil
 import subprocess
 from pathlib import Path
 import sys
-from typing import List, Optional
+from typing import List
 import typer
 
 from snk.cli.dynamic_typer import DynamicTyper
@@ -28,7 +28,7 @@ class EnvApp(DynamicTyper):
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
         self.configfile = get_config_from_workflow_dir(self.workflow.path)
-        self.workflow = create_workflow(
+        self.snakemake_workflow = create_workflow(
             self.snakefile,
             config=self.snakemake_config,
             configfiles=[self.configfile] if self.configfile else None,
@@ -95,7 +95,7 @@ class EnvApp(DynamicTyper):
         cmd: List[str] = typer.Argument(..., help="The command to run in environment."),
     ):
         env_path = self._get_conda_env_path(name)
-        env = Env(self.workflow, env_file=env_path.resolve())
+        env = Env(self.snakemake_workflow, env_file=env_path.resolve())
         env.create()
         cmd = self._shellcmd(env.address, " ".join(cmd))
         subprocess.run(cmd, shell=True, env=os.environ.copy())
@@ -113,7 +113,7 @@ class EnvApp(DynamicTyper):
 
     def create(self):
         for env_path in self.workflow.environments:
-            env = Env(self.workflow, env_file=env_path.resolve())
+            env = Env(self.snakemake_workflow, env_file=env_path.resolve())
             try:
                 env.create()
             except CreateCondaEnvironmentException:
@@ -126,7 +126,7 @@ class EnvApp(DynamicTyper):
     ):
         env_path = self._get_conda_env_path(name)
         self.log(f"Activating {name} environment... (type 'exit' to deactivate)")
-        env = Env(self.workflow, env_file=env_path.resolve())
+        env = Env(self.snakemake_workflow, env_file=env_path.resolve())
         env.create()
         user_shell = os.environ.get("SHELL", "/bin/sh")
         activate_cmd = self._shellcmd(env.address, user_shell)
