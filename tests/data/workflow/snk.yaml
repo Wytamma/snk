@@ -1,50 +1,56 @@
-annotations:
+art: null
+cli:
   hidden:
     hidden: true
-  visible:
-    hidden: false
   no_run:
-    default: False
-    type: bool
-    help: "A boolean to test"
+    default: false
+    help: A boolean to test
     short: b
+    type: bool
   null_annotation:
     default: null
-  times: 
-    default: 1
-    type: int
-    help: Number of times to repeat the message
-  text:
-    default: "Hi from snk.yaml!"
-    type: str
-    help: "A string to save to a file"
   test:
-    test_bool:
-      default: true
-      type: bool
-      help: "A boolean to test"
-    test_int:
-      default: 1
-      type: int
-      help: "An integer to test"
     another:
       test:
-        default: "test"
+        default: test
+        help: A string to test
         type: str
-        help: "A string to test"
+    test_bool:
+      default: true
+      help: A boolean to test
+      type: bool
+    test_int:
+      default: 1
+      help: An integer to test
+      type: int
     test_list:
-      default: 
-        - 1
-        - 2
-        - 3
+      default:
+      - 1
+      - 2
+      - 3
+      help: A list to test
       type: list[int]
-      help: "A list to test"
     test_null:
+      type: str
       default: null
-      help: "A null to test"
+      help: A null to test
+  text:
+    default: Hi from snk.yaml!
+    help: A string to save to a file
+    type: str
+  times:
+    default: 1
+    help: Number of times to repeat the message
+    type: int
+  visible:
+    hidden: false
+conda: true
+font: cybermedium
+logo: MyWorkflow
+resources: []
+skip_missing: false
 symlink_resources: true
-logo: "MyWorkflow"
-tagline: "\nA workflow to test the workflow logo and tagline"
-font: "cybermedium"
-version: "things/__about__.py"
-conda: false
+tagline: '
+
+  A workflow to test the workflow logo and tagline'
+version: 0.13.0

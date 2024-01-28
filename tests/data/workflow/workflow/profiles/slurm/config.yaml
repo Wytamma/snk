@@ -1,0 +1,33 @@
+---
+snakefile: snakeFile
+reason: True
+show-failed-logs: True
+keep-going: True
+printshellcmds: True
+rerun-incomplete: True
+# Cluster submission
+jobname: "{rule}.{jobid}"              # Provide a custom name for the jobscript that is submitted to the cluster.
+max-jobs-per-second: 1                 #Maximal number of cluster/drmaa jobs per second, default is 10, fractions allowed.
+max-status-checks-per-second: 10       #Maximal number of job status checks per second, default is 10
+jobs: 400                              #Use at most N CPU cluster/cloud jobs in parallel.
+cluster: >-
+  bash
+cluster-cancel: slurm-cancel
+# Job resources
+set-resources:
+  - train:mem_mb=16G
+  - train:runtime=4h
+  - train:gres=gpu:1
+  - train:partition=gpu-a100-short
+  
+# For some reasons time needs quotes to be read by snakemake
+default-resources:
+  - account=''
+  - partition=''
+  - runtime=15
+  - mem_mb='4G'
+  - nodes=1
+  - tasks_per_node=1
+  - qos=''
+  - gres=''
+  - extra=''

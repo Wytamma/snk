@@ -7,6 +7,7 @@ from pathlib import Path
 types = {
     "int": int,
     "integer": int,
+    "float": float,
     "str": str,
     "string": str,
     "path": Path,

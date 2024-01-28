@@ -83,6 +83,20 @@ cli:
 
 In this example, the `input` and `count` parameters are required, while the `text` and `flag` parameters are optional. the flas `-i` can be used as shorthand for `--input`. The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
 
+### Validating Config with the `snk.yaml` File
+
+Snk provides a function that can be use to validate snakemake config using the `snk.yaml` cli annotations. The `validate_config` function will convert values to the correct type if possible. If the value cannot be converted to the correct type, an error will be raised. This can be added to the start of your `Snakefile` to ensure that the config is valid before running the workflow.
+
+```python
+try:
+  from snk import validate_config
+  validate_config(config, snk_yaml)
+except ImportError:
+  pass
+```
+
+To ensure that the workflow will still run in the absence of the `snk` package, you can wrap the import statement in a try/except block.
+
 ## Resources
 
 Resources represent files or folders that are essential for the execution of the workflow. They must be present in the workflow's working directory at runtime. The `snk.yaml` configuration file allows you to specify these resources.

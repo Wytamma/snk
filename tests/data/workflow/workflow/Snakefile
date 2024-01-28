@@ -1,5 +1,8 @@
 configfile: "config.yaml"
 
+from snk import validate_config
+validate_config(config, "../snk.yaml")
+
 print(config)
 
 rule hello_world:
