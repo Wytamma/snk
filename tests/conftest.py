@@ -71,7 +71,7 @@ def dynamic_runner(tmp_path_factory, request: Request) -> CLIRunner:
     (path / "home").mkdir()
     (path / "bin").mkdir()
     nest = Nest(path / "home", path / "bin")
-    config, snk = request.param
+    config, snk, snakefile_text = request.param
     path = Path(tmp_path_factory.mktemp("workflow"))
     snk_path = path / "snk.yaml"
     config_path = path / "config.yaml"
@@ -79,7 +79,7 @@ def dynamic_runner(tmp_path_factory, request: Request) -> CLIRunner:
         yaml.dump(config, f)
     snk.to_yaml(snk_path)
     snakefile_path = path / "Snakefile"
-    snakefile_path.write_text("print(config)")
+    snakefile_path.write_text(snakefile_text)
     workflow = nest.install(snakefile_path, editable=True)
     runner = CLIRunner([workflow.executable])
     return runner
