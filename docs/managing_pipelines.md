@@ -126,6 +126,6 @@ Proceed (Y/n)? y
 
 ## Ejecting workflows
 
-The `cp -r $(workflow-name -p) .` command is used to eject the workflow from the package. This will copy the workflow files to the current working directory. This will allow you to modify the workflow and run it with the standard `snakemake` command.
+The `cp -r $(workflow-name -p) workflow-name` command is used to eject the workflow from the package. This will copy the workflow files to the current working directory. This will allow you to modify the workflow and run it with the standard `snakemake` command.
 
-Following modification of the workflow you can run `snk install . --name new-workflow-name` to install the updated workflow.
+Following modification of the workflow you can run `snk install ./workflow-name --force` to install the updated workflow.
