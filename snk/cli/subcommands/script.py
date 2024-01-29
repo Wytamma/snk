@@ -114,7 +114,7 @@ class ScriptApp(DynamicTyper):
     ):
         script_path = self._get_script_path(name)
         executor = self._get_executor(script_path.suffix[1:])
-        cmd = [executor, str(script_path)] + args
+        cmd = [executor, f'"{script_path}"'] + args
         if env:
             env_path = self._get_conda_env_path(env)
             workflow = create_snakemake_workflow(
