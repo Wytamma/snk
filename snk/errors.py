@@ -13,7 +13,9 @@ class WorkflowNotFoundError(NestError):
 class InvalidWorkflowRepositoryError(NestError):
     """Thrown if the given repository appears to have an invalid format."""
 
-
+class InvalidWorkflowError(NestError):
+    """Thrown if the given workflow appears to have an invalid format."""
+    
 class SnkConfigError(Exception):
     """Base class for all SNK config exceptions"""
 

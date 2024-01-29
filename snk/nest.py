@@ -11,6 +11,7 @@ from .errors import (
     WorkflowExistsError,
     WorkflowNotFoundError,
     InvalidWorkflowRepositoryError,
+    InvalidWorkflowError
 )
 from .cli.config.config import SnkConfig
 from .workflow import Workflow
@@ -138,6 +139,10 @@ class Nest:
             workflow_path = self.download(workflow, name, tag_name=tag, commit=commit)
         except InvalidWorkflowRepositoryError:
             workflow_local_path = Path(workflow)
+            if workflow_local_path.is_file():
+                raise InvalidWorkflowError(
+                    f"When installing a local workflow, the path must be a directory. Found: {workflow_local_path}"
+                )
             if not name:
                 name = workflow_local_path.name
             if not force:
@@ -405,6 +410,17 @@ class Nest:
         return location
 
     def local(self, path: Path, name: str, editable=False) -> Path:
+        """
+        Install a local workflow.
+        Args:
+            path (Path): The path to the local workflow.
+            name (str): The name of the workflow.
+            editable (bool, optional): Whether to install the workflow in editable mode. Defaults to False.
+        Returns:
+            Path: The path to the installed workflow.
+        Examples:
+            >>> Nest.local(Path('/path/to/workflow'), 'example')
+        """
         location = self.snk_workflows_dir / name
         if editable:
             os.symlink(path.absolute(), location, target_is_directory=True)

@@ -135,10 +135,7 @@ def install(
             force=force,
             conda=not no_conda,
         )
-    except WorkflowExistsError as e:
-        typer.secho(e, fg="red")
-        raise typer.Exit()
-    except WorkflowNotFoundError as e:
+    except Exception as e:
         typer.secho(e, fg="red")
         raise typer.Exit()
     typer.secho(f"Successfully installed {installed_workflow.name} ({installed_workflow.version})!", fg="green")
