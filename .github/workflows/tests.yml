@@ -12,9 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: "conda-incubator/setup-miniconda@v2"
         with:
           python-version: 3.10.5
+          auto-activate-base: true
+          miniforge-variant: Mambaforge
+          channels: conda-forge,bioconda,defaults
+          channel-priority: strict
+          auto-update-conda: true
       - uses: actions/cache@v2
         with:
           key: ${{ github.ref }}
