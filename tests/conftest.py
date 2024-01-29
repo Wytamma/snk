@@ -80,7 +80,7 @@ def dynamic_runner(tmp_path_factory, request: Request) -> CLIRunner:
     snk.to_yaml(snk_path)
     snakefile_path = path / "Snakefile"
     snakefile_path.write_text(snakefile_text)
-    workflow = nest.install(snakefile_path, editable=True)
+    workflow = nest.install(path, editable=True)
     runner = CLIRunner([workflow.executable])
     return runner
 
