@@ -54,12 +54,8 @@ class CLI(DynamicTyper):
                 self.version = self.workflow.commit
         self.options = build_dynamic_cli_options(self.snakemake_config, self.snk_config)
         self.snakefile = self._find_snakefile()
-        self.conda_prefix_dir = workflow_dir_path / ".conda"
-        if " " in str(workflow_dir_path):
-            # cannot have spaces!
-            self.singularity_prefix_dir = None
-        else:
-            self.singularity_prefix_dir = workflow_dir_path / ".singularity"
+        self.conda_prefix_dir = self.workflow.conda_prefix_dir
+        self.singularity_prefix_dir = self.workflow.singularity_prefix_dir
         self.name = self.workflow.name
         self.verbose = False
         if (

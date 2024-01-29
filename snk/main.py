@@ -192,7 +192,7 @@ def list(
     for workflow in workflows:
         if workflow.editable:
             print(
-                f'- {workflow.name} ([bold green]editable[/bold green]) -> "{workflow.path}"'
+                f'- {workflow.name} ([bold green]editable[/bold green]) -> "{workflow.path.resolve()}"'
             )
             continue
         print(f"- {workflow.name} ([bold green]{workflow.version}[/bold green])")

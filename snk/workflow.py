@@ -35,6 +35,7 @@ class Workflow:
                 self.repo = None
         self.name = self.path.name
 
+
     @property
     def tag(self):
         """
@@ -43,7 +44,6 @@ class Workflow:
             str: The tag of the workflow, or None if no tag is found.
         """
         try:
-            # TODO: default to commit
             tag = self.repo.git.describe(["--tags", "--exact-match"])
         except Exception:
             tag = None
@@ -91,6 +91,28 @@ class Workflow:
         if sys.platform.startswith("win"):
             name += ".exe"
         return workflow_bin_dir / name
+    
+    @property
+    def conda_prefix_dir(self):
+        """
+        Gets the conda prefix directory of the workflow.
+        Returns:
+            Path: The path to the conda prefix directory.
+        """
+        return Path(".snakemake") / "conda" if self.editable else self.path / ".conda"
+
+    @property
+    def singularity_prefix_dir(self):
+        """
+        Gets the singularity prefix directory of the workflow.
+        Returns:
+            Path: The path to the singularity prefix directory.
+        """
+        if " " in str(self.path):
+            # sigh, snakemake singularity does not support spaces in the path
+            # https://github.com/snakemake/snakemake/blob/2ecb21ba04088b9e6850447760f713784cf8b775/snakemake/deployment/singularity.py#L130C1-L131C1
+            return None
+        return Path(".snakemake") / "singularity" if self.editable else self.path / ".singularity"
 
     @property
     def editable(self):

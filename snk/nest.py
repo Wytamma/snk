@@ -428,7 +428,7 @@ class Nest:
             from snk import create_cli
             if __name__ == "__main__":
                 sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
-                sys.exit(create_cli("{workflow_path.resolve()}"))
+                sys.exit(create_cli("{workflow_path}"))
                 
         """
         )
