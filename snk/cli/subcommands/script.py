@@ -6,7 +6,7 @@ from typing import List
 import typer
 
 from snk.cli.dynamic_typer import DynamicTyper
-from snk.cli.workflow import create_workflow
+from snk.cli.snakemake_workflow import create_snakemake_workflow
 from snk.workflow import Workflow
 from rich.console import Console
 from rich.syntax import Syntax
@@ -117,7 +117,7 @@ class ScriptApp(DynamicTyper):
         cmd = [executor, str(script_path)] + args
         if env:
             env_path = self._get_conda_env_path(env)
-            workflow = create_workflow(
+            workflow = create_snakemake_workflow(
                 self.snakefile,
                 config=self.snakemake_config,
                 configfiles=[self.configfile] if self.configfile else None,

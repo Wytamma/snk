@@ -11,7 +11,7 @@ from snakemake.persistence import Persistence
 import os
 
 
-def create_workflow(
+def create_snakemake_workflow(
     snakefile,
     cache=None,
     lint=None,

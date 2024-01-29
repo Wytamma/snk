@@ -7,7 +7,7 @@ from typing import List
 import typer
 
 from snk.cli.dynamic_typer import DynamicTyper
-from snk.cli.workflow import create_workflow
+from snk.cli.snakemake_workflow import create_snakemake_workflow
 from snk.workflow import Workflow
 from rich.console import Console
 from rich.syntax import Syntax
@@ -28,7 +28,7 @@ class EnvApp(DynamicTyper):
         self.snakemake_config = snakemake_config
         self.snakefile = snakefile
         self.configfile = get_config_from_workflow_dir(self.workflow.path)
-        self.snakemake_workflow = create_workflow(
+        self.snakemake_workflow = create_snakemake_workflow(
             self.snakefile,
             config=self.snakemake_config,
             configfiles=[self.configfile] if self.configfile else None,
