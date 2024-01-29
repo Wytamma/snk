@@ -1,5 +1,5 @@
 def test_env_run(local_runner):
-    res = local_runner(["env", "run", "pandas", "which python"])
+    res = local_runner(["env", "run", "-v", "pandas", "which python"])
     assert res.code == 0, res.stderr
     assert ".snakemake" in res.stdout, res.stderr
 

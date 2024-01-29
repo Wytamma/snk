@@ -92,12 +92,15 @@ class EnvApp(DynamicTyper):
     def run(
         self,
         name: str = typer.Argument(..., help="The name of the environment."),
+        verbose: bool = typer.Option(False, "--verbose", "-v", help="Print the command to run."),
         cmd: List[str] = typer.Argument(..., help="The command to run in environment."),
     ):
         env_path = self._get_conda_env_path(name)
         env = Env(self.snakemake_workflow, env_file=env_path.resolve())
         env.create()
         cmd = self._shellcmd(env.address, " ".join(cmd))
+        if verbose:
+            self.log(cmd)
         subprocess.run(cmd, shell=True, env=os.environ.copy())
 
     def prune(
