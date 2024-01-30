@@ -94,7 +94,7 @@ class EnvApp(DynamicTyper):
                 cmd = f"{self.workflow.name} env activate {env.stem}"
             else:
                 address = ""
-                cmd = f"{self.workflow.name} env create {env.stem}"
+                cmd = f"{self.workflow.name} env show {env.stem}"
             table.add_row(
                 env.stem, cmd, address
             )
@@ -154,7 +154,9 @@ class EnvApp(DynamicTyper):
         if name:
             env_path = self._get_conda_env_path(name)
             env = Env(self.snakemake_workflow, env_file=env_path.resolve())
-            path = env.address
+            path = Path(env.address)
+            if not path.exists():
+                self.error(f"Environment {name} not created!")
         else:
             path = self.conda_prefix_dir
         if force or input(f"Delete {path}? [y/N] ").lower() == "y":
@@ -163,11 +165,11 @@ class EnvApp(DynamicTyper):
 
     def create(
             self, 
-            name: Optional[str] = typer.Argument(None, help="The name of the environment to create. If not provided, all environments will be created."),
+            names: Optional[List[str]] = typer.Argument(None, help="The names of the environments to create. If not provided, all environments will be created."),
             max_workers: int = typer.Option(get_num_cores(), "--workers", "-w", help="Max number of envs to create in parallel.")
         ):
-        if name:
-            env_paths = [self._get_conda_env_path(name)]
+        if names:
+            env_paths = [self._get_conda_env_path(name) for name in names]
         else:
             env_paths = self.workflow.environments
         env_args = [
@@ -184,8 +186,8 @@ class EnvApp(DynamicTyper):
             status_codes = executor.map(create_conda_environment, env_args)
         if any(status_codes):
             self.error("Failed to create all conda environments!")
-        if name:
-            self.success(f"Created {name} environment!")
+        if names:
+            self.success(f"Created environment{'s' if len(names) > 1 else ''} {' '.join(names)}!")
         else:
             self.success("All conda environments created!")
 
