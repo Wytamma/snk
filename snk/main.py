@@ -162,38 +162,35 @@ def uninstall(
         typer.secho(f"Successfully uninstalled {name}!", fg="green")
 
 
-# @app.command()
-# def update():
-#     """
-#     Update a workflow.
-#     """
-#     raise NotImplementedError
-
-
 @app.command()
 def list(
     ctx: typer.Context,
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Show the workflow paths."
+    ),
 ):
     """
     List the installed workflows.
     """
+    from rich.console import Console
+    from rich.table import Table
+
+    table = Table("Workflow", "Version", show_header=True, show_lines=True)
+    if verbose:
+        table.add_column("Path")
     nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
     try:
         workflows = nest.workflows
     except FileNotFoundError:
         workflows = []
-    workflow_dir_yellow = typer.style(
-        nest.snk_workflows_dir, fg=typer.colors.YELLOW, bold=False
-    )
-    typer.echo(f"Found {len(workflows)} workflows in {workflow_dir_yellow}")
     for workflow in workflows:
-        if workflow.editable:
-            print(
-                f'- {workflow.name} ([bold green]editable[/bold green]) -> "{workflow.path.resolve()}"'
-            )
-            continue
-        print(f"- {workflow.name} ([bold green]{workflow.version}[/bold green])")
-
+        version = "[green]editable[/green]" if workflow.editable else f"[blue]{workflow.version}[/blue]"
+        if verbose:
+            table.add_row(workflow.name, version, f"[yellow]{str(workflow.path.resolve())}[/yellow]")
+        else:
+            table.add_row(workflow.name, version)
+    console = Console()
+    console.print(table)
 
 # @app.command()
 # def run(
@@ -214,4 +211,11 @@ def list(
 # @app.command()
 # def create(name: str):
 #     """Create a default project that can be installed with snk"""
+#     raise NotImplementedError
+
+# @app.command()
+# def update():
+#     """
+#     Update a workflow.
+#     """
 #     raise NotImplementedError
