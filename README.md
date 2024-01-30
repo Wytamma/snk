@@ -37,15 +37,17 @@ Successfully installed variant-calling (v2.1.1)!
 ```
 variant-calling --help
 ```
-<img width="862" alt="main cli help" src="https://github.com/Wytamma/snk/assets/13726005/bb3997c5-9ee6-465d-8f79-c94067ce9997">
+<img width="862" alt="cli help" src="https://github.com/Wytamma/snk/assets/13726005/3e6e4134-efe5-47e1-b6f4-81b60e1c9ea7">
+
 
 ### View run options
+
+Workflow configuration options are automatically generated from the snakemake config file.
 
 ```
 variant-calling run --help
 ```
 <img width="862" alt="run cli help" src="https://github.com/Wytamma/snk/assets/13726005/ef1dd9ca-1ba2-4a77-921a-4de16dd57631">
-
 
 
 ### Create a DAG
