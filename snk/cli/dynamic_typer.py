@@ -212,7 +212,7 @@ class DynamicTyper:
           msg (str): The error message to log.
           exit (bool): Whether to exit after logging the error message.
         """
-        typer.secho(msg, fg="red")
+        typer.secho(msg, fg="red", err=True)
         if exit:
             raise typer.Exit(1)
 
