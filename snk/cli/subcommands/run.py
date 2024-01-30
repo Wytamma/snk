@@ -114,11 +114,10 @@ class RunApp(DynamicTyper):
             "-c",
             help="Set the number of cores to use. If None will use all cores.",
         ),
-        verbose: Optional[bool] = typer.Option(
+        no_conda: bool = typer.Option(
             False,
-            "--verbose",
-            "-v",
-            help="Run workflow in verbose mode.",
+            "--no-conda",
+            help="Do not use conda environments.",
         ),
         keep_resources: bool = typer.Option(
             False,
@@ -129,6 +128,12 @@ class RunApp(DynamicTyper):
             False,
             "--keep-snakemake",
             help="Keep .snakemake folder after pipeline completes.",
+        ),
+        verbose: Optional[bool] = typer.Option(
+            False,
+            "--verbose",
+            "-v",
+            help="Run workflow in verbose mode.",
         ),
         help_snakemake: Optional[bool] = typer.Option(
             False,
@@ -198,7 +203,7 @@ class RunApp(DynamicTyper):
                 fg=typer.colors.MAGENTA,
             )
 
-        if conda_found and self.snk_config.conda:
+        if conda_found and self.snk_config.conda and not no_conda:
             args.extend(
                 [
                     "--use-conda",
