@@ -20,6 +20,6 @@ rule hello_world:
 rule error:
     shell: "exit 1"
 
-rule pandas:
+rule python:
     conda: "envs/python.yml"
     shell: "python -V"

@@ -34,9 +34,7 @@ def create_conda_environment(args):
         use_conda=True,
         conda_prefix=conda_prefix_dir,
     )
-
     env_path = Path(env_path_str).resolve()
-    # Assuming Env is a class that takes snakemake_workflow and creates a Conda environment
     env = Env(snakemake_workflow, env_file=env_path)
     try:
         env.create()
