@@ -43,17 +43,16 @@ class ScriptApp(DynamicTyper):
 
     def list(
             self, 
-            verbose: bool = typer.Option(False, "--verbose", "-v", help="Show profiles as paths."), 
+            verbose: bool = typer.Option(False, "--verbose", "-v", help="Show script as paths."), 
         ):
-        number_of_scripts = len(self.workflow.scripts)  
-        typer.echo(
-            f"Found {number_of_scripts} script{'' if number_of_scripts == 1 else 's'}:"
-        )
+        from rich.console import Console
+        from rich.table import Table
+        table = Table("Name", "CMD", "File", show_header=True, show_lines=True)
         for script in self.workflow.scripts:
-            filename = typer.style(script.name, fg=typer.colors.GREEN)
-            if verbose:
-                filename = typer.style(script, fg=typer.colors.YELLOW)
-            typer.echo(f"- {script.stem} ({filename})")
+            # address relative to cwd
+            table.add_row(script.stem, f"{self.workflow.name} script show {script.stem}", str(script.resolve()) if verbose else script.name)
+        console = Console()
+        console.print(table)
 
     def _get_script_path(self, name: str) -> Path:
         script = [e for e in self.workflow.scripts if e.name == name or e.stem == name]

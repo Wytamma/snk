@@ -50,17 +50,22 @@ class EnvApp(DynamicTyper):
 
     def list(
             self,
-            verbose: bool = typer.Option(False, "--verbose", "-v", help="Show profiles as paths."), 
+            verbose: bool = typer.Option(False, "--verbose", "-v", help="Show conda paths."), 
         ):
-        number_of_environments = len(self.workflow.environments)
-        typer.echo(
-            f"Found {number_of_environments} environment{'' if number_of_environments == 1 else 's'}:"
-        )
+        from rich.console import Console
+        from rich.table import Table
+        table = Table("Name", "CMD", "Env", show_header=True, show_lines=True)
         for env in self.workflow.environments:
-            if verbose:
-                typer.echo(f"- {typer.style(env, fg=typer.colors.YELLOW)}")
+            conda = Env(self.snakemake_workflow, env_file=env.resolve())
+            # address relative to cwd
+            address = Path(conda.address)
+            if address.exists():
+                address = str(address) if verbose else f"[green]{address.name}[/green]"
             else:
-                typer.echo(f"- {env.stem}")
+                address = ""
+            table.add_row(env.stem, f"{self.workflow.name} env activate {env.stem}", address)
+        console = Console()
+        console.print(table)
 
     def _get_conda_env_path(self, name: str) -> Path:
         env = [e for e in self.workflow.environments if e.stem == name]
@@ -125,7 +130,9 @@ class EnvApp(DynamicTyper):
                 )
 
     def activate(
-        self, name: str = typer.Argument(..., help="The name of the environment.")
+        self, 
+        name: str = typer.Argument(..., help="The name of the environment."),
+        verbose: bool = typer.Option(False, "--verbose", "-v", help="Print the activation command."),
     ):
         env_path = self._get_conda_env_path(name)
         self.log(f"Activating {name} environment... (type 'exit' to deactivate)")
@@ -133,6 +140,7 @@ class EnvApp(DynamicTyper):
         env.create()
         user_shell = os.environ.get("SHELL", "/bin/sh")
         activate_cmd = self._shellcmd(env.address, user_shell)
-        self.log(activate_cmd)
+        if verbose:
+            self.log(activate_cmd)
         subprocess.run(activate_cmd, shell=True, env=os.environ.copy())
         self.log(f"Exiting {name} environment...")

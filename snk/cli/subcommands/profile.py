@@ -21,16 +21,22 @@ class ProfileApp(DynamicTyper):
         self,
         verbose: bool = typer.Option(False, "--verbose", "-v", help="Show profiles as paths."), 
     ):
-        number_of_profiles = len(self.workflow.profiles)
-        typer.echo(
-            f"Found {number_of_profiles} profile{'' if number_of_profiles == 1 else 's'}:"
-        )
+        from rich.console import Console
+        from rich.table import Table
+        table = Table("Name", "CMD", show_header=True, show_lines=True)
+        if verbose:
+            table.add_column("Path")
         for profile in self.workflow.profiles:
             if verbose:
-                typer.echo(f"- {typer.style(profile / 'config.yaml', fg=typer.colors.YELLOW)}")
+                path = str(profile.resolve())
+                table.add_row(profile.stem, f"{self.workflow.name} profile show {profile.stem}", path)
             else:
-                typer.echo(f"- {profile.stem}")
-    
+                table.add_row(profile.stem, f"{self.workflow.name} profile show {profile.stem}")
+        console = Console()
+        console.print(table)
+
+
+
     def _get_profile_path(self, name: str) -> Path:
         profile = [p for p in self.workflow.profiles if p.name == name or p.stem == name]
         if not profile:
