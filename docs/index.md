@@ -28,7 +28,7 @@ pip install snk
 
 ### Install a workflow as a CLI
 
-Install the dna-seq-gatk-variant-calling workflow (v2.1.1) as `variant-calling`.
+Install the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling`.
 
 ```
 snk install snakemake-workflows/dna-seq-gatk-variant-calling --name variant-calling -t v2.1.1
@@ -37,15 +37,20 @@ Successfully installed variant-calling (v2.1.1)!
 
 ### Inspect the CLI   
 
+Snk will automatically create a fully featured CLI for the Snakemake workflow. 
+
 ```
 variant-calling --help
 ```
-<img width="862" alt="main cli" src="https://github.com/Wytamma/snk/assets/13726005/bb3997c5-9ee6-465d-8f79-c94067ce9997">
+<img width="862" alt="cli help" src="https://github.com/Wytamma/snk/assets/13726005/3e6e4134-efe5-47e1-b6f4-81b60e1c9ea7">
+
 
 ### View run options
 
+Workflow configuration options are automatically generated from the snakemake config file.
+
 ```
-variant-calling run -h
+variant-calling run --help
 ```
 <img width="862" alt="run cli help" src="https://github.com/Wytamma/snk/assets/13726005/ef1dd9ca-1ba2-4a77-921a-4de16dd57631">
 
@@ -76,15 +81,7 @@ variant-calling config > config.yml # save the config
 variant-calling run --config config.yml # run with config 
 ```
 
-## how it works
-
-When installing a workflow snk will
-
-- create directory `$PYTHON_BIN_DIR/../snk/workflows/WORKFLOW`
-- install the workflow into this directory
-- expose CLI at `$PYTHON_BIN_DIR` that point to workflow directory in `snk/workflows/WORKFLOW/bin`
-- As long as `$PYTHON_BIN_DIR` is on your PATH, you can now invoke the workflow globally
-
+Read the [documentation](https://snk.wytamma.com) for more information.
 
 ## License
 
