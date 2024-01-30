@@ -34,14 +34,14 @@ Successfully installed variant-calling (v2.1.1)!
 
 ### Inspect the CLI   
 
-```
+```bash
 variant-calling --help
 ```
 <img width="862" alt="main cli help" src="https://github.com/Wytamma/snk/assets/13726005/bb3997c5-9ee6-465d-8f79-c94067ce9997">
 
 ### View run options
 
-```
+```bash
 variant-calling run --help
 ```
 <img width="862" alt="run cli help" src="https://github.com/Wytamma/snk/assets/13726005/ef1dd9ca-1ba2-4a77-921a-4de16dd57631">
@@ -52,7 +52,7 @@ variant-calling run --help
 
 Here we use the `.test` resources included in the workflow to create the DAG.
 
-```
+```bash
 variant-calling run -r .test/config -r .test/data --dag dag.pdf
 ```
 <img width="862" alt="dag" src="https://github.com/Wytamma/snk/assets/13726005/f79bcfd3-f6cd-401e-b5d8-904e7d5f1835">
@@ -62,13 +62,13 @@ variant-calling run -r .test/config -r .test/data --dag dag.pdf
 
 Snk will dynamically generate config options for the CLI. For example if your config.yaml file has the option `fasta: null` you can set this option with `--fasta`.
 
-```
+```bash
 variant-calling run --fasta example.fa
 ```
 
 You can also configure the workflow using a config file. 
 
-```
+```bash
 variant-calling config --pretty # print the config 
 variant-calling config > config.yml # save the config 
 variant-calling run --config config.yml # run with config 
