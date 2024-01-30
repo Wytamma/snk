@@ -1,8 +1,8 @@
 ---
-title: ENV
+title: Environments
 ---
 
-# The CLI ENV command 
+# The CLI env command 
 
 The `env` subcommand in the `workflow` tool allows you to access and manage the conda environments used within the workflow. This guide provides an overview of the available options and commands for working with workflow environments.
 
@@ -13,6 +13,14 @@ The `env` subcommand in the `workflow` tool allows you to access and manage the 
 ## Commands
 
 The `env` subcommand provides several commands to manage the workflows conda environments.
+
+### `list`
+
+List the environments in the workflow.
+
+```bash
+workflow env list [OPTIONS]
+```
 
 ### `activate`
 
@@ -28,30 +36,25 @@ This command activates the specified conda environment within the workflow.
 
 ### `create`
 
-Create all conda environments.
-
-```bash
-workflow env create [OPTIONS]
-```
-
 This command creates all the conda environments specified in the `envs` dir.
 
-### `list`
-
-List the environments in the workflow.
+A Snakemake workflow that uses a lot of conda envs can take a long time to install as each env is created sequentially. Running `workflow env create` will create all the conda envs in parallel (up to `--workers` at a time, defaults to number of cores).
 
 ```bash
-workflow env list [OPTIONS]
+workflow env create [OPTIONS] [NAME]
 ```
+
+Individual conda envs can be create with `workflow env create ENV_NAME`.
+
 
 This command lists all the conda environments present in the workflow.
 
-### `prune`
+### `remove`
 
 Delete all conda environments.
 
 ```bash
-workflow env prune [OPTIONS]
+workflow env remove [OPTIONS]
 ```
 
 This command deletes all the conda environments in the workflow.
@@ -66,7 +69,7 @@ The `env run` command in the `workflow` tool allows you to run a command within 
 
 #### Options
 
-- `--env`, `-e`: The name of the environment in which to run the command. This option is required.
+- `--env`, `-e`: The name of the environment in which to run the command.
 - `--help`, `-h`: Show the help message and exit.
 
 #### Usage
