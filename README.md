@@ -37,14 +37,14 @@ Successfully installed variant-calling (v2.1.1)!
 ```
 variant-calling --help
 ```
-<img width="862" alt="main cli" src="https://github.com/Wytamma/snk/assets/13726005/bb3997c5-9ee6-465d-8f79-c94067ce9997">
+<img width="862" alt="main cli help" src="https://github.com/Wytamma/snk/assets/13726005/bb3997c5-9ee6-465d-8f79-c94067ce9997">
 
 ### View run options
 
 ```
 variant-calling run --help
 ```
-<img width="862" alt="Screenshot 2024-01-30 at 10 55 31 pm" src="https://github.com/Wytamma/snk/assets/13726005/ef1dd9ca-1ba2-4a77-921a-4de16dd57631">
+<img width="862" alt="run cli help" src="https://github.com/Wytamma/snk/assets/13726005/ef1dd9ca-1ba2-4a77-921a-4de16dd57631">
 
 
 
