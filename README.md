@@ -34,6 +34,8 @@ Successfully installed variant-calling (v2.1.1)!
 
 ### Inspect the CLI   
 
+Snk will automatically create a fully featured CLI for the Snakemake workflow. 
+
 ```
 variant-calling --help
 ```
