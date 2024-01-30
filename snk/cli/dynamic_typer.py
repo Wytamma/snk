@@ -176,10 +176,10 @@ class DynamicTyper:
             flat_config = None
 
             if kwargs.get("configfile"):
-                import snakemake
+                from snakemake import load_configfile
                 from .utils import flatten
 
-                snakemake_config = snakemake.load_configfile(kwargs["configfile"])
+                snakemake_config = load_configfile(kwargs["configfile"])
                 flat_config = flatten(snakemake_config)
 
             for option in options:
