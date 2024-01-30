@@ -7,7 +7,7 @@ import pytest
     (["env", "list"], ["python"]),
     (["env", "show", "python"], ["python"]),
     (["env", "create"], ["All conda environments created!"]),
-    (["env", "create", "python"], ["Created python environment!"]),
+    (["env", "create", "python"], ["Created environment python!"]),
     (["env", "run", "-v", "python", "which python"], [".snakemake"]),
     (["env", "activate", "python"], ["Activating python environment...", "Exiting python environment..."]),
     (["env", "remove", "-f"], ["Deleted"]),
