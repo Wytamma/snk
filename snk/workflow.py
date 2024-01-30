@@ -3,8 +3,6 @@ import sys
 from typing import Optional
 from git import Repo, InvalidGitRepositoryError
 
-from snk.cli.config.utils import get_version_from_config
-
 
 class Workflow:
     """
@@ -71,13 +69,12 @@ class Workflow:
             str: The version of the workflow, or None if no version is found.
         """
         version = None
-        if (self.path / "snk.yaml").exists():
-            version = get_version_from_config(self.path / "snk.yaml")
-        if version is None and not self.tag:
-            version = self.commit
-        else:
-            version = self.tag
-        return version if version else "latest"
+        if version is None:
+            if self.tag:
+                version = self.tag
+            else:
+                version = self.commit
+        return version
 
     @property
     def executable(self):
