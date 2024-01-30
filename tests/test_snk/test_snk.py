@@ -45,7 +45,8 @@ def test_snk_list(local_workflow: Workflow):
     bin_dir = local_workflow.path.parent.parent.parent / "bin"
     result = runner.invoke(app, ["--home", snk_home, "--bin", bin_dir, "list"])
     assert result.exit_code == 0
-    assert "Found 1 workflows" in result.stdout
+    assert "workflow" in result.stdout
+    assert "editable" in result.stdout
 
 
 def test_snk_uninstall(local_workflow: Workflow):
