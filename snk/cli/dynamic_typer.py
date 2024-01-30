@@ -216,6 +216,14 @@ class DynamicTyper:
         if exit:
             raise typer.Exit(1)
 
+    def success(self, msg):
+        """
+        Logs a success message (green).
+        Args:
+          msg (str): The success message to log.
+        """
+        typer.secho(msg, fg="green")
+
     def log(self, msg):
         """
         Logs a message (yellow).
