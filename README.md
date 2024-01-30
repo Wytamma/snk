@@ -42,9 +42,10 @@ variant-calling --help
 ### View run options
 
 ```
-variant-calling run -h
+variant-calling run --help
 ```
-<img width="862" alt="run cli" src="https://github.com/Wytamma/snk/assets/13726005/34c40a7c-72c2-4245-9589-7c3c8982be08">
+<img width="862" alt="Screenshot 2024-01-30 at 10 55 31 pm" src="https://github.com/Wytamma/snk/assets/13726005/ef1dd9ca-1ba2-4a77-921a-4de16dd57631">
+
 
 
 ### Create a DAG
