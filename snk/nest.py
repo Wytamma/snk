@@ -125,8 +125,6 @@ class Nest:
                 self.uninstall(name=name, force=True)
             except WorkflowNotFoundError:
                 pass
-
-        self._check_workflow_name_available(name)
         workflow = str(workflow) # ensure it is a string
         try:
             workflow = self._format_repo_url(workflow)
