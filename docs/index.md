@@ -47,7 +47,7 @@ variant-calling --help
 ```
 variant-calling run -h
 ```
-<img width="862" alt="run cli" src="https://github.com/Wytamma/snk/assets/13726005/34c40a7c-72c2-4245-9589-7c3c8982be08">
+<img width="862" alt="run cli help" src="https://github.com/Wytamma/snk/assets/13726005/ef1dd9ca-1ba2-4a77-921a-4de16dd57631">
 
 
 ### Create a DAG
