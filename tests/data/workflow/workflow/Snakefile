@@ -21,5 +21,5 @@ rule error:
     shell: "exit 1"
 
 rule pandas:
-    conda: "envs/pandas.yml"
-    shell: "python -c 'import pandas; print(pandas.__version__)'"
+    conda: "envs/python.yml"
+    shell: "python -V"

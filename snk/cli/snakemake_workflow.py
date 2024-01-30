@@ -10,6 +10,19 @@ from snakemake import (
 from snakemake.persistence import Persistence
 import os
 
+@dataclass
+class PersistenceMock(Persistence):
+    """
+    Mock for workflow.persistence
+    """
+
+    conda_env_path: Path = None
+    _metadata_path: Path = None
+    _incomplete_path: Path = None
+    shadow_path: Path = None
+    conda_env_archive_path: Path = None
+    container_img_path: Path = None
+    aux_path: Path = None
 
 def create_snakemake_workflow(
     snakefile,
@@ -146,20 +159,6 @@ def create_snakemake_workflow(
         keep_metadata=keep_metadata,
         latency_wait=latency_wait,
     )
-
-    @dataclass
-    class PersistenceMock(Persistence):
-        """
-        Mock for workflow.persistence
-        """
-
-        conda_env_path: Path = None
-        _metadata_path: Path = None
-        _incomplete_path: Path = None
-        shadow_path: Path = None
-        conda_env_archive_path: Path = None
-        container_img_path: Path = None
-        aux_path: Path = None
 
     persistence = PersistenceMock(
         conda_env_path=Path(conda_prefix).resolve() if conda_prefix else None,
