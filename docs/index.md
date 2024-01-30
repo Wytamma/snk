@@ -28,6 +28,8 @@ pip install snk
 
 ### Install a workflow as a CLI
 
+The snk install comamnd can be use to install Snakemake workflows as CLIs. An index of publicly available Snakemake workflows can be found on the [snakemake workflow catalog](https://snakemake.github.io/snakemake-workflow-catalog/). Snk can install snakemake workflows from these GitHub repos.
+
 Install the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling`.
 
 ```
@@ -59,7 +61,7 @@ variant-calling run --help
 
 Here we use the `.test` resources included in the workflow to create the DAG.
 
-```
+```bash
 variant-calling run -r .test/config -r .test/data --dag dag.pdf
 ```
 <img width="862" alt="dag" src="https://github.com/Wytamma/snk/assets/13726005/f79bcfd3-f6cd-401e-b5d8-904e7d5f1835">
@@ -69,13 +71,13 @@ variant-calling run -r .test/config -r .test/data --dag dag.pdf
 
 Snk will dynamically generate config options for the CLI. For example if your config.yaml file has the option `fasta: null` you can set this option with `--fasta`.
 
-```
+```bash
 variant-calling run --fasta example.fa
 ```
 
 You can also configure the workflow using a config file. 
 
-```
+```bash
 variant-calling config --pretty # print the config 
 variant-calling config > config.yml # save the config 
 variant-calling run --config config.yml # run with config 
