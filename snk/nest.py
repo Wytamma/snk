@@ -141,6 +141,10 @@ class Nest:
                 raise InvalidWorkflowError(
                     f"When installing a local workflow, the path must be a directory. Found: {workflow_local_path}"
                 )
+            if self.snk_workflows_dir.resolve().is_relative_to(workflow_local_path.resolve()) and not editable:
+                raise InvalidWorkflowError(
+                    f"The workflow directory contains SNK_HOME!\nWORKFLOW: {workflow_local_path.resolve()}\nSNK_HOME: {self.snk_workflows_dir.resolve()}.\n\nTry installing the workflow with --editable."
+                )
             if not name:
                 name = workflow_local_path.name
             if not force:
