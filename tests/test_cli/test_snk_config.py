@@ -10,7 +10,7 @@ def test_skip_missing(dynamic_runner: CLIRunner):
     assert "visible" in res.stdout, res.stderr
 
 
-@gen_dynamic_runner_fixture({"missing": True}, SnkConfig(additional_snakemake_args="--help"))
+@gen_dynamic_runner_fixture({"missing": True}, SnkConfig(additional_snakemake_args=["--help"]))
 def test_additional_snakemake_args(dynamic_runner: CLIRunner):
     res = dynamic_runner(["run", "-v"])
     assert res.code == 0, res.stderr
