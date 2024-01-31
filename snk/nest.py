@@ -136,14 +136,14 @@ class Nest:
                 handle_force_installation(name)
             workflow_path = self.download(workflow, name, tag_name=tag, commit=commit)
         except InvalidWorkflowRepositoryError:
-            workflow_local_path = Path(workflow)
+            workflow_local_path = Path(workflow).resolve()
             if workflow_local_path.is_file():
                 raise InvalidWorkflowError(
                     f"When installing a local workflow, the path must be a directory. Found: {workflow_local_path}"
                 )
-            if self.snk_workflows_dir.resolve().is_relative_to(workflow_local_path.resolve()) and not editable:
+            if self.snk_workflows_dir.resolve().is_relative_to(workflow_local_path) and not editable:
                 raise InvalidWorkflowError(
-                    f"The workflow directory contains SNK_HOME!\nWORKFLOW: {workflow_local_path.resolve()}\nSNK_HOME: {self.snk_workflows_dir.resolve()}.\n\nTry installing the workflow with --editable."
+                    f"The workflow directory contains SNK_HOME!\nWORKFLOW: {workflow_local_path}\nSNK_HOME: {self.snk_workflows_dir.resolve()}.\n\nTry installing the workflow with --editable."
                 )
             if not name:
                 name = workflow_local_path.name
