@@ -4,6 +4,8 @@ import pytest
     (["script", "run", "hello.py"], ["hello world"], []),
     (["script", "list"], ["hello.py"], []),
     (["script", "show", "hello.py"], ["print('hello world')"], []),
+    (["profile", "list"], ["slurm"], []),
+    (["profile", "show", "slurm"], ["cluster"], []),
     (["env", "list"], ["python"], []),
     (["env", "show", "python"], ["python"], []),
     (["env", "create"], ["All conda environments created!"], []),
