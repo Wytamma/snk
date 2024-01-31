@@ -128,6 +128,7 @@ class ScriptApp(DynamicTyper):
             cmd = self._shellcmd(env.address, " ".join(cmd))
         else:
             cmd = " ".join(cmd)
-        subprocess.run(cmd, shell=True, env=os.environ.copy())
+        user_shell = os.environ.get("SHELL", "/bin/bash")
+        subprocess.run(cmd, shell=True, env=os.environ.copy(), executable=user_shell)
 
 

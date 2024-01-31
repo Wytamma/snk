@@ -142,7 +142,8 @@ class EnvApp(DynamicTyper):
         cmd = self._shellcmd(env.address, " ".join(cmd))
         if verbose:
             self.log(cmd)
-        subprocess.run(cmd, shell=True, env=os.environ.copy())
+        user_shell = os.environ.get("SHELL", "/bin/bash")
+        subprocess.run(cmd, shell=True, env=os.environ.copy(), executable=user_shell)
 
     def remove(
         self,
@@ -202,9 +203,9 @@ class EnvApp(DynamicTyper):
         self.log(f"Activating {name} environment... (type 'exit' to deactivate)")
         env = Env(self.snakemake_workflow, env_file=env_path.resolve())
         env.create()
-        user_shell = os.environ.get("SHELL", "/bin/sh")
+        user_shell = os.environ.get("SHELL", "/bin/bash")
         activate_cmd = self._shellcmd(env.address, user_shell)
         if verbose:
             self.log(activate_cmd)
-        subprocess.run(activate_cmd, shell=True, env=os.environ.copy())
+        subprocess.run(activate_cmd, shell=True, env=os.environ.copy(), executable=user_shell)
         self.log(f"Exiting {name} environment...")
