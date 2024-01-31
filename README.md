@@ -61,9 +61,7 @@ Here we use the `.test` resources included in the workflow to create the DAG.
 ```bash
 variant-calling run -r .test/config -r .test/data --dag dag.pdf
 ```
-![dag@4x](https://github.com/Wytamma/snk/assets/13726005/0c25886c-0ab1-49ad-9fdd-315827dcaeb8)
-
-
+<img width="862" alt="run cli help" src="https://github.com/Wytamma/snk/assets/13726005/0c25886c-0ab1-49ad-9fdd-315827dcaeb8">
 
 ### Configure 
 
