@@ -18,6 +18,7 @@ The following options are available for configuration in `snk.yaml`:
 - `cli`: Annotations for the workflow cli parameters.
 - `symlink_resources`: A boolean that controls whether symbolic links are created for resources.
 - `conda`: A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available.
+- `additional_snakemake_args`: A list of additional arguments to pass to snakemake.
 
 ## Example `snk.yaml` File
 

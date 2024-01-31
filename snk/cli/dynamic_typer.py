@@ -224,13 +224,13 @@ class DynamicTyper:
         """
         typer.secho(msg, fg="green")
 
-    def log(self, msg):
+    def log(self, msg, color="yellow"):
         """
         Logs a message (yellow).
         Args:
           msg (str): The message to log.
         """
-        typer.secho(msg, fg="yellow")
+        typer.secho(msg, fg=color)
 
     def echo(self, msg):
         """

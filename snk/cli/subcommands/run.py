@@ -166,6 +166,13 @@ class RunApp(DynamicTyper):
 
         self.verbose = verbose
         args = []
+        if self.snk_config.additional_snakemake_args:
+            if verbose:
+                self.log(
+                    f"Using additional snakemake args: {' '.join(self.snk_config.additional_snakemake_args)}",
+                    color=typer.colors.MAGENTA
+                )
+            args.extend(self.snk_config.additional_snakemake_args)
         if not cores:
             cores = "all"
         args.extend(
