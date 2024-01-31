@@ -126,6 +126,6 @@ def test_error(dynamic_typer, cli_runner):
 
 
 def test_log(dynamic_typer, cli_runner, capsys):
-    dynamic_typer.log("Log message")
+    dynamic_typer.log("Log message", stderr=False)
     captured = capsys.readouterr()
     assert "Log message" in captured.out

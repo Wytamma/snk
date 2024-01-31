@@ -256,7 +256,7 @@ class RunApp(DynamicTyper):
         if configs:
             args.extend(["--config", *configs])
         if verbose:
-            typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA, secho=True)
+            typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA, err=True)
         if not keep_snakemake and Path(".snakemake").exists():
             keep_snakemake = True
         try:

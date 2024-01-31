@@ -32,8 +32,8 @@ class CLI(DynamicTyper):
       >>> CLI(Path('/path/to/workflow'))
     """
 
-    def __init__(self, workflow_dir_path: Path = None) -> None:
-        if not workflow_dir_path:
+    def __init__(self, workflow_dir_path: Path = None, snk_config: SnkConfig = None) -> None:
+        if workflow_dir_path is None:
             # get the calling frame (the frame of the function that called this function)
             calling_frame = inspect.currentframe().f_back
             # get the file path from the calling frame
@@ -42,9 +42,12 @@ class CLI(DynamicTyper):
             workflow_dir_path = workflow_dir_path.parent
         self.workflow = Workflow(path=workflow_dir_path)
         self.snakemake_config = load_workflow_snakemake_config(workflow_dir_path)
-        self.snk_config = SnkConfig.from_workflow_dir(
-            workflow_dir_path, create_if_not_exists=True
-        )
+        if snk_config is None:
+            self.snk_config = SnkConfig.from_workflow_dir(
+                workflow_dir_path, create_if_not_exists=True
+            )
+        else:
+            self.snk_config = snk_config
         if self.snk_config.version:
             self.version = self.snk_config.version
         else: 
