@@ -65,7 +65,7 @@ variant-calling run -r .test/config -r .test/data --dag dag.pdf
 
 ### Configure 
 
-Snk will dynamically generate config options for the CLI. For example if your config.yaml file has the option `fasta: null` you can set this option with `--fasta`.
+Snk will dynamically generate config options for the CLI. For example if the config.yaml file has the option `fasta: null` you can set this option with `--fasta`.
 
 ```bash
 variant-calling run --fasta example.fa
