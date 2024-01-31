@@ -185,7 +185,7 @@ class RunApp(DynamicTyper):
             # only set prefix if --use-singularity is explicitly called
             args.append(f"--singularity-prefix={self.singularity_prefix_dir}")
             if verbose:
-                self.log(f"Using singularity prefix: {self.singularity_prefix_dir}")
+                self.log(f"Using singularity prefix: {self.singularity_prefix_dir}", color=typer.colors.MAGENTA)
         if not self.snakefile.exists():
             raise ValueError("Could not find Snakefile")  # this should occur at install
         else:
@@ -208,6 +208,7 @@ class RunApp(DynamicTyper):
             typer.secho(
                 "Conda not found! Install conda to use environments.\n",
                 fg=typer.colors.MAGENTA,
+                err=True,
             )
 
         if conda_found and self.snk_config.conda and not no_conda:
@@ -222,6 +223,7 @@ class RunApp(DynamicTyper):
                     typer.secho(
                         "Could not find mamba, using conda instead...",
                         fg=typer.colors.MAGENTA,
+                        err=True,
                     )
                 args.append("--conda-frontend=conda")
             else:
@@ -254,7 +256,7 @@ class RunApp(DynamicTyper):
         if configs:
             args.extend(["--config", *configs])
         if verbose:
-            typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA)
+            typer.secho(f"snakemake {' '.join(args)}\n", fg=typer.colors.MAGENTA, secho=True)
         if not keep_snakemake and Path(".snakemake").exists():
             keep_snakemake = True
         try:
@@ -277,7 +279,7 @@ class RunApp(DynamicTyper):
                     sys.exit(status)
         if not keep_snakemake and Path(".snakemake").exists():
             if verbose:
-                typer.secho("Deleting '.snakemake' folder...", fg=typer.colors.MAGENTA)
+                typer.secho("Deleting '.snakemake' folder...", fg=typer.colors.MAGENTA, err=True)
             shutil.rmtree(".snakemake")
 
     def _save_dag(self, snakemake_args: List[str], filename: Path):
@@ -318,7 +320,7 @@ class RunApp(DynamicTyper):
             )
             with open(filename, "w") as output_file:
                 if self.verbose:
-                    typer.secho(f"Saving dag to {filename}", fg=typer.colors.MAGENTA)
+                    typer.secho(f"Saving dag to {filename}", fg=typer.colors.MAGENTA, err=True)
                 subprocess.run(["cat"], stdin=dot_process.stdout, stdout=output_file)
         except (subprocess.CalledProcessError, FileNotFoundError):
             typer.echo("dot command not found!", fg=typer.colors.RED, err=True)
@@ -351,6 +353,7 @@ class RunApp(DynamicTyper):
                 typer.secho(
                     f"  - Copying resource '{src}' to '{dst}'",
                     fg=typer.colors.MAGENTA,
+                    err=True,
                 )
             target_is_directory = src.is_dir()
             if symlink:
@@ -375,6 +378,7 @@ class RunApp(DynamicTyper):
             typer.secho(
                 f"Copying {len(resources)} resources to working directory...",
                 fg=typer.colors.MAGENTA,
+                err=True,
             )
         try:
             for resource in resources:
@@ -388,6 +392,7 @@ class RunApp(DynamicTyper):
                     typer.secho(
                         f"  - Resource '{resource.name}' already exists! Skipping...",
                         fg=typer.colors.MAGENTA,
+                        err=True,
                     )
             yield
         finally:
@@ -399,6 +404,7 @@ class RunApp(DynamicTyper):
                         typer.secho(
                             f"Deleting '{copied_resource.name}' resource...",
                             fg=typer.colors.MAGENTA,
+                            err=True,
                         )
                     remove_resource(copied_resource)
 
