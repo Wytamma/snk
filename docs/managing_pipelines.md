@@ -103,8 +103,15 @@ The `snk list` command is used to view the installed workflows.
 snk list
 ```
 ```
-Found 1 workflows in <SNK_HOME>/workflows
-- workflow (latest)
+┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Workflow              ┃ Version  ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
+│ snk-basic-pipeline    │ 3445c7cd │
+├───────────────────────┼──────────┤
+│ variant-calling       │ v2.1.1   │
+├───────────────────────┼──────────┤
+│ workflow              │ editable │
+└───────────────────────┴──────────┘
 ```
 
 ## Uninstall workflows
