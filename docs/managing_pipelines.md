@@ -114,6 +114,8 @@ snk list
 └───────────────────────┴──────────┘
 ```
 
+!!! Note Use `--verbose` (`-v`) to show workflow installation paths.
+
 ## Uninstall workflows
 
 The `snk uninstall` command is used to uninstall workflows. You must pass uninstall the `name` of the workflow (e.g. only the `repo` part of `user`/`repo` if installed from Github). 
