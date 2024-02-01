@@ -21,19 +21,20 @@ By default Snk workflows will be installed (cloned) into a `snk` folder in the p
 /home/wwirth/.conda/envs/snk/
 ├── bin ($SNK_BIN)
 │   ├── python
-│   ├── snk-basic-pipeline -> .../snk/workflows/snk-basic-pipeline/bin/snk-basic-pipeline
+│   ├── snk-basic-pipeline -> .../snk/bin/snk-basic-pipeline
 │   └── ...
 ├── lib
 │   └── ...
 └── snk ($SNK_HOME)
+    ├── bin
+    │   └── snk-basic-pipeline (symlinked to $SNK_BIN)
     └── workflows
         └── snk-basic-pipeline
-            ├── bin
-            │   └── snk-basic-pipeline (symlinked to $SNK_BIN)
             ├── config
             └── workflow
+                ├── Snakefile
                 ├── envs
-                └── scripts
+                └── ...
 ```
 
 !!! note
