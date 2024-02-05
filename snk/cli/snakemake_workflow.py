@@ -8,6 +8,7 @@ from snakemake import (
     common,
 )
 from snakemake.persistence import Persistence
+from snk.cli.utils import check_command_available
 import os
 
 @dataclass
@@ -101,6 +102,9 @@ def create_snakemake_workflow(
             os.makedirs(workdir)
         workdir = os.path.abspath(workdir)
         os.chdir(workdir)
+    
+    if check_command_available("mamba"):
+        conda_frontend = "mamba"
 
     workflow = Workflow(
         snakefile=snakefile,

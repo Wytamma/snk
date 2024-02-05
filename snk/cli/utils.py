@@ -12,6 +12,21 @@ else:
 from snk.cli.options import Option
 
 
+def check_command_available(command: str):
+    """
+    Check if a command is available.
+    Args:
+      command (str): The command to check.
+    Returns:
+      bool: True if the command is available, False otherwise.
+    Examples:
+      >>> CLI.check_command_available('ls')
+    """
+    from shutil import which
+
+    return which(command) is not None
+
+
 def flatten(d, parent_key="", sep=":"):
     """
     Flattens a nested dictionary.

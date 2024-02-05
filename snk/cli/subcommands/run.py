@@ -9,6 +9,7 @@ from snk.workflow import Workflow
 from snk.cli.utils import (
     parse_config_args,
     dag_filetype_callback,
+    check_command_available
 )
 
 from snk.cli.config.config import (
@@ -407,21 +408,6 @@ class RunApp(DynamicTyper):
                             err=True,
                         )
                     remove_resource(copied_resource)
-
-
-def check_command_available(command: str):
-    """
-    Check if a command is available.
-    Args:
-      command (str): The command to check.
-    Returns:
-      bool: True if the command is available, False otherwise.
-    Examples:
-      >>> CLI.check_command_available('ls')
-    """
-    import shutil
-
-    return shutil.which(command) is not None
 
 
 def parse_config_monkeypatch(args):
