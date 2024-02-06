@@ -138,6 +138,9 @@ class DynamicTyper:
         """
         if option.flag in sys.argv:
             return True
+        elif option.type is bool and f"--no-{option.flag[2:]}" in sys.argv:
+            # Check for boolean flags like --foo/--no-foo
+            return True
         elif option.short and option.short_flag in sys.argv:
             return True
         return False
