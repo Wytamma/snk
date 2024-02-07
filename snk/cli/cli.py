@@ -40,6 +40,7 @@ class CLI(DynamicTyper):
                 "The `pipeline_dir_path` argument is deprecated and will be removed in a future release. Use `workflow_dir_path` instead.",
                 DeprecationWarning,
             )
+            workflow_dir_path = pipeline_dir_path
         if workflow_dir_path is None:
             # get the calling frame (the frame of the function that called this function)
             calling_frame = inspect.currentframe().f_back
