@@ -32,7 +32,7 @@ class CLI(DynamicTyper):
       >>> CLI(Path('/path/to/workflow'))
     """
 
-    def __init__(self, workflow_dir_path: Path = None, pipeline_dir_path: Path = None, snk_config: SnkConfig = None) -> None:
+    def __init__(self, workflow_dir_path: Path = None, *, pipeline_dir_path: Path = None, snk_config: SnkConfig = None) -> None:
         if pipeline_dir_path is not None:
             # raise a deprecation warning
             import warnings
