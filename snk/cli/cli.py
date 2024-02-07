@@ -32,7 +32,14 @@ class CLI(DynamicTyper):
       >>> CLI(Path('/path/to/workflow'))
     """
 
-    def __init__(self, workflow_dir_path: Path = None, snk_config: SnkConfig = None) -> None:
+    def __init__(self, workflow_dir_path: Path = None, pipeline_dir_path: Path = None, snk_config: SnkConfig = None) -> None:
+        if pipeline_dir_path is not None:
+            # raise a deprecation warning
+            import warnings
+            warnings.warn(
+                "The `pipeline_dir_path` argument is deprecated and will be removed in a future release. Use `workflow_dir_path` instead.",
+                DeprecationWarning,
+            )
         if workflow_dir_path is None:
             # get the calling frame (the frame of the function that called this function)
             calling_frame = inspect.currentframe().f_back
