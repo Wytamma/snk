@@ -20,7 +20,14 @@ types = {
 }
 
 def get_keys_from_annotation(annotations):
-    return {":".join(annotation.split(":")[:-1]) for annotation in annotations}
+    # Get the unique keys from the annotations
+    # preserving the order
+    keys = []
+    for key in annotations:
+        key = ":".join(key.split(":")[:-1])
+        if key not in keys:
+            keys.append(key)
+    return keys
 
 def create_option_from_annotation(
     annotation_key: str,

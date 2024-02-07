@@ -58,12 +58,14 @@ def test_config(local_runner: CLIRunner):
     assert res.code == 0, res.stderr
     assert "output: hello.txt" in res.stdout
 
-def test_run_cli(local_runner: CLIRunner):
+def test_run_cli_help(local_runner: CLIRunner):
     res = local_runner(["run", "-h"])
     assert res.code == 0, res.stderr
     assert "workflow" in res.stdout, res.stderr
     assert "times" in res.stdout
     assert "text" in res.stdout
+    # check the order of the options
+    assert res.stdout.index("--text") < res.stdout.index("--times")
 
 
 @pytest.mark.parametrize("filetype", ["pdf", "svg", "png"])
