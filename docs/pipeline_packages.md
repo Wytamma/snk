@@ -57,7 +57,7 @@ from pathlib import Path
 
 from snk.cli import CLI
 
-workflow_name = CLI(workflow_dir_path = Path(__file__).parent.parent)
+workflow_name = CLI(Path(__file__).parent.parent)
 ```
 
 !!! note
