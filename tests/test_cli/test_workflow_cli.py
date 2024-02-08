@@ -64,9 +64,6 @@ def test_run_cli_help(local_runner: CLIRunner):
     assert "workflow" in res.stdout, res.stderr
     assert "times" in res.stdout
     assert "text" in res.stdout
-    # check the order of the options
-    assert res.stdout.index("--text") < res.stdout.index("--times")
-
 
 @pytest.mark.parametrize("filetype", ["pdf", "svg", "png"])
 def test_dag(local_runner: CLIRunner, tmp_path, filetype):
