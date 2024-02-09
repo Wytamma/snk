@@ -10,15 +10,16 @@ The `snk.yaml` file serves as the main interface for configuring the Snk workflo
 
 The following options are available for configuration in `snk.yaml`:
 
-- `logo`: The text used to dynamically generate the ASCII art displayed in the CLI.
-- `art`: A string representing ASCII art to display in the CLI (overwrites `logo`).
-- `tagline`: A string representing the tagline displayed in the CLI.
-- `font`: A string representing the font used in the CLI.
-- `resources`: A list of resource files required for the workflow.
+- `logo`: The text used to dynamically generate the ASCII art displayed in the CLI. Default: `<name-of-workflow>`.
+- `art`: A string representing ASCII art to display in the CLI (overwrites `logo`). Default: `null`.
+- `tagline`: A string representing the tagline displayed in the CLI. Default: `"A Snakemake workflow CLI generated with Snk"`.
+- `font`: A string representing the font used in the CLI (see [FontList](https://www.ascii-art.site/FontList.html)). Default: `"small"`.
+- `resources`: A list of resource files required for the workflow. Default: `[]`.
 - `cli`: Annotations for the workflow cli parameters.
-- `symlink_resources`: A boolean that controls whether symbolic links are created for resources.
-- `conda`: A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available.
-- `additional_snakemake_args`: A list of additional arguments to pass to snakemake.
+- `symlink_resources`: A boolean that controls whether symbolic links are created for resources (avoid using this unless you know). Default: `False`.
+- `conda`: A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available. Default: `True`.
+- `additional_snakemake_args`: A list of additional arguments to pass to snakemake. Default: `[]`.
+- `skip_missing`: skip any missing cli options (i.e. those in config but not in the snk file). Default: `False`.
 
 ## Example `snk.yaml` File
 
