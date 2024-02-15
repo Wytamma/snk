@@ -196,6 +196,20 @@ workflow-name
     └── __init__.py
 ```
 
+At this point you can delete the `config.yaml` file and use the `snk.yaml` file to specify the parameters for your workflow. The `snk.yaml` file will be used to generate the CLI, and the parameters will be available in the `config` dictionary in your `Snakefile` (just remember to set defaults!).  
+
+```yaml
+cli:
+  text:
+    type: str
+    help: "The message to save to the file"
+    default: "hello world!"
+  output:
+    type: path
+    help: "The path to save the message to"
+    default: "message.txt"
+```
+
 ## Add additional commands to the workflow
 
 To add commands to the workflow cli you can access the underlying typer app:
