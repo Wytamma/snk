@@ -84,6 +84,39 @@ cli:
 
 In this example, the `input` and `count` parameters are required, while the `text` and `flag` parameters are optional. the flas `-i` can be used as shorthand for `--input`. The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
 
+## Nested Annotations in the `snk.yaml` File
+
+Your `snk.yaml` annotations must match the structure of your `config.yaml` file. If you have nested options in your `config.yaml` file, you must specify these in the `snk.yaml` file as well. Here's an example of how you might specify nested options in a `snk.yaml` file:
+
+```yaml
+cli:
+  nested:
+    input:
+      type: path
+      help: "Path to the input file"
+  option:
+    type: str
+    default: "Hello, world!"
+```
+
+This will produce the following CLI:
+
+```bash
+workflow run --nested-input <input> --option <other_option>
+```
+
+The matching `config.yaml` would look like this:
+
+```yaml
+nested:
+  input: "path/to/input"
+option: "Hello, world!"
+```
+
+### Using snk.yaml without a config.yaml file
+
+If you don't have a `config.yaml` file, you can still use the `snk.yaml` file to specify the parameters for your workflow. The `snk.yaml` file will be used to generate the CLI, and the parameters will be available in the `config` dictionary in your `Snakefile`. However, you should probably still have a `config.yaml` file to store your config, as this is the standard way to manage configuration in Snakemake workflows (unless you're creating a [workflow package](https://snk.wytamma.com/workflow_packages)).
+
 ### Validating Config with the `snk.yaml` File
 
 Snk provides a function that can be use to validate snakemake config using the `snk.yaml` cli annotations. The `validate_config` function will convert values to the correct type if possible. If the value cannot be converted to the correct type, an error will be raised. This can be added to the start of your `Snakefile` to ensure that the config is valid before running the workflow.
