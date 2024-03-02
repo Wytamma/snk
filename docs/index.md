@@ -1,7 +1,7 @@
 ---
 title: Home
 ---
-# SNK (Snek)
+# Snk
 
 [![PyPI - Version](https://img.shields.io/pypi/v/snk.svg)](https://pypi.org/project/snk)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/snk.svg)](https://pypi.org/project/snk)
