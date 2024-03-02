@@ -15,7 +15,7 @@ The following options are available for configuration in `snk.yaml`:
 - `tagline`: A string representing the tagline displayed in the CLI. Default: `"A Snakemake workflow CLI generated with Snk"`.
 - `font`: A string representing the font used in the CLI (see [FontList](https://www.ascii-art.site/FontList.html)). Default: `"small"`.
 - `resources`: A list of resource files required for the workflow. Default: `[]`.
-- `cli`: Annotations for the workflow cli parameters.
+- `cli`: Annotations for the workflow cli parameters (see [CLI section](https://snk.wytamma.com/snk_config_file/#cli) below.
 - `symlink_resources`: A boolean that controls whether symbolic links are created for resources (avoid using this unless you know). Default: `False`.
 - `conda`: A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available. Default: `True`.
 - `additional_snakemake_args`: A list of additional arguments to pass to snakemake. Default: `[]`.
