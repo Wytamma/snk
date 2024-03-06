@@ -144,10 +144,10 @@ class Workflow:
 
     def _find_folder(self, name) -> Optional[Path]:
         """Search for folder"""
-        if (self.path / name).exists():
-            return self.path / name
         if (self.path / "workflow" / name).exists():
             return self.path / "workflow" / name
+        if (self.path / name).exists():
+            return self.path / name
         return None
 
     @property
