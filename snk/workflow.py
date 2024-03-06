@@ -2,7 +2,8 @@ from pathlib import Path
 import sys
 from typing import Optional
 from git import Repo, InvalidGitRepositoryError
-
+import importlib.util
+import os
 
 class Workflow:
     """
@@ -32,6 +33,7 @@ class Workflow:
             except InvalidGitRepositoryError:
                 self.repo = None
         self.name = self.path.name
+        self.editable = self.check_is_editable()
 
 
     @property
@@ -92,7 +94,10 @@ class Workflow:
     @property
     def conda_prefix_dir(self):
         """
-        Gets the conda prefix directory of the workflow.
+        Gets the conda prefix directory of the workflow. If in editable mode, the conda prefix directory is
+        located in the .snakemake directory. Otherwise, it is located in the .conda directory in the workflow
+        directory.
+        
         Returns:
             Path: The path to the conda prefix directory.
         """
@@ -110,11 +115,32 @@ class Workflow:
             # https://github.com/snakemake/snakemake/blob/2ecb21ba04088b9e6850447760f713784cf8b775/snakemake/deployment/singularity.py#L130C1-L131C1
             return None
         return Path(".snakemake") / "singularity" if self.editable else self.path / ".singularity"
+    
+    def _is_editable_pip_install(self):
+        # This function now acts as a method within the Workflow class
+        package_spec = importlib.util.find_spec(self.name)
+        if package_spec is None:
+            return False  # Package is not installed
 
-    @property
-    def editable(self):
+        package_location = package_spec.origin
+        site_packages_paths = [p for p in sys.path if 'site-packages' in p]
+        is_inside_site_packages = any(package_location.startswith(sp) for sp in site_packages_paths)
+
+        if not is_inside_site_packages:
+            return True
+
+        for sp in site_packages_paths:
+            egg_link_path = os.path.join(sp, self.name + '.egg-link')
+            if os.path.isfile(egg_link_path):
+                return True
+
+        return False
+
+    def check_is_editable(self):
         """Is the workflow editable?"""
-        return self.path.is_symlink()
+        if self.path.is_symlink():
+            return True
+        return self._is_editable_pip_install()
 
     def _find_folder(self, name) -> Optional[Path]:
         """Search for folder"""
