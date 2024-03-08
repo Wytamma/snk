@@ -47,8 +47,6 @@ workflow env create [OPTIONS] [NAME]
 Individual conda envs can be create with `workflow env create ENV_NAME`.
 
 
-This command lists all the conda environments present in the workflow.
-
 ### `remove`
 
 Delete all conda environments.
@@ -61,7 +59,7 @@ This command deletes all the conda environments in the workflow.
 
 ### `run`
 
-The `env run` command in the `workflow` tool allows you to run a command within one of the workflow environments. This guide provides an overview of the available options and arguments for the `env run` command.
+The `env run` command in the `workflow` tool allows you to run a command within one of the workflow environments.
 
 #### Arguments
 
