@@ -44,7 +44,7 @@ snk = "snk.main:app"
 path = "snk/__about__.py"
 
 [tool.hatch.envs.default]
-python = "3.11"
+python = "3.10"
 dependencies = [
   "pytest",
   "pytest-cov",
