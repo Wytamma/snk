@@ -25,7 +25,9 @@ jobs:
           key: ${{ github.ref }}
           path: .cache
       - run: pip install hatch
+      - run: sudo apt-get update
       - run: sudo apt-get -y install graphviz
+      - run: sudo apt install -y llvm
       - name: Run tests
         shell: bash
         run: hatch run cov
