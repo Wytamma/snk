@@ -26,8 +26,7 @@ jobs:
           path: .cache
       - run: pip install hatch
       - run: sudo apt-get update
-      - run: sudo apt-get -y install graphviz
-      - run: sudo apt install -y llvm
+      - run: sudo apt-get -y install graphviz llvm
       - name: Run tests
         shell: bash
         run: hatch run cov
