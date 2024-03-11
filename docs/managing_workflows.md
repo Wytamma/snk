@@ -114,7 +114,9 @@ snk list
 └───────────────────────┴──────────┘
 ```
 
-!!! Note Use `--verbose` (`-v`) to show workflow installation paths.
+!!! note 
+    
+    Use `--verbose` (`-v`) to show workflow installation paths.
 
 ## Uninstall workflows
 
