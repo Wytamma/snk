@@ -2,11 +2,10 @@ from types import SimpleNamespace
 import typer
 from pathlib import Path
 from typing import Optional, List
-from rich import print
 from .nest import Nest
 from .errors import WorkflowExistsError, WorkflowNotFoundError
 from .__about__ import __version__
-
+from snk_cli.config import SnkConfig
 
 app = typer.Typer()
 
@@ -48,8 +47,12 @@ def callback(
         show_default=False,
         ),
     ):
-    """\b
-        _            _             _        
+    # suppress python warning 
+    ctx.obj = SimpleNamespace(snk_home = home, snk_bin = bin)
+# fmt: on
+
+callback.__doc__ = "\b"
+callback.__doc__ += r"""        _            _             _        
        / /\         /\ \     _    /\_\      
       / /  \       /  \ \   /\_\ / / /  _   
      / / /\ \__   / /\ \ \_/ / // / /  /\_\ 
@@ -60,13 +63,8 @@ def callback(
 /_/\__/ / /  / / /    / / // / /  \ \ \     
 \ \/___/ /  / / /    / / // / /    \ \ \    
  \_____\/   \/_/     \/_/ \/_/      \_\_\   
- \b
- \n
- Snakemake workflow management system
-    """
-    ctx.obj = SimpleNamespace(snk_home = home, snk_bin = bin)
-# fmt: on
-
+"""
+callback.__doc__ += f"\b\n\nA Snakemake Workflow Management System ({__version__})"
 
 @app.command()
 def install(
@@ -98,6 +96,11 @@ def install(
     resource: Optional[List[Path]] = typer.Option(
         [],
         help="Specify resources additional to the resources folder required by the workflow (copied to working dir at runtime).",
+    ),
+    snakemake_version: Optional[str] = typer.Option(
+        None,
+        "--snakemake",
+        help="Specify a specific version of snakemake to use.",
     ),
     no_conda: bool = typer.Option(
         False,
@@ -134,11 +137,24 @@ def install(
             additional_resources=resource,
             force=force,
             conda=not no_conda,
+            snakemake_version=snakemake_version,
         )
+    except WorkflowExistsError as e:
+        typer.secho(str(e) + ". Use a different name (--name) or overwrite (--force).", fg="red", err=True)
+        raise typer.Exit(1)
     except Exception as e:
-        typer.secho(e, fg="red")
-        raise typer.Exit()
-    typer.secho(f"Successfully installed {installed_workflow.name} ({installed_workflow.version})!", fg="green")
+        typer.secho(e, fg="red", err=True)
+        raise typer.Exit(1)
+    
+    if editable:
+        version = "editable"
+    elif installed_workflow.version is None:
+        snk_config = SnkConfig.from_workflow_dir(installed_workflow.path)
+        version = snk_config.version
+    else:
+        version = installed_workflow.version
+
+    typer.secho(f"Successfully installed {installed_workflow.name} ({version})!", fg="green")
 
 
 @app.command()
@@ -184,11 +200,15 @@ def list(
     except FileNotFoundError:
         workflows = []
     for workflow in workflows:
-        version = "[green]editable[/green]" if workflow.editable else f"[blue]{workflow.version}[/blue]"
+        version = workflow.version
+        if version is None:
+            snk_config = SnkConfig.from_workflow_dir(workflow.path)
+            version = snk_config.version
+        version_str = "[green]editable[/green]" if workflow.editable else f"[blue]{version}[/blue]"
         if verbose:
-            table.add_row(workflow.name, version, f"[yellow]{str(workflow.path.resolve())}[/yellow]")
+            table.add_row(workflow.name, version_str, f"[yellow]{str(workflow.path.resolve())}[/yellow]")
         else:
-            table.add_row(workflow.name, version)
+            table.add_row(workflow.name, version_str)
     console = Console()
     console.print(table)
 

@@ -2,7 +2,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from snk.main import app
-from snk.workflow import Workflow
+from snk_cli.workflow import Workflow
 
 runner = CliRunner()
 

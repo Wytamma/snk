@@ -4,6 +4,8 @@ import sys
 import stat
 import inspect
 import os
+import venv
+import subprocess
 from typing import List
 import shutil
 
@@ -13,8 +15,8 @@ from .errors import (
     InvalidWorkflowRepositoryError,
     InvalidWorkflowError
 )
-from .cli.config.config import SnkConfig
-from .workflow import Workflow
+from snk_cli.config.config import SnkConfig
+from snk_cli.workflow import Workflow
 
 
 class Nest:
@@ -61,6 +63,7 @@ class Nest:
         self.bin_dir = Path(bin_dir).absolute()
         self.snk_home = Path(snk_home).absolute()
         self.snk_workflows_dir = self.snk_home / "workflows"
+        self.snk_venv_dir = self.snk_home / "venvs"
         self.snk_executable_dir = self.snk_home / "bin"
 
         # Create dirs
@@ -100,6 +103,7 @@ class Nest:
         force=False,
         additional_resources=[],
         conda: bool = None,
+        snakemake_version=None,
     ) -> Workflow:
         """
         Installs a Snakemake workflow as a CLI.
@@ -154,7 +158,16 @@ class Nest:
             workflow_path = self.local(workflow_local_path, name, editable)
         try:
             self.validate_SnakeMake_repo(workflow_path)
-            workflow_executable_path = self.create_executable(workflow_path, name)
+            if snakemake_version is None:
+                snakemake_min_version = self.check_for_snakemake_min_version(workflow_path)
+                if snakemake_min_version:
+                    snakemake_version = snakemake_min_version
+            if snakemake_version is not None:
+                venv_path = self.create_virtual_environment(name, snakemake_version=snakemake_version)
+                python_interpreter_path = venv_path / "bin" / "python"
+            else:
+                python_interpreter_path = self.python_interpreter_path
+            workflow_executable_path = self.create_executable(workflow_path, name, python_interpreter_path=python_interpreter_path)
             self.link_workflow_executable_to_bin(workflow_executable_path)
             if config:
                 self.copy_nonstandard_config(workflow_path, config)
@@ -243,6 +256,11 @@ class Nest:
         if workflow_executable.exists():
             to_delete.append(workflow_executable)
 
+        # remove venv  
+        venv_path = self.snk_venv_dir / workflow_name
+        if venv_path.exists():
+            to_delete.append(venv_path)
+
         # remove link
         workflow_symlink_executable = self.bin_dir / workflow_name
         if workflow_symlink_executable.is_symlink():
@@ -299,6 +317,8 @@ class Nest:
           >>> nest.uninstall('example')
           True
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Name must be a string. Found: {name}")
         to_remove = self.get_paths_to_delete(name)
         if force:
             proceed = True
@@ -433,19 +453,76 @@ class Nest:
         except InvalidGitRepositoryError:
             Repo.init(location, mkdir=False)
         return location
+    
+    def create_virtual_environment(self, name: str, snakemake_version) -> Path:
+        """
+        Create a virtual environment for the workflow.
+        Args:
+          workflow_path (Path): The path to the workflow directory.
+          name (str): The name of the virtual environment.
+        Returns:
+          Path: The path to the virtual environment.
+        Examples:
+          >>> Nest.create_virtual_environment(Path('/path/to/workflow'), 'example')
+        """
+        venv_dir = self.snk_home / "venvs"
+        venv_dir.mkdir(exist_ok=True)
+        venv_path = venv_dir / name
+        try:
+            venv.create(venv_path, with_pip=True, symlinks=True)
+        except FileExistsError:
+            raise FileExistsError(f"The venv {venv_path} already exists. Please choose a different location or name. Alternatively, use the --force flag to overwrite the existing venv.")
+        self._install_snk_cli_in_venv(venv_path, snakemake_version=snakemake_version)
+        return venv_path
+    
+    def _install_snk_cli_in_venv(self, venv_path: Path, snakemake_version="7.32.4"):
+        """
+        Install snk_cli in the virtual environment.
+        Args:
+          venv_path (Path): The path to the virtual environment.
+          snakemake_version (str, optional): The version of Snakemake to install. Defaults to "7.32.4".
+        Examples:
+          >>> Nest.install_snakemake(Path('/path/to/venv'), '7.32.4')
+        """
+        if not venv_path.exists():
+            raise FileNotFoundError(f"Virtual environment not found at {venv_path}")
+        if sys.platform.startswith("win"):
+            pip_path = venv_path / "Scripts" / "pip.exe"
+        else:
+            pip_path = venv_path / "bin" / "pip"
+        if not pip_path.exists():
+            raise FileNotFoundError(f"pip not found at {pip_path}")
+        # check if snakemake version starts with >= or <=
+        if snakemake_version.startswith(">") or snakemake_version.startswith("<"):
+            snakemake_version = f"snakemake{snakemake_version}"
+        else:
+            snakemake_version = f"snakemake=={snakemake_version}"
+        try:
+            subprocess.run([pip_path, 'install', snakemake_version, "snk_cli"], check=True)
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Failed to install snk_cli in virtual environment. Error: {e}")
 
-    def create_executable(self, workflow_path: Path, name: str) -> Path:
+    def create_executable(self, workflow_path: Path, name: str, python_interpreter_path = None) -> Path:
+        if not python_interpreter_path:
+            python_interpreter_path = self.python_interpreter_path
         template = inspect.cleandoc(
             f"""
             #!/bin/sh
-            '''exec' "{self.python_interpreter_path}" "$0" "$@"
+            '''exec' "{python_interpreter_path}" "$0" "$@"
             ' '''
             # -*- coding: utf-8 -*-
             import re
             import sys
-            from snk import create_cli
+            from pathlib import Path
+            from snk_cli import CLI
+
+            def create_cli(p):
+                workflow_dir_path = Path(p)
+                cli = CLI(workflow_dir_path)
+                cli()
+
             if __name__ == "__main__":
-                sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+                sys.argv[0] = re.sub(r'(-script\\.pyw|\\.exe)?$', '', sys.argv[0])
                 sys.exit(create_cli("{workflow_path}"))
                 
         """
@@ -489,6 +566,38 @@ class Nest:
             )
         return self.bin_dir / name
 
+    def check_for_snakemake_min_version(self, workflow_path: Path):
+        """
+        Check if the workflow has a minimum version of Snakemake.
+        Args:
+          workflow_path (Path): The path to the workflow directory.
+        Returns:
+            str: The minimum version of Snakemake.
+        Examples:
+            >>> Nest.check_for_snakemake_min_version(Path('/path/to/workflow'))
+            '3.2'
+        """
+        import re
+
+        min_version = None
+        for snakefile in workflow_path.glob("**/Snakefile"):
+            if not snakefile.exists():
+                break
+        else:
+            return None
+        with open(snakefile, "r") as f:
+            for line in f:
+                match = re.search(r'min_version\("(\d+\.\d+)"\)', line)
+                if match:
+                    min_version = match.group(1)
+                    break
+        if min_version:
+            import pkg_resources # type: ignore
+            from snakemake.common import __version__
+            if pkg_resources.parse_version(__version__) < pkg_resources.parse_version(min_version):
+                min_version = f">={min_version}"
+        return min_version
+
     def validate_SnakeMake_repo(self, repo: Repo):
         """
         Validates a SnakeMake repository.
@@ -500,5 +609,4 @@ class Nest:
           >>> Nest.validate_SnakeMake_repo('/path/to/repo')
           True
         """
-        # print("Skipping validation!")
         pass

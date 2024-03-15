@@ -19,6 +19,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -29,6 +30,7 @@ dependencies = [
   "pulp<2.8",  # Pin pulp <2.8 for snakemake: https://github.com/snakemake/snakemake/issues/2607
   "art<=5.9",
   "makefun<=1.15.1",
+  "snk-cli"
 ]
 dynamic = ["version"]
 
@@ -44,7 +46,7 @@ snk = "snk.main:app"
 path = "snk/__about__.py"
 
 [tool.hatch.envs.default]
-python = "3.10"
+python = "3.12"
 dependencies = [
   "pytest",
   "pytest-cov",
