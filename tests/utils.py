@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import subprocess
 from typing import List
 import pytest
-from snk.cli.config import SnkConfig
+from snk_cli.config import SnkConfig
 
 @dataclass
 class Result:

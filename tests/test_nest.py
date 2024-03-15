@@ -31,6 +31,13 @@ def test_install(nest: Nest):
     workflow = nest.install("tests/data/workflow")
     assert workflow.name == "workflow"
     assert len(nest.workflows) == 1
+    assert (nest.snk_workflows_dir / "workflow").exists()
+    assert (nest.snk_home / "bin" / "workflow").exists()
+
+    with open(nest.snk_home / "bin" / "workflow") as f:
+        contents = f.read()
+        assert "from snk_cli import CLI" in contents
+        assert "create_cli" in contents
 
 
 def test_install_custom_name(nest: Nest):
@@ -45,4 +52,9 @@ def test_link_workflow_executable_to_bin(nest: Nest):
 
 
 def test_uninstall(nest: Nest):
-    pass
+    workflow = nest.install("tests/data/workflow")
+    assert len(nest.workflows) == 1
+    nest.uninstall(workflow.name, force=True)
+    assert len(nest.workflows) == 0
+    assert not (nest.snk_workflows_dir / "workflow").exists()
+    assert not (nest.snk_home / "bin" / "workflow").exists()

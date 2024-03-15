@@ -1,5 +1,5 @@
 import pytest
-from snk.cli.config.config import SnkConfig
+from snk_cli.config.config import SnkConfig
 
 
 def test_snk_config_creation():

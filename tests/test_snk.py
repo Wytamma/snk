@@ -2,7 +2,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from snk.main import app
-from snk.workflow import Workflow
+from snk_cli.workflow import Workflow
 
 runner = CliRunner()
 
@@ -61,3 +61,19 @@ def test_snk_uninstall(local_workflow: Workflow):
     )
     assert result.exit_code == 0
     assert "Successfully uninstalled" in result.stdout
+
+
+def test_import_create_cli(capsys):
+    from snk import create_cli
+    assert callable(create_cli)
+    assert create_cli.__module__ == "snk"
+    assert create_cli.__name__ == "create_cli"
+    
+    import sys
+    sys.argv = ['cli', '-h']
+    try:
+        create_cli("tests/data/workflow")
+    except SystemExit:
+        pass
+    captured = capsys.readouterr()
+    assert "Usage" in captured.out

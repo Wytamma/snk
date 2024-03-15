@@ -1,4 +1,5 @@
 art: null
+version: 0.13.0
 cli:
   hidden:
     hidden: true

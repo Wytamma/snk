@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 from snk import Nest
 from .utils import CLIRunner
-from snk.cli.config import SnkConfig
+from snk_cli.config import SnkConfig
 import yaml
 
 @pytest.fixture()
