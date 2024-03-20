@@ -9,6 +9,16 @@ def create_cli(p):
     """
     This is the interface to create the dynamic CLI.
     Changing this function name will break backwards compatibility.
+
+    Args:
+      p (str): The path to the workflow directory.
+
+    Returns:
+      None
+
+    Examples:
+      >>> create_cli('/path/to/workflow')
+      ... # CLI is created and executed
     """
     workflow_dir_path = Path(p)
     cli = CLI(workflow_dir_path)
