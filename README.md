@@ -13,7 +13,7 @@
 
 ---
 
-Snk (pronounced snek) is a Snakemake workflow management system. Snk allows you to install Snakemake workflows as dynamically generated Command Line Interfaces (CLIs). Using a workflow as a CLI increases its interoperability and allows complex workflows to be used as modular components in a larger system.
+Snk (pronounced snek) is a Snakemake workflow management system. Snk allows you to install Snakemake workflows as dynamically generated Command Line Interfaces (via [snk-cli](https://github.com/Wytamma/snk-cli)). Using a workflow as a CLI increases its interoperability and allows complex workflows to be used as modular components in a larger system.
 
 ## Installation
 
@@ -36,7 +36,7 @@ Successfully installed variant-calling (v2.1.1)!
 
 ### Inspect the CLI   
 
-Snk will automatically create a fully featured CLI for the Snakemake workflow. 
+Snk will automatically create a fully featured CLI for the Snakemake workflow using [snk-cli](https://github.com/Wytamma/snk-cli). 
 
 ```
 variant-calling --help
@@ -78,6 +78,26 @@ variant-calling config --pretty # print the config
 variant-calling config > config.yml # save the config 
 variant-calling run --config config.yml # run with config 
 ```
+
+### Manage Installed Workflows
+
+You can list installed workflows with `snk list` and uninstall them with `snk uninstall`.
+
+```bash
+snk list
+```
+┏━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Workflow           ┃ Version  ┃
+┡━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
+│ variant-calling    │ v2.1.1   │
+└────────────────────┴──────────┘
+
+```bash
+snk uninstall variant-calling
+```
+Successfully uninstalled variant-calling!
+
+## Documentation
 
 Read the [documentation](https://snk.wytamma.com) for more information.
 
