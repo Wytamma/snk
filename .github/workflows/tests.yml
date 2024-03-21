@@ -31,7 +31,7 @@ jobs:
           key: ${{ github.ref }}
           path: .cache
       - run: pip install hatch
-      - run: sudo apt-get update && sudo apt-get install -y llvm-10*
+      - run: sudo apt-get update && sudo apt-get install -y llvm-10 lldb-10 llvm-10-dev libllvm10 llvm-10-runtime
       - run: sudo apt-get -y install graphviz
       - name: Run tests
         shell: bash
