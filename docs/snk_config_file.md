@@ -27,24 +27,46 @@ Below is an example of a `snk.yaml` file illustrating all available options:
 
 ```yaml
 logo: "MyWorkflow"
-tagline: "A workflow to illustrate the use of snk.yaml"
 font: "cybermedium"
+art: |
+  _______  _______  _______  _______ 
+ (  ____ \(  ___  )(       )(  ____ \
+ | (    \/| (   ) || () () || (    \/
+ | (__    | (___) || || || || (_____ 
+ |  __)   |  ___  || |(_)| |(_____  )
+ | (      | (   ) || |   | |      ) |
+ | (____/\| )   ( || )   ( |/\____) |
+ (_______/|/     \||/     \|\_______)
+tagline: "A comprehensive Snakemake workflow configured with snk.yaml"
 resources:
   - "data/input1.txt"
   - "data/input2.txt"
+symlink_resources: False
+conda: True
+additional_snakemake_args:
+  - "--reason"
+skip_missing: True
 cli:
   input:
     type: Path
     help: "Path to the input file"
-    required: False
+    required: True
+  output:
+    type: Path
+    help: "Path to the output directory"
+    required: True
 ```
 
 In this example:
 
-- The workflow logo is set to "MyWorkflow".
-- The tagline is "A workflow to illustrate the use of snk.yaml".
-- The font used in the CLI is "cybermedium".
-- Two resource files, "data/input1.txt" and "data/input2.txt", are required for the workflow.
+- The workflow `logo` is set to "MyWorkflow".
+- The `font` used for the CLI logo is "cybermedium".
+- ASCII art is specified directly in the `art` configuration, taking precedence over the logo if both are provided.
+- The `tagline` is "A workflow to illustrate the use of snk.yaml". This will be printed in the CLI help under the logo.
+- Two resource files, `data/input1.txt` and `data/input2.txt`, are required for the workflow. They will be copied to the working directory at runtime.
+- The `conda` flag is enabled (True), indicating that the workflow should utilise Conda environments for executing tasks, provided the conda command is accessible in the system environment.
+- Additional Snakemake arguments are specified under `additional_snakemake_args`, including --reason which will display the reasons for rule execution.
+- The `skip_missing` option is enabled (True), which means that only config defined in the `snk.yaml` file, will be included in the dynamically generate CLI.
 - An annotation is provided for the `input` parameter, which is of type `str` and comes with a help message "Path to the input file".
 
 ## CLI
