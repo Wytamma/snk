@@ -38,7 +38,7 @@ jobs:
       - run: sudo apt-get -y install graphviz
       - name: Run tests
         shell: bash
-        run: hatch run cov
+        run: AR=/usr/bin/ar hatch run cov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
 
