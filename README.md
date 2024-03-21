@@ -86,12 +86,13 @@ You can list installed workflows with `snk list` and uninstall them with `snk un
 ```bash
 snk list
 ```
+```
 ┏━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
 ┃ Workflow           ┃ Version  ┃
 ┡━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
 │ variant-calling    │ v2.1.1   │
 └────────────────────┴──────────┘
-
+```
 ```bash
 snk uninstall variant-calling
 ```
