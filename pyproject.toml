@@ -30,7 +30,7 @@ dependencies = [
   "pulp<2.8",  # Pin pulp <2.8 for snakemake: https://github.com/snakemake/snakemake/issues/2607
   "art<=5.9",
   "makefun<=1.15.1",
-  "snk-cli"
+  "snk-cli==0.1.0"
 ]
 dynamic = ["version"]
 
