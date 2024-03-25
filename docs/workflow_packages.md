@@ -7,7 +7,7 @@ While `snk` is useful for managing workflows, using snk does add an extra step t
 
 Turning a workflow into a package means that you are committing to a different style of project. A good example of this style is [pangolin](https://github.com/cov-lineages/pangolin), a tool for assigning SARS-CoV-2 genome sequences to global lineages. Pangolin has a CLI that wraps serval Snakemake rules. From the user perspective they `conda install pangolin` and then use the CLI `pangolin <query>` to run the tool. Pangolin abstracts away the execution of the Snakemake workflow. 
 
-Internally `snk` uses [`snk-cli`](https://github.com/Wytamma/snk-cli) to generate snakemake CLIs. By using the `CLI` class from `snk-cli` you can build a fully featured workflow package without having to write the Snakemake wrapper. 
+Internally `snk` uses [`snk-cli`](https://github.com/Wytamma/snk-cli) to generate snakemake CLIs. By using the `CLI` class from `snk-cli` you can build a fully featured workflow package without having to write a Snakemake wrapper. 
 
 !!! info
 
