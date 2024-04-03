@@ -1,11 +1,13 @@
 ---
 title: Workflow Packages
 ---
-# Using Snk CLI to build self contained tools
+# Using Snk-CLI to build self contained tools
 
-While `snk` is useful for managing workflows, using snk does add an extra step to typical install processes. Users must first install snk before they can `snk install` your workflow. However, it is possible to build a workflow as a standalone package (relying on `pip` or `conda` to do the installation) and only using `snk` to dynamically generate the CLI. 
+While `snk` is useful for managing workflows, using snk does add an extra step to typical install processes. Users must first install snk before they can `snk install` your workflow. However, it is possible to build a workflow as a standalone package (relying on `pip` or `conda` to do the installation) and only using [`snk-cli`](https://github.com/Wytamma/snk-cli) to dynamically generate the CLI. 
 
-Turning a workflow into a package means that you are committing to a different style of project. A good example of this style is [pangolin](https://github.com/cov-lineages/pangolin), a tool for assigning SARS-CoV-2 genome sequences to global lineages. Pangolin has a CLI that wraps serval Snakemake rules. From the user perspective they `conda install pangolin` and then use the CLI `pangolin <query>` to run the tool. Pangolin abstracts away the execution of the Snakemake workflow. Using the snk CLI class can do the same except by using snk you don't have to build the Snakemake wrapper. 
+Turning a workflow into a package means that you are committing to a different style of project. A good example of this style is [pangolin](https://github.com/cov-lineages/pangolin), a tool for assigning SARS-CoV-2 genome sequences to global lineages. Pangolin has a CLI that wraps serval Snakemake rules. From the user perspective they `conda install pangolin` and then use the CLI `pangolin <query>` to run the tool. Pangolin abstracts away the execution of the Snakemake workflow. 
+
+Internally `snk` uses [`snk-cli`](https://github.com/Wytamma/snk-cli) to generate snakemake CLIs. By using the `CLI` class from `snk-cli` you can build a fully featured workflow package without having to write a Snakemake wrapper. 
 
 !!! info
 
@@ -35,13 +37,17 @@ workflow-name
 
 ## Configuration
 
-The `pyproject.toml` file is used to configure the project metadata, dependencies, environments, etc. (see https://hatch.pypa.io/latest/config/metadata/ for details). Replace the default dependency of `click` with `snk` e.g.
+The `pyproject.toml` file is used to configure the project metadata, dependencies, environments, etc. (see https://hatch.pypa.io/latest/config/metadata/ for details). Replace the default dependency of `click` with `snk-cli` e.g.
 
 ```toml
 dependencies = [
-  "snk",
+  "snk-cli",
 ]
 ```
+
+!!! warning
+    
+    To prevent unexpected changes to your CLI you should propbably pin `snk-cli` to the latest version e.g. `snk-cli==0.1.2` and update the dependency incrementally when a new version becomes avaible
 
 The `[project.scripts]` section in the `pyproject.toml` file is used to define the entry point for our tool (the CLI). 
 
@@ -55,7 +61,7 @@ Modify the the default hatch CLI to the dynamic CLI generated with snk by replac
 ```python
 from pathlib import Path
 
-from snk.cli import CLI
+from snk_cli import CLI
 
 workflow_name = CLI(Path(__file__).parent.parent)
 ```
@@ -217,7 +223,7 @@ To add commands to the workflow cli you can access the underlying typer app:
 ```python
 from pathlib import Path
 
-from snk.cli import CLI
+from snk_cli import CLI
 
 workflow_name = CLI(workflow_dir_path = Path(__file__).parent.parent)
 
