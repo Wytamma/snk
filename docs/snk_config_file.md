@@ -20,6 +20,7 @@ The following options are available for configuration in `snk.yaml`:
 - `conda`: A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available. Default: `True`.
 - `additional_snakemake_args`: A list of additional arguments to pass to snakemake. Default: `[]`.
 - `skip_missing`: skip any missing cli options (i.e. those in config but not in the snk file). Default: `False`.
+- `commands`: A list of subcommands to include in the CLI. Defaults to `["run", "script", "env", "profile", "info", "config"]`.
 
 ## Example `snk.yaml` File
 

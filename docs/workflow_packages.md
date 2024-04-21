@@ -218,7 +218,7 @@ cli:
 
 ## Add additional commands to the workflow
 
-To add commands to the workflow cli you can access the underlying typer app:
+To add commands to the workflow cli you can access the underlying [typer](https://typer.tiangolo.com/) app:
 
 ```python
 from pathlib import Path
