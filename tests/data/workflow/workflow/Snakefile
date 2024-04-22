@@ -2,7 +2,7 @@ configfile: "config.yaml"
 from snakemake.utils import min_version
 min_version("3.2")
 
-from snk import validate_config
+from snk_cli import validate_config
 validate_config(config, "../snk.yaml")
 
 print(config)

@@ -147,7 +147,7 @@ Snk provides a function that can be use to validate snakemake config using the `
 
 ```python
 try:
-  from snk import validate_config
+  from snk_cli import validate_config
   validate_config(config, snk_yaml)
 except ImportError:
   pass
