@@ -643,11 +643,13 @@ class Nest:
                     min_version = match.group(1).strip().strip('"').strip("'")
                     break
         if min_version:
+            # check if the version of Snakemake installed is greater than or equal to the minimum version
             from packaging import version
             from snakemake.common import __version__
             if version.parse(__version__) >= version.parse(min_version):
                 return None
-        return f">={min_version}"
+            return f">={min_version}"
+        return None
 
     def validate_Snakemake_repo(self, repo: Repo):
         """
