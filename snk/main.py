@@ -100,7 +100,8 @@ def install(
     snakemake_version: Optional[str] = typer.Option(
         None,
         "--snakemake",
-        help="Specify a specific version of snakemake to use.",
+        "-s",
+        help="Isolate workflow in a virtual environment with a specific version of snakemake.",
     ),
     no_conda: bool = typer.Option(
         False,
