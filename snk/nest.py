@@ -517,7 +517,7 @@ class Nest:
         self._install_snk_cli_in_venv(venv_path, snakemake_version=snakemake_version)
         return venv_path
     
-    def _install_snk_cli_in_venv(self, venv_path: Path, snakemake_version="7.32.4"):
+    def _install_snk_cli_in_venv(self, venv_path: Path, snakemake_version=None):
         """
         Install snk_cli in the virtual environment.
 
@@ -537,12 +537,16 @@ class Nest:
         if not pip_path.exists():
             raise FileNotFoundError(f"pip not found at {pip_path}")
         # check if snakemake version starts with >= or <=
-        if snakemake_version.startswith(">") or snakemake_version.startswith("<"):
-            snakemake_version = f"snakemake{snakemake_version}"
+        if snakemake_version:
+            # check if snakemake version starts with >, <, =, ~, ^,
+            if snakemake_version[0] in [">", "<", "="]:
+                snakemake_version = f"snakemake{snakemake_version}"
+            else:
+                snakemake_version = f"snakemake=={snakemake_version}"
         else:
-            snakemake_version = f"snakemake=={snakemake_version}"
+            snakemake_version = "snakemake"
         try:
-            subprocess.run([pip_path, 'install', snakemake_version, "snk_cli"], check=True)
+            subprocess.run([pip_path, 'install', snakemake_version, "snk_cli", "setuptools"], check=True)
         except subprocess.CalledProcessError as e:
             raise Exception(f"Failed to install snk_cli in virtual environment. Error: {e}")
 
@@ -628,22 +632,22 @@ class Nest:
 
         min_version = None
         for snakefile in workflow_path.glob("**/Snakefile"):
-            if not snakefile.exists():
+            if snakefile.exists():
                 break
         else:
             return None
         with open(snakefile, "r") as f:
             for line in f:
-                match = re.search(r'min_version\("(\d+\.\d+)"\)', line)
+                match = re.search(r'min_version\((.*)\)', line)
                 if match:
-                    min_version = match.group(1)
+                    min_version = match.group(1).strip().strip('"').strip("'")
                     break
         if min_version:
-            import pkg_resources # type: ignore
+            from packaging import version
             from snakemake.common import __version__
-            if pkg_resources.parse_version(__version__) < pkg_resources.parse_version(min_version):
-                min_version = f">={min_version}"
-        return min_version
+            if version.parse(__version__) >= version.parse(min_version):
+                return None
+        return f">={min_version}"
 
     def validate_Snakemake_repo(self, repo: Repo):
         """
