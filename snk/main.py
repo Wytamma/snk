@@ -90,18 +90,24 @@ def install(
         "-c",
         help="Commit (SHA) of the workflow to install. If None the latest commit will be installed.",
     ),
+    snakemake_version: Optional[str] = typer.Option(
+        None,
+        "--snakemake",
+        "-s",
+        help="Snakemake version to install with the workflow.",
+    ),
+    dependencies: Optional[List[str]] = typer.Option(
+        [],
+        "--dependency",
+        "-d",
+        help="Additional pip dependencies to install with the workflow.",
+    ),
     config: Optional[Path] = typer.Option(
         None, help="Specify a non-standard config location."
     ),
     resource: Optional[List[Path]] = typer.Option(
         [],
         help="Specify resources additional to the resources folder required by the workflow (copied to working dir at runtime).",
-    ),
-    snakemake_version: Optional[str] = typer.Option(
-        None,
-        "--snakemake",
-        "-s",
-        help="Isolate workflow in a virtual environment with a specific version of snakemake.",
     ),
     no_conda: bool = typer.Option(
         False,
@@ -139,6 +145,7 @@ def install(
             force=force,
             conda=not no_conda,
             snakemake_version=snakemake_version,
+            dependencies=dependencies,
         )
     except WorkflowExistsError as e:
         typer.secho(str(e) + ". Use a different name (--name) or overwrite (--force).", fg="red", err=True)
