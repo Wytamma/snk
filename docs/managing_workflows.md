@@ -59,13 +59,13 @@ snk install -e path/to/snakemake/workflow
 
 By default snk will use the snakemake and `snk-cli` version installed in the current environment. 
 
-Use the `--isolate` flag to create a new python virtual environment for the workflow. This will install a standalone version of `snk-cli` in the environment. 
+Use the `--isolate` flag to create a new python virtual environment for the workflow. This will install a standalone version of snakemake and `snk-cli` in the environment. By isolating workflows you can use workflows that depend on different versions of snakemake at the same time.
 
 ```bash
 snk install --isolate Wytamma/snk-basic-pipeline
 ```
 
-To use a specific version of snakemake, use the `--snakemake` flag. This will create a python virtual environment with the specified version of snakemake. 
+To install a specific version of snakemake in the isolated environment, use the `--snakemake` flag. This will create a python virtual environment with the specified version of snakemake. 
 
 ```bash
 snk install --snakemake 7.32.4 Wytamma/snk-basic-pipeline
