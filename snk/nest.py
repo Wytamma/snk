@@ -114,6 +114,7 @@ class Nest:
         conda: bool = None,
         snakemake_version=None,
         dependencies=[],
+        isolate=False,
     ) -> Workflow:
         """
         Installs a Snakemake workflow as a CLI.
@@ -180,7 +181,6 @@ class Nest:
                 # The current version of Snakemake is less than the minimum version required by the workflow
                 snakemake_version_to_install_in_venv = f">={self.check_for_snakemake_min_version(workflow_path)}"
             
-            isolate = False
             if snakemake_version_to_install_in_venv is not None or dependencies:
                 isolate = True
             

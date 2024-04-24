@@ -90,11 +90,17 @@ def install(
         "-c",
         help="Commit (SHA) of the workflow to install. If None the latest commit will be installed.",
     ),
+    isolate: Optional[bool] = typer.Option(
+        False,
+        "--isolate",
+        "-i",
+        help="Install the workflow in a isolated environment.",
+    ),
     snakemake_version: Optional[str] = typer.Option(
         None,
         "--snakemake",
         "-s",
-        help="Snakemake version to install with the workflow.",
+        help="Snakemake version to install with the isolated workflow. Default is the latest version.",
     ),
     dependencies: Optional[List[str]] = typer.Option(
         [],
@@ -146,6 +152,7 @@ def install(
             conda=not no_conda,
             snakemake_version=snakemake_version,
             dependencies=dependencies,
+            isolate=isolate,
         )
     except WorkflowExistsError as e:
         typer.secho(str(e) + ". Use a different name (--name) or overwrite (--force).", fg="red", err=True)
