@@ -1,7 +1,8 @@
 ---
-title: Snk-cli
+title: The Snk CLI
 ---
-# snk-cli
+
+# Snk-cli
 
 [Snk-cli](https://github.com/Wytamma/snk-cli) is used internally by snk to dynamically generate the snakemake CLIs. The generated CLI is modern and feature rich and provides subcommands for interacting with the workflow. Many aspects of the generated CLI can be configured though the [Snk config file](/snk_config_file/).
 

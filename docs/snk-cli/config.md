@@ -1,3 +1,7 @@
+---
+title: Config
+---
+
 # Show the Workflow Configuration
 
 The config subcommand will display the workflow configuration file contents. You can use the `--pretty` (`-p`) flag to display the configuration in a more readable format.

@@ -1,8 +1,8 @@
 ---
-title: Scripts
+title: Script
 ---
 
-# Script Commands
+# Access the workflow scripts
 
 The `script` commands allow you to interact with the workflow scripts. Scripts must be located in the `scripts` directory of the workflow.
 

@@ -1,8 +1,8 @@
 ---
-title: Environments
+title: env
 ---
 
-# The CLI env command 
+# Access the workflow conda environments
 
 The `env` subcommand in the `workflow` tool allows you to access and manage the conda environments used within the workflow. This guide provides an overview of the available options and commands for working with workflow environments.
 

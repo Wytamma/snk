@@ -1,3 +1,7 @@
+---
+title: run
+---
+
 # Run the snakemake workflow
 
 The `run` subcommand will run the workflow. 

@@ -1,3 +1,7 @@
+---
+title: info
+---
+
 # Show information about the workflow
 
 The `info` subcommand provides JSON formatted information about the workflow.
