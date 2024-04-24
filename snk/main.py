@@ -169,7 +169,7 @@ def install(
     else:
         version = installed_workflow.version
 
-    typer.secho(f"\nSuccessfully installed {installed_workflow.name} ({version})!", fg="green")
+    typer.secho(f"Successfully installed {installed_workflow.name} ({version})!", fg="green")
 
 
 @app.command()
@@ -190,7 +190,7 @@ def uninstall(
         typer.secho(e, fg="red")
         raise typer.Exit(1)
     if uninstalled:
-        typer.secho(f"\nSuccessfully uninstalled {name}!", fg="green")
+        typer.secho(f"Successfully uninstalled {name}!", fg="green")
 
 
 @app.command()
