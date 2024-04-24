@@ -519,7 +519,7 @@ class Nest:
           Path: The path to the virtual environment.
 
         Examples:
-          >>> nest.create_virtual_environment('example', snakemake_version='7.32.4')
+          >>> nest.create_virtual_environment('example')
         """
         venv_dir = self.snk_home / "venvs"
         venv_dir.mkdir(exist_ok=True)
