@@ -27,10 +27,14 @@ pip install snk
 
 The snk install command can be use to install Snakemake workflows as CLIs. Snk can install Snakemake workflows from GitHub repos or local paths. An index of publicly available Snakemake workflows can be found on the [snakemake workflow catalog](https://snakemake.github.io/snakemake-workflow-catalog/).
 
-Install the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling`.
+Install the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling` with snakemake v8.10.8.
 
 ```
-snk install snakemake-workflows/dna-seq-gatk-variant-calling --name variant-calling -t v2.1.1
+snk install \
+  snakemake-workflows/dna-seq-gatk-variant-calling \
+  --snakemake 8.10.8 \
+  --name variant-calling \
+  -t v2.1.1
 ```
 Successfully installed variant-calling (v2.1.1)!
 
