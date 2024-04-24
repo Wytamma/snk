@@ -8,7 +8,7 @@ import venv
 import subprocess
 from typing import List
 import shutil
-
+from packaging import version
 from .errors import (
     WorkflowExistsError,
     WorkflowNotFoundError,
@@ -113,6 +113,8 @@ class Nest:
         additional_resources=[],
         conda: bool = None,
         snakemake_version=None,
+        dependencies=[],
+        isolate=False,
     ) -> Workflow:
         """
         Installs a Snakemake workflow as a CLI.
@@ -128,7 +130,7 @@ class Nest:
           additional_resources (list, optional): A list of resources additional to the resources folder to copy. Defaults to [].
           conda (bool, optional): Modify the snk config file to control conda use. If None, will not modify the config file. Defaults to None.
           snakemake_version (str, optional): The version of Snakemake to install in the virtual environment. Defaults to None.
-
+          dependencies (list, optional): A list of dependencies to install. Defaults to [].
         Returns:
           Workflow: The installed workflow.
 
@@ -171,12 +173,24 @@ class Nest:
             workflow_path = self.local(workflow_local_path, name, editable)
         try:
             self.validate_Snakemake_repo(workflow_path)
-            if snakemake_version is None:
-                snakemake_min_version = self.check_for_snakemake_min_version(workflow_path)
-                if snakemake_min_version:
-                    snakemake_version = snakemake_min_version
+            
+            snakemake_version_to_install_in_venv = None
             if snakemake_version is not None:
-                venv_path = self.create_virtual_environment(name, snakemake_version=snakemake_version)
+                snakemake_version_to_install_in_venv = snakemake_version
+            elif version.parse(self._current_snakemake_version) < version.parse(self.check_for_snakemake_min_version(workflow_path)):
+                # The current version of Snakemake is less than the minimum version required by the workflow
+                snakemake_version_to_install_in_venv = f">={self.check_for_snakemake_min_version(workflow_path)}"
+            
+            if snakemake_version_to_install_in_venv is not None or dependencies:
+                isolate = True
+            
+            if isolate:
+                venv_path = self.create_virtual_environment(name)
+                self._install_snk_cli_in_venv(
+                    venv_path, 
+                    snakemake_version=snakemake_version_to_install_in_venv, 
+                    dependencies=dependencies
+                )
                 python_interpreter_path = venv_path / "bin" / "python"
             else:
                 python_interpreter_path = self.python_interpreter_path
@@ -493,7 +507,7 @@ class Nest:
             Repo.init(location, mkdir=False)
         return location
     
-    def create_virtual_environment(self, name: str, snakemake_version) -> Path:
+    def create_virtual_environment(self, name: str) -> Path:
         """
         Create a virtual environment for the workflow.
 
@@ -505,7 +519,7 @@ class Nest:
           Path: The path to the virtual environment.
 
         Examples:
-          >>> nest.create_virtual_environment('example', snakemake_version='7.32.4')
+          >>> nest.create_virtual_environment('example')
         """
         venv_dir = self.snk_home / "venvs"
         venv_dir.mkdir(exist_ok=True)
@@ -514,10 +528,9 @@ class Nest:
             venv.create(venv_path, with_pip=True, symlinks=True)
         except FileExistsError:
             raise FileExistsError(f"The venv {venv_path} already exists. Please choose a different location or name. Alternatively, use the --force flag to overwrite the existing venv.")
-        self._install_snk_cli_in_venv(venv_path, snakemake_version=snakemake_version)
         return venv_path
     
-    def _install_snk_cli_in_venv(self, venv_path: Path, snakemake_version=None):
+    def _install_snk_cli_in_venv(self, venv_path: Path, snakemake_version=None, dependencies=[]):
         """
         Install snk_cli in the virtual environment.
 
@@ -546,7 +559,7 @@ class Nest:
         else:
             snakemake_version = "snakemake"
         try:
-            subprocess.run([pip_path, 'install', snakemake_version, "snk_cli", "setuptools"], check=True)
+            subprocess.run([pip_path, 'install', snakemake_version, "snk_cli", "setuptools"] + dependencies, check=True)
         except subprocess.CalledProcessError as e:
             raise Exception(f"Failed to install snk_cli in virtual environment. Error: {e}")
 
@@ -630,26 +643,34 @@ class Nest:
         """
         import re
 
-        min_version = None
+        min_version = "0.0.0"
         for snakefile in workflow_path.glob("**/Snakefile"):
             if snakefile.exists():
                 break
         else:
-            return None
+            return min_version
         with open(snakefile, "r") as f:
             for line in f:
                 match = re.search(r'min_version\((.*)\)', line)
                 if match:
                     min_version = match.group(1).strip().strip('"').strip("'")
                     break
-        if min_version:
-            # check if the version of Snakemake installed is greater than or equal to the minimum version
-            from packaging import version
-            from snakemake.common import __version__
-            if version.parse(__version__) >= version.parse(min_version):
-                return None
-            return f">={min_version}"
-        return None
+        return min_version
+        
+
+    @property
+    def _current_snakemake_version(self):
+        """
+        Get the current version of Snakemake.
+
+        Returns:
+          str: The current version of Snakemake.
+
+        Examples:
+          >>> nest.get_current_current_snakemake_version()
+        """
+        from snakemake.common import __version__
+        return __version__
 
     def validate_Snakemake_repo(self, repo: Repo):
         """

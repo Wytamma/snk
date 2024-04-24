@@ -55,7 +55,29 @@ Use the `--editable` flag to install local workflows in editable mode (useful fo
 snk install -e path/to/snakemake/workflow
 ```
 
-### Install options 
+### Isolated workflow environments
+
+By default snk will use the snakemake and `snk-cli` version installed in the current environment. 
+
+Use the `--isolate` flag to create a new python virtual environment for the workflow. This will install a standalone version of snakemake and `snk-cli` in the environment. By isolating workflows you can use workflows that depend on different versions of snakemake at the same time.
+
+```bash
+snk install --isolate Wytamma/snk-basic-pipeline
+```
+
+To install a specific version of snakemake in the isolated environment, use the `--snakemake` flag. This will create a python virtual environment with the specified version of snakemake. 
+
+```bash
+snk install --snakemake 7.32.4 Wytamma/snk-basic-pipeline
+```
+
+You can add dependencies to the environment with the `--dependency` flag. This will install the specified python package in the environment. Useful for v8 workflows that use [Snakemake plugins](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html).
+
+```bash
+snk install --snakemake ">8.0" --dependency snakemake-executor-plugin-slurm Wytamma/snk-basic-pipeline
+```
+
+### Other install options 
 
 Several options exist to modify the install process. 
 
