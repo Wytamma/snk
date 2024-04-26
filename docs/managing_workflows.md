@@ -43,7 +43,7 @@ By default Snk workflows will be installed (cloned) into a `snk` folder in the p
 
 ### Local install
 
-To install local workflow simply pass the path to `snk install`. 
+To install a local workflow simply pass the path to `snk install`. 
 
 ```bash
 snk install path/to/snakemake/workflow
