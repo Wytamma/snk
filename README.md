@@ -47,10 +47,14 @@ Successfully installed variant-calling (v2.1.1)!
 
 Snk will automatically create a fully featured CLI for the Snakemake workflow using [snk-cli](https://github.com/Wytamma/snk-cli). 
 
+>[!note]
+>For more details on the CLI created by `snk` read the [snk-cli docs](https://snk.wytamma.com/snk-cli/)
+
 ```
 variant-calling --help
 ```
 <img width="862" alt="cli help" src="https://github.com/Wytamma/snk/assets/13726005/3e6e4134-efe5-47e1-b6f4-81b60e1c9ea7">
+
 
 
 ### View run options
