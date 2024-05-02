@@ -47,7 +47,7 @@ dependencies = [
 
 !!! warning
     
-    To prevent unexpected changes to your CLI you should propbably pin `snk-cli` to the latest version e.g. `snk-cli==0.1.2` and update the dependency incrementally when a new version becomes avaible
+    To prevent unexpected changes to your CLI you should propbably pin `snk-cli` to the latest version and update the dependency incrementally when a new version becomes avaible
 
 The `[project.scripts]` section in the `pyproject.toml` file is used to define the entry point for our tool (the CLI). 
 
