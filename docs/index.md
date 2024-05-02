@@ -52,7 +52,7 @@ Snk will automatically create a fully featured CLI for the Snakemake workflow us
 
 !!! note 
     
-    For more details on the CLI created by snk read the [snk-cli docs](https://snk.wytamma.com/snk-cli)
+    For more details on the CLI created by `snk` read the [snk-cli docs](https://snk.wytamma.com/snk-cli)
 
 ```
 variant-calling --help
