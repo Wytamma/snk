@@ -7,8 +7,9 @@ title: run
 The `run` subcommand will run the workflow. 
 
 !!! note
+   
+   The snk-basic-pipeline workflow used as an example in this documentation can be found [here](https://github.com/Wytamma/snk-basic-pipeline)
 
-   the snk-basic-pipeline workflow used as an example in this documentation can be found [here](https://github.com/Wytamma/snk-basic-pipeline)
 
 ## Setup 
 
@@ -46,7 +47,7 @@ total                  9
 The `run` command will pass all unrecognized arguments to Snakemake. That means that if you want to use any of the Snakemake options, you can pass them to the `run` command e.g. `snk-basic-pipeline run --use-singularity`. To see all the options available in Snakemake, you can use the `--help-snakemake` (`-h`) flag. Alternatively, you can prepend `--snake` to the Snakemake option e.g. `snk-basic-pipeline run --snake--use-singularity` to pass the `--use-singularity` option to Snakemake.
 
 !!! note 
-
+   
    You can permanently set additional Snakemake options by adding them to the `additional_snakemake_args` section of the `snk.yaml` file.
 
 The snk-cli provides several options to configure the workflow.
