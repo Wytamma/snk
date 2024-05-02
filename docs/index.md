@@ -55,6 +55,9 @@ variant-calling --help
 ```
 <img width="862" alt="cli help" src="https://github.com/Wytamma/snk/assets/13726005/3e6e4134-efe5-47e1-b6f4-81b60e1c9ea7">
 
+!!! note
+
+  For more details on the CLI created by snk read the [snk-cli docs](https://snk.wytamma.com/snk-cli)
 
 ### View run options
 
