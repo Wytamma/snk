@@ -96,9 +96,9 @@ Use `--commit` to specify the commit (SHA) of the workflow to install. If not sp
 snk install --commit a725d3a4 Wytamma/snk-basic-pipeline && snk-basic-pipeline -v
 ```
 
-Use `--config` to install a workflow with a non-standard config location. This is useful for installing a workflow that does not follow Snakemake best practices. 
+Use `--config` to install a workflow with a non-standard config location. This is useful for installing a workflow that does not follow Snakemake best practices. The path should be relative to the workflow directory.
 ```bash
-snk install --config /path/to/config Wytamma/snk-basic-pipeline
+snk install --config path/to/config Wytamma/snk-basic-pipeline
 ```
 
 Use `--resource` specify a resource that is required at run time. Resources will be copied to the run directory at runtime. The path should be relative to the workflow directory. 
