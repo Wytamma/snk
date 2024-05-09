@@ -36,26 +36,28 @@ This command activates the specified conda environment within the workflow.
 
 ### `create`
 
-This command creates all the conda environments specified in the `envs` dir.
+This command creates all the conda environments specified in the `envs` dir. Individual conda envs can be create with `workflow env create ENV_NAME`.
 
-A Snakemake workflow that uses a lot of conda envs can take a long time to install as each env is created sequentially. Running `workflow env create` will create all the conda envs in parallel (up to `--workers` at a time, defaults to number of cores).
+Snakemake workflows that use a lot of conda environments can take a long time to install as each env is created sequentially. Running `workflow env create --workers number_of_workers` will create all the conda envs in parallel up to the `number of workers` requested (defaults to 1).
 
 ```bash
-snk-basic-pipeline env create [OPTIONS] [NAME]
+snk-basic-pipeline env create --workers 4  # create up to 4 conda envs at a time
 ```
 
-Individual conda envs can be create with `workflow env create ENV_NAME`.
+!!! warning
+
+    Some conda envs may not support parallel creation. If you encounter an error, try reducing the number of workers.
 
 
 ### `remove`
 
-Delete all conda environments.
+Delete conda environments.
 
 ```bash
-snk-basic-pipeline env remove [OPTIONS]
+snk-basic-pipeline env remove [OPTIONS] [ENV_NAME...]
 ```
 
-This command deletes all the conda environments in the workflow.
+This command deletes all the conda environments in the workflow. You can also delete individual environments by specifying the environment name. Use the `--force` option to skip the confirmation prompt.
 
 ### `run`
 
