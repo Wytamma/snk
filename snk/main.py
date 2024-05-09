@@ -111,6 +111,9 @@ def install(
     config: Optional[Path] = typer.Option(
         None, help="Specify a non-standard config location."
     ),
+    snakefile: Optional[Path] = typer.Option(
+        None, help="Specify a non-standard Snakefile location."
+    ),
     resource: Optional[List[Path]] = typer.Option(
         [],
         help="Specify resources additional to the resources folder required by the workflow (copied to working dir at runtime).",
@@ -147,6 +150,7 @@ def install(
             tag=tag,
             commit=commit,
             config=config,
+            snakefile=snakefile,
             additional_resources=resource,
             force=force,
             conda=not no_conda,

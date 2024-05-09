@@ -109,6 +109,7 @@ class Nest:
         tag=None,
         commit=None,
         config: Path = None,
+        snakefile: Path = None,
         force=False,
         additional_resources=[],
         conda: bool = None,
@@ -126,6 +127,7 @@ class Nest:
           tag (str, optional): The tag of the workflow. Defaults to None.
           commit (str, optional): The commit SHA of the workflow. Defaults to None.
           config (Path, optional): The path to the config file. Defaults to None.
+          snakefile (Path, optional): The path to the Snakefile. Defaults to None.
           force (bool, optional): Whether to force the installation. Defaults to False.
           additional_resources (list, optional): A list of resources additional to the resources folder to copy. Defaults to [].
           conda (bool, optional): Modify the snk config file to control conda use. If None, will not modify the config file. Defaults to None.
@@ -198,6 +200,11 @@ class Nest:
             self.link_workflow_executable_to_bin(workflow_executable_path)
             if config:
                 self.copy_nonstandard_config(workflow_path, config)
+            if snakefile:
+                snakefile_path = workflow_path / snakefile
+                if not snakefile_path.exists():
+                    raise FileNotFoundError(f"Snakefile not found at {snakefile_path}")
+                shutil.copyfile(snakefile_path, snakefile_path.parent / "Snakefile")
             if additional_resources:
                 self.additional_resources(workflow_path, additional_resources)
             if conda is not None:
