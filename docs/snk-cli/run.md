@@ -44,7 +44,7 @@ total                  9
 
 ## Options
 
-The `run` command will pass all unrecognized arguments to Snakemake. That means that if you want to use any of the Snakemake options, you can pass them to the `run` command e.g. `snk-basic-pipeline run --use-singularity`. To see all the options available in Snakemake, you can use the `--help-snakemake` (`-h`) flag. You can prepend `--snake` to any Snakemake option e.g. `snk-basic-pipeline run --snake--use-singularity` to ensure the `--use-singularity` option is passed to Snakemake.
+The `run` command will pass all unrecognized arguments to Snakemake. That means that if you want to use any of the Snakemake options, you can pass them to the `run` command e.g. `snk-basic-pipeline run --use-singularity`. To see all the options available in Snakemake, you can use the `--help-snakemake` (`-hs`) flag. You can prepend `--snake` to any Snakemake option e.g. `snk-basic-pipeline run --snake--use-singularity` to ensure the `--use-singularity` option is passed to Snakemake.
 
 !!! note
 
