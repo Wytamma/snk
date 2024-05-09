@@ -1,5 +1,5 @@
 ---
-title: run
+title: Run
 ---
 
 # Run the snakemake workflow

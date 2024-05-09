@@ -1,5 +1,5 @@
 ---
-title: info
+title: Info
 ---
 
 # Show information about the workflow

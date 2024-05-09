@@ -1,5 +1,5 @@
 ---
-title: env
+title: Env
 ---
 
 # Access the workflow conda environments

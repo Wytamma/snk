@@ -1,5 +1,5 @@
 ---
-title: profile
+title: Profile
 ---
 
 # Access the workflow profiles
