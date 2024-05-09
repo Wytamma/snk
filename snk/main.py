@@ -164,12 +164,13 @@ def install(
     if editable:
         version = "editable"
     elif installed_workflow.version is None:
-        snk_config = SnkConfig.from_workflow_dir(installed_workflow.path)
+        # is local workflow
+        snk_config = SnkConfig.from_workflow_dir(installed_workflow.path, create_if_not_exists=True)
         version = snk_config.version
     else:
         version = installed_workflow.version
-
-    typer.secho(f"Successfully installed {installed_workflow.name} ({version})!", fg="green")
+    version_str = f" ({version})" if version else ""
+    typer.secho(f"Successfully installed {installed_workflow.name}{version_str}!", fg="green")
 
 
 @app.command()
@@ -215,11 +216,16 @@ def list(
     except FileNotFoundError:
         workflows = []
     for workflow in workflows:
-        version = workflow.version
-        if version is None:
-            snk_config = SnkConfig.from_workflow_dir(workflow.path)
+        if workflow.editable:
+            version_str = "[green]editable[/green]"
+        elif workflow.version is None:
+            # is local workflow
+            snk_config = SnkConfig.from_workflow_dir(workflow.path, create_if_not_exists=True)
             version = snk_config.version
-        version_str = "[green]editable[/green]" if workflow.editable else f"[blue]{version}[/blue]"
+            version_str = f"[blue]{version}[/blue]"
+        else:
+            version = workflow.version
+            version_str = f"[blue]{version}[/blue]"
         if verbose:
             table.add_row(workflow.name, version_str, f"[yellow]{str(workflow.path.resolve())}[/yellow]")
         else:
