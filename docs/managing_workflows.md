@@ -101,6 +101,11 @@ Use `--config` to install a workflow with a non-standard config location. This i
 snk install --config path/to/config Wytamma/snk-basic-pipeline
 ```
 
+Use `--snakefile` to install a workflow with a non-standard Snakefile name. Will rename the given file to `Snakefile`. This is useful for installing a workflow that does not follow Snakemake best practices. The path should be relative to the workflow directory.
+```bash
+snk install --snakefile path/to/Snakefile Wytamma/snk-basic-pipeline
+```
+
 Use `--resource` specify a resource that is required at run time. Resources will be copied to the run directory at runtime. The path should be relative to the workflow directory. 
 
 ```bash
