@@ -12,7 +12,7 @@ The CLI provides several commands for interacting with the workflow including:
 - [env](/snk-cli/env/) - Access the workflow conda environments.
 - [script](/snk-cli/script/) - Access the workflow scripts.
 - [info](/snk-cli/info) - Show information about the workflow.
-- [profile](/snk-cli/info) - Access the workflow profiles.
-- [run](/snk-cli/info) - Run the Snakemake workflow.
+- [profile](/snk-cli/profile) - Access the workflow profiles.
+- [run](/snk-cli/run) - Run the Snakemake workflow.
 
 You can also use `snk-cli` without `snk` to build self contained snakemake tools. See here for more details -> https://snk.wytamma.com/workflow_packages
