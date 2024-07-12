@@ -26,3 +26,32 @@ The show command will display the contents of a profile.
 snk-basic-pipeline profile show slurm
 ```
 
+You can save the profiles by piping the output to a file.
+
+```bash
+snk-basic-pipeline profile show slurm > profile/config.yaml
+```
+
+!!! note
+
+    You must save the profile as config.yaml in a directory so that it can be accessed by the workflow.
+
+
+### Load a profile
+
+You can load a profile by using the `--profile` option in the run command.
+
+```bash
+snk-basic-pipeline run --profile profile/config.yaml
+```
+
+
+## Edit 
+
+The edit command will open the profile in the default editor. Changes saved will modify the default profile settings for the installation.
+
+```bash
+snk-basic-pipeline profile edit slurm
+```
+
+
