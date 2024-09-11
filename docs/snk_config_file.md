@@ -10,17 +10,20 @@ The `snk.yaml` file serves as the main interface for configuring the Snk workflo
 
 The following options are available for configuration in `snk.yaml`:
 
-- `logo`: The text used to dynamically generate the ASCII art displayed in the CLI. Default: `<name-of-workflow>`.
-- `art`: A string representing ASCII art to display in the CLI (overwrites `logo`). Default: `null`.
-- `tagline`: A string representing the tagline displayed in the CLI. Default: `"A Snakemake workflow CLI generated with Snk"`.
-- `font`: A string representing the font used in the CLI (see [FontList](https://www.ascii-art.site/FontList.html)). Default: `"small"`.
-- `resources`: A list of resource files required for the workflow. Default: `[]`.
-- `cli`: Annotations for the workflow cli parameters (see [CLI section](https://snk.wytamma.com/snk_config_file/#cli) below).
-- `symlink_resources`: A boolean that controls whether symbolic links are created for resources (avoid using this unless you know). Default: `False`.
-- `conda`: A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed to snakemake if conda is True and the `conda` command is available. Default: `True`.
-- `additional_snakemake_args`: A list of additional arguments to pass to snakemake. Default: `[]`.
-- `skip_missing`: skip any missing cli options (i.e. those in config but not in the snk file). Default: `False`.
-- `commands`: A list of subcommands to include in the CLI. Defaults to `["run", "script", "env", "profile", "info", "config"]`.
+| Name                      | Description                                                                                                              | Type                | Default                                                          |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------|---------------------|------------------------------------------------------------------|
+| `logo`                    | The text used to dynamically generate the ASCII art displayed in the CLI.                                                 | String              | `<name-of-workflow>`                                              |
+| `art`                     | A string representing ASCII art to display in the CLI (overwrites `logo`).                                                | String or `null`    | `null`                                                           |
+| `tagline`                 | A string representing the tagline displayed in the CLI.                                                                   | String              | `"A Snakemake workflow CLI generated with Snk"`                   |
+| `font`                    | A string representing the font used in the CLI (see [FontList](https://www.ascii-art.site/FontList.html)).                 | String              | `"small"`                                                         |
+| `resources`               | A list of resource files required for the workflow.                                                                       | List                | `[]`                                                             |
+| `symlink_resources`        | A boolean that controls whether symbolic links are created for resources (avoid using this unless you know).               | Boolean             | `False`                                                          |
+| `conda`                   | A boolean that controls whether the workflow should use conda. The `--use-conda` flag will only be passed if True.         | Boolean             | `True`                                                           |
+| `additional_snakemake_args`| A list of additional arguments to pass to snakemake.                                                                      | List                | `[]`                                                             |
+| `skip_missing`            | Skip any missing CLI options (i.e. those in config but not in the snk file).                                               | Boolean             | `False`                                                          |
+| `commands`                | A list of subcommands to include in the CLI.                                                                               | List                | `["run", "script", "env", "profile", "info", "config"]`           |
+| `cli`                     | Annotations for the workflow CLI parameters (see [CLI section](https://snk.wytamma.com/snk_config_file/#cli) below).       | Object              | None                                                             |
+
 
 ## Example `snk.yaml` File
 
@@ -28,7 +31,7 @@ Below is an example of a `snk.yaml` file illustrating all available options:
 
 ```yaml
 logo: "MyWorkflow"
-font: "cybermedium"
+font: "small"
 art: |
   _______  _______  _______  _______ 
  (  ____ \(  ___  )(       )(  ____ \
@@ -60,8 +63,8 @@ cli:
 
 In this example:
 
-- The workflow `logo` is set to "MyWorkflow".
-- The `font` used for the CLI logo is "cybermedium".
+- The workflow dynamically generated `logo` is set to "MyWorkflow".
+- The `font` used for the logo is "small".
 - ASCII art is specified directly in the `art` configuration, taking precedence over the logo if both are provided.
 - The `tagline` is "A workflow to illustrate the use of snk.yaml". This will be printed in the CLI help under the logo.
 - Two resource files, `data/input1.txt` and `data/input2.txt`, are required for the workflow. They will be copied to the working directory at runtime.
