@@ -142,7 +142,7 @@ option: "Hello, world!"
 
 ### Using snk.yaml without a config.yaml file
 
-If you don't have a `config.yaml` file, you can still use the `snk.yaml` file to specify the parameters for your workflow. The `snk.yaml` file will be used to generate the CLI, and the parameters will be available in the `config` dictionary in your `Snakefile`. However, you should probably still have a `config.yaml` file to store your config, as this is the standard way to manage configuration in Snakemake workflows (unless you're creating a [workflow package](https://snk.wytamma.com/workflow_packages)).
+If you don't have a `config.yaml` file, you can still use the `snk.yaml` file to specify the parameters and defaults for your workflow. The `snk.yaml` file will be used to generate the CLI, and the parameters will be available in the `config` dictionary in your `Snakefile`. However, you should probably still have a `config.yaml` file to store your config, as this is the standard way to manage configuration in Snakemake workflows (unless you're creating a [workflow package](https://snk.wytamma.com/workflow_packages)).
 
 ### Validating Config with the `snk.yaml` File
 
