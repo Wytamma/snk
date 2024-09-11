@@ -75,7 +75,7 @@ In this example:
 
 ## CLI
 
-Annotations play a crucial role in configuring the dynamic Snk CLI. They provide metadata about the configuration parameters used in your Snakemake workflow and can dictate how the CLI will prompt users for these parameters. The `snk.yaml` file supports the following fields under `annotations`:
+Annotations play a crucial role in configuring the dynamic Snk CLI. They provide metadata about the configuration parameters used in your Snakemake workflow and can dictate how the CLI will prompt users for these parameters. The `snk.yaml` file supports the following fields under the `cli` option:
 
 - `type`: Determines the datatype of the configuration parameter. It can be one of the following: `int`, `str`, `path`, `bool`, `list`, `list[str]`, `list[path]`, or `list[int]`.
 - `help`: This is a descriptive text that provides users with information or guidance on what the parameter is used for.
