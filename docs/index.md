@@ -34,7 +34,7 @@ The snk install command can be use to install Snakemake workflows as CLIs. Snk c
 snk install wytamma/snk-basic-pipeline
 ```
 
-The snk install command is flexbilbe and can be used to install diverse workflows. For example, the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling` with Snakemake v8.10.8 and pandas dependency.
+The snk install command is flexible and can be used to install diverse workflows. For example, the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling` with Snakemake v8.10.8 and pandas dependency.
 
 ```
 snk install \
@@ -80,10 +80,10 @@ variant-calling run -r .test/config -r .test/data --dag dag.pdf
 
 ### Configure 
 
-Snk will dynamically generate config options for the CLI. For example if the config.yaml file has the option `fasta: null` you can set this option with `--fasta`.
+Snk will dynamically generate config options for the CLI. For example if the config.yaml file has the option `samples: config/samples.tsv` you can set this option with the `--samples` flag.
 
 ```bash
-variant-calling run --fasta example.fa
+variant-calling run --samples new.tsv
 ```
 
 You can also configure the workflow using a config file. 
