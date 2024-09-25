@@ -8,7 +8,7 @@ import venv
 import subprocess
 from typing import List
 import shutil
-from packaging import version
+from packaging.version import parse as parse_version
 from .errors import (
     WorkflowExistsError,
     WorkflowNotFoundError,
@@ -126,7 +126,7 @@ class Nest:
           name (str, optional): The name of the workflow. Defaults to None.
           tag (str, optional): The tag of the workflow. Defaults to None.
           commit (str, optional): The commit SHA of the workflow. Defaults to None.
-          config (Path, optional): The path to the config file. Defaults to None.
+          config (Path, optional): The path to the snakemake config file. Defaults to None.
           snakefile (Path, optional): The path to the Snakefile. Defaults to None.
           force (bool, optional): Whether to force the installation. Defaults to False.
           additional_resources (list, optional): A list of resources additional to the resources folder to copy. Defaults to [].
@@ -175,17 +175,42 @@ class Nest:
             workflow_path = self.local(workflow_local_path, name, editable)
         try:
             self.validate_Snakemake_repo(workflow_path)
-            
+            # update non standard files
+            if config:
+                config_path = workflow_path / config
+                if not config_path.exists():
+                    raise FileNotFoundError(f"Config file not found at {config_path}")
+                self.modify_snk_config(workflow_path, configfile=config_path)
+            if snakefile:
+                snakefile_path = workflow_path / snakefile
+                if not snakefile_path.exists():
+                    raise FileNotFoundError(f"Snakefile not found at {snakefile_path}")
+                self.modify_snk_config(workflow_path, snakefile=snakefile_path)
+            # set the version of the workflow
+            if editable:
+                version="editable"
+            elif tag:
+                version=tag
+            elif commit:
+                version=commit
+            else:
+                try:
+                    repo = Repo(workflow_path)
+                    sha = repo.head.object.hexsha
+                    version = repo.git.rev_parse(sha, short=8)
+                except Exception:
+                    version = None
+            self.modify_snk_config(workflow_path, version=version)
+            # check if we need to install snakemake in a virtual environment
             snakemake_version_to_install_in_venv = None
+            snakemake_min_version = self.check_for_snakemake_min_version(workflow_path, snakefile)
             if snakemake_version is not None:
                 snakemake_version_to_install_in_venv = snakemake_version
-            elif version.parse(self._current_snakemake_version) < version.parse(self.check_for_snakemake_min_version(workflow_path)):
+            elif parse_version(self._current_snakemake_version) < parse_version(snakemake_min_version):
                 # The current version of Snakemake is less than the minimum version required by the workflow
-                snakemake_version_to_install_in_venv = f">={self.check_for_snakemake_min_version(workflow_path)}"
-            
+                snakemake_version_to_install_in_venv = f">={snakemake_min_version}"
             if snakemake_version_to_install_in_venv is not None or dependencies:
                 isolate = True
-            
             if isolate:
                 venv_path = self.create_virtual_environment(name)
                 self._install_snk_cli_in_venv(
@@ -196,15 +221,9 @@ class Nest:
                 python_interpreter_path = venv_path / "bin" / "python"
             else:
                 python_interpreter_path = self.python_interpreter_path
+            # create the workflow executable
             workflow_executable_path = self.create_executable(workflow_path, name, python_interpreter_path=python_interpreter_path)
             self.link_workflow_executable_to_bin(workflow_executable_path)
-            if config:
-                self.copy_nonstandard_config(workflow_path, config)
-            if snakefile:
-                snakefile_path = workflow_path / snakefile
-                if not snakefile_path.exists():
-                    raise FileNotFoundError(f"Snakefile not found at {snakefile_path}")
-                shutil.copyfile(snakefile_path, snakefile_path.parent / "Snakefile")
             if additional_resources:
                 self.additional_resources(workflow_path, additional_resources)
             if conda is not None:
@@ -635,7 +654,7 @@ class Nest:
             )
         return self.bin_dir / name
 
-    def check_for_snakemake_min_version(self, workflow_path: Path):
+    def check_for_snakemake_min_version(self, workflow_path: Path, snakefile: Path = None):
         """
         Check if the workflow has a minimum version of Snakemake.
 
@@ -651,11 +670,14 @@ class Nest:
         import re
 
         min_version = "0.0.0"
-        for snakefile in workflow_path.glob("**/Snakefile"):
-            if snakefile.exists():
-                break
+        if snakefile:
+            snakefile = workflow_path / snakefile
         else:
-            return min_version
+            for snakefile in workflow_path.glob("**/Snakefile"):
+                if snakefile.exists():
+                    break
+            else:
+                return min_version
         with open(snakefile, "r") as f:
             for line in f:
                 match = re.search(r'min_version\((.*)\)', line)

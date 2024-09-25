@@ -165,14 +165,8 @@ def install(
         typer.secho(e, fg="red", err=True)
         raise typer.Exit(1)
     
-    if editable:
-        version = "editable"
-    elif installed_workflow.version is None:
-        # is local workflow
-        snk_config = SnkConfig.from_workflow_dir(installed_workflow.path, create_if_not_exists=True)
-        version = snk_config.version
-    else:
-        version = installed_workflow.version
+    snk_config = SnkConfig.from_workflow_dir(installed_workflow.path, create_if_not_exists=True)
+    version = snk_config.version
     version_str = f" ({version})" if version else ""
     typer.secho(f"Successfully installed {installed_workflow.name}{version_str}!", fg="green")
 
@@ -220,16 +214,11 @@ def list(
     except FileNotFoundError:
         workflows = []
     for workflow in workflows:
-        if workflow.editable:
+        snk_config = SnkConfig.from_workflow_dir(workflow.path, create_if_not_exists=True)
+        if snk_config.version == "editable":
             version_str = "[green]editable[/green]"
-        elif workflow.version is None:
-            # is local workflow
-            snk_config = SnkConfig.from_workflow_dir(workflow.path, create_if_not_exists=True)
-            version = snk_config.version
-            version_str = f"[blue]{version}[/blue]"
         else:
-            version = workflow.version
-            version_str = f"[blue]{version}[/blue]"
+            version_str = f"[blue]{snk_config.version}[/blue]"
         if verbose:
             table.add_row(workflow.name, version_str, f"[yellow]{str(workflow.path.resolve())}[/yellow]")
         else:

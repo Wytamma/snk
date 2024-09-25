@@ -1,5 +1,5 @@
+additional_snakemake_args: []
 art: null
-version: 0.13.0
 cli:
   hidden:
     hidden: true
@@ -32,9 +32,9 @@ cli:
       help: A list to test
       type: list[int]
     test_null:
-      type: str
       default: null
       help: A null to test
+      type: str
   text:
     default: Hi from snk.yaml!
     help: A string to save to a file
@@ -45,13 +45,20 @@ cli:
     type: int
   visible:
     hidden: false
+commands:
+- run
+- script
+- env
+- profile
+- info
+- config
 conda: true
+configfile: null
 font: cybermedium
 logo: MyWorkflow
 resources: []
 skip_missing: false
+snakefile: null
 symlink_resources: true
-tagline: '
-
-  A workflow to test the workflow logo and tagline'
-version: 0.13.0
+tagline: 'A workflow to test the workflow logo and tagline'
+version: editable
