@@ -11,3 +11,4 @@ __pycache__
 tests/data/workflow/.conda
 .DS_Store
 results/
+jats/
