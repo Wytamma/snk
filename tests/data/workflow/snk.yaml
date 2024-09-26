@@ -10,6 +10,13 @@ cli:
     type: bool
   null_annotation:
     default: null
+  choice:
+    choices: 
+    - a
+    - b
+    - c
+    default: a
+    help: A string to test
   test:
     another:
       test:

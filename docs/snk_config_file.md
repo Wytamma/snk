@@ -82,6 +82,7 @@ Annotations play a crucial role in configuring the dynamic Snk CLI. They provide
 - `required`: A boolean value (either `True` or `False`) that indicates whether the parameter is mandatory. If a parameter is marked as `required: True`, the Snk CLI will insist that a user provides a value for it.
 - `default`: A default value for the parameter. If a user does not provide a value for the parameter, the Snk CLI will use this default value instead.
 - `short`: A short (-) flag to use with the option.
+- `choices`: A list of possible values that the parameter can take. If a user provides a value that is not in this list, the Snk CLI will raise an error.
 
 ### Example `snk.yaml` File with CLI Annotations
 
@@ -107,9 +108,15 @@ cli:
     type: bool
     help: "A boolean flag to enable or disable a feature"
     required: False
+  choice:
+    help: "A choice to select"
+    choices:
+      - "option1"
+      - "option2"
+    required: False
 ```
 
-In this example, the `input` and `count` parameters are required, while the `text` and `flag` parameters are optional. the flas `-i` can be used as shorthand for `--input`. The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
+In this example, the `input` and `count` parameters are required, while the `text`, `flag` and `choice` parameters are optional. the flag `-i` can be used as shorthand for `--input`. The `text` parameter has a default value of "Hello, world!" that will be used if the user does not provide a value. The `choice` parameter can only take one of the values specified in the `choices` list. The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
 
 ### Nested Annotations in the `snk.yaml` File
 
