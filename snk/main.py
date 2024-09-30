@@ -6,6 +6,7 @@ from .nest import Nest
 from .errors import WorkflowExistsError, WorkflowNotFoundError
 from .__about__ import __version__
 from snk_cli.config import SnkConfig
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 app = typer.Typer()
 
@@ -143,21 +144,27 @@ def install(
     if not Path(workflow).exists() and not workflow.startswith("http"):
         workflow = f"https://github.com/{workflow}.git"
     try:
-        installed_workflow = nest.install(
-            workflow,
-            editable=editable,
-            name=name,
-            tag=tag,
-            commit=commit,
-            config=config,
-            snakefile=snakefile,
-            additional_resources=resource,
-            force=force,
-            conda=not no_conda,
-            snakemake_version=snakemake_version,
-            dependencies=dependencies,
-            isolate=isolate,
-        )
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Installing...", total=None)
+            installed_workflow = nest.install(
+                workflow,
+                editable=editable,
+                name=name,
+                tag=tag,
+                commit=commit,
+                config=config,
+                snakefile=snakefile,
+                additional_resources=resource,
+                force=force,
+                conda=not no_conda,
+                snakemake_version=snakemake_version,
+                dependencies=dependencies,
+                isolate=isolate,
+            )
     except WorkflowExistsError as e:
         typer.secho(str(e) + ". Use a different name (--name) or overwrite (--force).", fg="red", err=True)
         raise typer.Exit(1)
