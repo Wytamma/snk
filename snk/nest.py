@@ -156,6 +156,10 @@ class Nest:
             else:
                 handle_force_installation(name)
             workflow_path = self.download(workflow, name, tag_name=tag, commit=commit)
+        except WorkflowNotFoundError as e:
+            to_remove = self.get_paths_to_delete(name)
+            self.delete_paths(to_remove)
+            raise e
         except InvalidWorkflowRepositoryError:
             workflow_local_path = Path(workflow).resolve()
             if workflow_local_path.is_file():
