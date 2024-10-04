@@ -38,7 +38,7 @@ snk install \
   snakemake-workflows/dna-seq-gatk-variant-calling \
   --name variant-calling \
   --snakemake 8.10.8 \
-  -d pandas \
+  -d "pandas==1.5.3" \
   -t v2.1.1
 ```
 Successfully installed variant-calling (v2.1.1)!
