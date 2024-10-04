@@ -1,5 +1,6 @@
-from snk import Nest
 from pathlib import Path
+
+from snk import Nest
 
 
 def test_init(bin_dir, snk_home):
@@ -10,9 +11,7 @@ def test_init(bin_dir, snk_home):
 
 
 def test_download(nest: Nest):
-    path = nest.download(
-        "https://github.com/Wytamma/snk-basic-pipeline.git", "rna-seq-star-deseq2"
-    )
+    path = nest.download("https://github.com/Wytamma/snk-basic-pipeline.git", "rna-seq-star-deseq2")
     expected_location = nest.snk_workflows_dir / "rna-seq-star-deseq2"
     assert (expected_location).exists()
     assert path == expected_location
@@ -21,9 +20,7 @@ def test_download(nest: Nest):
 def test_create_package(nest: Nest):
     test_workflow_path = nest.snk_workflows_dir / "workflow-name"
     test_workflow_path.mkdir()
-    path = nest.create_executable(
-        workflow_path=test_workflow_path, name=test_workflow_path.name
-    )
+    path = nest.create_executable(workflow_path=test_workflow_path, name=test_workflow_path.name)
     assert path == nest.snk_home / "bin" / "workflow-name"
 
 

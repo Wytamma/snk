@@ -1,22 +1,24 @@
-from pathlib import Path
-from git import InvalidGitRepositoryError, Repo, GitCommandError
-import sys
-import stat
 import inspect
 import os
-import venv
-import subprocess
-from typing import List
 import shutil
+import stat
+import subprocess
+import sys
+import venv
+from pathlib import Path
+from typing import List
+
+from git import GitCommandError, InvalidGitRepositoryError, Repo
 from packaging.version import parse as parse_version
-from .errors import (
-    WorkflowExistsError,
-    WorkflowNotFoundError,
-    InvalidWorkflowRepositoryError,
-    InvalidWorkflowError
-)
 from snk_cli.config.config import SnkConfig
 from snk_cli.workflow import Workflow
+
+from .errors import (
+    InvalidWorkflowError,
+    InvalidWorkflowRepositoryError,
+    WorkflowExistsError,
+    WorkflowNotFoundError,
+)
 
 
 class Nest:
@@ -93,7 +95,7 @@ class Nest:
           InvalidWorkflowRepositoryError: If the repo URL is not valid.
 
         Examples:
-          >>> nest._format_repo_url('https://github.com/example/repo.git')
+          >>> nest._format_repo_url("https://github.com/example/repo.git")
         """
         if not repo.endswith(".git"):
             repo += ".git"
@@ -137,8 +139,12 @@ class Nest:
           Workflow: The installed workflow.
 
         Examples:
-          >>> nest.install('https://github.com/example/repo.git', name='example', tag='v1.0.0')
-          >>> nest.install('https://github.com/example/repo.git', name='example', commit='0123456')
+          >>> nest.install(
+          ...     "https://github.com/example/repo.git", name="example", tag="v1.0.0"
+          ... )
+          >>> nest.install(
+          ...     "https://github.com/example/repo.git", name="example", commit="0123456"
+          ... )
         """
 
         def handle_force_installation(name: str):
@@ -146,7 +152,8 @@ class Nest:
                 self.uninstall(name=name, force=True)
             except WorkflowNotFoundError:
                 pass
-        workflow = str(workflow) # ensure it is a string
+
+        workflow = str(workflow)  # ensure it is a string
         try:
             workflow = self._format_repo_url(workflow)
             if not name:
@@ -166,7 +173,10 @@ class Nest:
                 raise InvalidWorkflowError(
                     f"When installing a local workflow, the path must be a directory. Found: {workflow_local_path}"
                 )
-            if self.snk_workflows_dir.resolve().is_relative_to(workflow_local_path) and not editable:
+            if (
+                self.snk_workflows_dir.resolve().is_relative_to(workflow_local_path)
+                and not editable
+            ):
                 raise InvalidWorkflowError(
                     f"The workflow directory contains SNK_HOME!\nWORKFLOW: {workflow_local_path}\nSNK_HOME: {self.snk_workflows_dir.resolve()}.\n\nTry installing the workflow with --editable."
                 )
@@ -192,11 +202,11 @@ class Nest:
                 self.modify_snk_config(workflow_path, snakefile=snakefile_path)
             # set the version of the workflow
             if editable:
-                version="editable"
+                version = "editable"
             elif tag:
-                version=tag
+                version = tag
             elif commit:
-                version=commit
+                version = commit
             else:
                 try:
                     repo = Repo(workflow_path)
@@ -210,7 +220,9 @@ class Nest:
             snakemake_min_version = self.check_for_snakemake_min_version(workflow_path, snakefile)
             if snakemake_version is not None:
                 snakemake_version_to_install_in_venv = snakemake_version
-            elif parse_version(self._current_snakemake_version) < parse_version(snakemake_min_version):
+            elif parse_version(self._current_snakemake_version) < parse_version(
+                snakemake_min_version
+            ):
                 # The current version of Snakemake is less than the minimum version required by the workflow
                 snakemake_version_to_install_in_venv = f">={snakemake_min_version}"
             if snakemake_version_to_install_in_venv is not None or dependencies:
@@ -218,15 +230,17 @@ class Nest:
             if isolate:
                 venv_path = self.create_virtual_environment(name)
                 self._install_snk_cli_in_venv(
-                    venv_path, 
-                    snakemake_version=snakemake_version_to_install_in_venv, 
-                    dependencies=dependencies
+                    venv_path,
+                    snakemake_version=snakemake_version_to_install_in_venv,
+                    dependencies=dependencies,
                 )
                 python_interpreter_path = venv_path / "bin" / "python"
             else:
                 python_interpreter_path = self.python_interpreter_path
             # create the workflow executable
-            workflow_executable_path = self.create_executable(workflow_path, name, python_interpreter_path=python_interpreter_path)
+            workflow_executable_path = self.create_executable(
+                workflow_path, name, python_interpreter_path=python_interpreter_path
+            )
             self.link_workflow_executable_to_bin(workflow_executable_path)
             if additional_resources:
                 self.additional_resources(workflow_path, additional_resources)
@@ -249,11 +263,9 @@ class Nest:
           **kwargs: Additional keyword arguments to modify the snk config file.
 
         Examples:
-          >>> nest.modify_snk_config(Path('/path/to/workflow'), logo=example)
+          >>> nest.modify_snk_config(Path("/path/to/workflow"), logo=example)
         """
-        snk_config = SnkConfig.from_workflow_dir(
-            workflow_path, create_if_not_exists=True
-        )
+        snk_config = SnkConfig.from_workflow_dir(workflow_path, create_if_not_exists=True)
         modified = False
         for key, value in kwargs.items():
             if getattr(snk_config, key) != value:
@@ -271,12 +283,13 @@ class Nest:
           resources (List[Path]): A list of additional resources to copy.
 
         Examples:
-          >>> nest.additional_resources(Path('/path/to/workflow'), [Path('/path/to/resource1'), Path('/path/to/resource2')])
+          >>> nest.additional_resources(
+          ...     Path("/path/to/workflow"),
+          ...     [Path("/path/to/resource1"), Path("/path/to/resource2")],
+          ... )
         """
         # validate_resources(resources)
-        snk_config = SnkConfig.from_workflow_dir(
-            workflow_path, create_if_not_exists=True
-        )
+        snk_config = SnkConfig.from_workflow_dir(workflow_path, create_if_not_exists=True)
         snk_config.add_resources(resources, workflow_path)
         snk_config.save()
 
@@ -289,7 +302,9 @@ class Nest:
           config_path (Path): The path to the config file.
 
         Examples:
-          >>> nest.copy_nonstandard_config(Path('/path/to/workflow'), Path('/path/to/config.yaml'))
+          >>> nest.copy_nonstandard_config(
+          ...     Path("/path/to/workflow"), Path("/path/to/config.yaml")
+          ... )
         """
         config_dir = workflow_dir / "config"
         config_dir.mkdir(exist_ok=True)
@@ -306,7 +321,7 @@ class Nest:
           List[Path]: A list of paths to delete.
 
         Examples:
-          >>> nest.get_paths_to_delete('example')
+          >>> nest.get_paths_to_delete("example")
           [Path('/path/to/workflows/example'), Path('/path/to/bin/example')]
         """
         to_delete = []
@@ -323,7 +338,7 @@ class Nest:
         if workflow_executable.exists():
             to_delete.append(workflow_executable)
 
-        # remove venv  
+        # remove venv
         venv_path = self.snk_venv_dir / workflow_name
         if venv_path.exists():
             to_delete.append(venv_path)
@@ -331,9 +346,7 @@ class Nest:
         # remove link
         workflow_symlink_executable = self.bin_dir / workflow_name
         if workflow_symlink_executable.is_symlink():
-            if str(os.readlink(workflow_symlink_executable)) == str(
-                workflow_executable
-            ):
+            if str(os.readlink(workflow_symlink_executable)) == str(workflow_executable):
                 to_delete.append(workflow_symlink_executable)
 
         if not to_delete:
@@ -352,7 +365,9 @@ class Nest:
           Deletes the given paths.
 
         Examples:
-          >>> nest.delete_paths([Path('/path/to/workflows/example'), Path('/path/to/bin/example')])
+          >>> nest.delete_paths(
+          ...     [Path("/path/to/workflows/example"), Path("/path/to/bin/example")]
+          ... )
         """
         # check that the files are in self.snk_workflows_dir
         # i.e. if it is a symlink read the link and check
@@ -362,15 +377,11 @@ class Nest:
                 path.unlink()
             elif path.is_file():
                 print("Deleting:", path)
-                assert str(self.snk_home) in str(
-                    path
-                ), "Cannot delete files outside of SNK_HOME"
+                assert str(self.snk_home) in str(path), "Cannot delete files outside of SNK_HOME"
                 path.unlink()
             elif path.is_dir():
                 print("Deleting:", path)
-                assert str(self.snk_home) in str(
-                    path
-                ), "Cannot delete folders outside of SNK_HOME"
+                assert str(self.snk_home) in str(path), "Cannot delete folders outside of SNK_HOME"
                 shutil.rmtree(path)
             else:
                 raise TypeError("Invalid file type")
@@ -387,7 +398,7 @@ class Nest:
           bool: Whether the uninstallation was successful.
 
         Examples:
-          >>> nest.uninstall('example')
+          >>> nest.uninstall("example")
           True
         """
         if not isinstance(name, str):
@@ -418,9 +429,9 @@ class Nest:
         if name in os.listdir(self.bin_dir):
             # check if orfan symlink
             def is_orfan_symlink(name):
-                return (self.bin_dir / name).is_symlink() and str(
-                    self.snk_home
-                ) in os.readlink(self.bin_dir / name)
+                return (self.bin_dir / name).is_symlink() and str(self.snk_home) in os.readlink(
+                    self.bin_dir / name
+                )
 
             if is_orfan_symlink(name):
                 self.delete_paths([self.bin_dir / name])
@@ -437,7 +448,7 @@ class Nest:
           name (str): The name of the workflow.
 
         Examples:
-          >>> nest._confirm_installation('example')
+          >>> nest._confirm_installation("example")
         """
         workflow_dir = self.snk_workflows_dir / name
         assert workflow_dir.exists()
@@ -459,8 +470,7 @@ class Nest:
     @property
     def workflows(self):
         return [
-            Workflow(workflow_dir.absolute())
-            for workflow_dir in self.snk_workflows_dir.glob("*")
+            Workflow(workflow_dir.absolute()) for workflow_dir in self.snk_workflows_dir.glob("*")
         ]
 
     def download(self, repo_url: str, name: str, tag_name: str = None, commit: str = None) -> Path:
@@ -477,14 +487,16 @@ class Nest:
           Path: The path to the cloned workflow.
 
         Examples:
-          >>> nest.download('https://github.com/example/repo.git', 'example', tag_name='v1.0.0')
+          >>> nest.download(
+          ...     "https://github.com/example/repo.git", "example", tag_name="v1.0.0"
+          ... )
         """
         location = self.snk_workflows_dir / name
         options = []
         if not commit:
-            options.append(f"--depth 1")
+            options.append("--depth 1")
         if tag_name:
-            options.append(f"--single-branch")
+            options.append("--single-branch")
             options.append(f"--branch {tag_name}")
         try:
             repo = Repo.clone_from(repo_url, location, multi_options=options)
@@ -501,13 +513,13 @@ class Nest:
                 raise WorkflowNotFoundError(f"Workflow tag '{tag_name}' not found")
             elif f"pathspec '{commit}' did not match" in e.stderr:
                 if tag_name:
-                    raise WorkflowNotFoundError(f"Workflow commit '{commit}' not found on branch {tag_name}")
+                    raise WorkflowNotFoundError(
+                        f"Workflow commit '{commit}' not found on branch {tag_name}"
+                    )
                 else:
                     raise WorkflowNotFoundError(f"Workflow commit '{commit}' not found")
             elif "not found" in e.stderr:
-                raise WorkflowNotFoundError(
-                    f"Workflow repository '{repo_url}' not found"
-                )
+                raise WorkflowNotFoundError(f"Workflow repository '{repo_url}' not found")
             raise e
         return location
 
@@ -524,7 +536,7 @@ class Nest:
           Path: The path to the installed workflow.
 
         Examples:
-          >>> nest.local(Path('/path/to/workflow'), 'example')
+          >>> nest.local(Path("/path/to/workflow"), "example")
         """
         location = self.snk_workflows_dir / name
         if editable:
@@ -536,7 +548,7 @@ class Nest:
         except InvalidGitRepositoryError:
             Repo.init(location, mkdir=False)
         return location
-    
+
     def create_virtual_environment(self, name: str) -> Path:
         """
         Create a virtual environment for the workflow.
@@ -549,7 +561,7 @@ class Nest:
           Path: The path to the virtual environment.
 
         Examples:
-          >>> nest.create_virtual_environment('example')
+          >>> nest.create_virtual_environment("example")
         """
         venv_dir = self.snk_home / "venvs"
         venv_dir.mkdir(exist_ok=True)
@@ -557,19 +569,22 @@ class Nest:
         try:
             venv.create(venv_path, with_pip=True, symlinks=True)
         except FileExistsError:
-            raise FileExistsError(f"The venv {venv_path} already exists. Please choose a different location or name. Alternatively, use the --force flag to overwrite the existing venv.")
+            raise FileExistsError(
+                f"The venv {venv_path} already exists. Please choose a different location or name. Alternatively, use the --force flag to overwrite the existing venv."
+            )
         return venv_path
-    
+
     def _install_snk_cli_in_venv(self, venv_path: Path, snakemake_version=None, dependencies=[]):
         """
         Install snk_cli in the virtual environment.
 
         Args:
           venv_path (Path): The path to the virtual environment.
-          snakemake_version (str, optional): The version of Snakemake to install in the virtual environment. Defaults to "7.32.4".
+          snakemake_version (str, optional): The version of Snakemake to install in the virtual
+          environment. Defaults to "7.32.4".
 
         Examples:
-          >>> nest._install_snk_cli_in_venv(Path('/path/to/venv'), snakemake_version='7.32.4')
+          >>> nest._install_snk_cli_in_venv(Path("/path/to/venv"), snakemake_version="7.32.4")
         """
         if not venv_path.exists():
             raise FileNotFoundError(f"Virtual environment not found at {venv_path}")
@@ -589,11 +604,16 @@ class Nest:
         else:
             snakemake_version = "snakemake"
         try:
-            subprocess.run([pip_path, 'install', snakemake_version, "snk_cli", "setuptools"] + dependencies, check=True)
+            subprocess.run(
+                [pip_path, "install", snakemake_version, "snk_cli", "setuptools"] + dependencies,
+                check=True,
+            )
         except subprocess.CalledProcessError as e:
             raise Exception(f"Failed to install snk_cli in virtual environment. Error: {e}")
 
-    def create_executable(self, workflow_path: Path, name: str, python_interpreter_path = None) -> Path:
+    def create_executable(
+        self, workflow_path: Path, name: str, python_interpreter_path=None
+    ) -> Path:
         if not python_interpreter_path:
             python_interpreter_path = self.python_interpreter_path
         template = inspect.cleandoc(
@@ -642,20 +662,18 @@ class Nest:
           Path: The path to the linked workflow executable.
 
         Examples:
-          >>> nest.link_workflow_executable_to_bin(Path('/path/to/workflow_executable'))
+          >>> nest.link_workflow_executable_to_bin(Path("/path/to/workflow_executable"))
         """
         name = workflow_executable_path.name
-        if (self.bin_dir / name).is_symlink() and os.readlink(
-            self.bin_dir / name
-        ) == str(workflow_executable_path):
+        if (self.bin_dir / name).is_symlink() and os.readlink(self.bin_dir / name) == str(
+            workflow_executable_path
+        ):
             # skip if it's already there
             return self.bin_dir / name
         try:
             os.symlink(workflow_executable_path.absolute(), self.bin_dir / name)
         except FileExistsError:
-            raise WorkflowExistsError(
-                f"File '{name}' already exists in SNK_BIN ({self.bin_dir})"
-            )
+            raise WorkflowExistsError(f"File '{name}' already exists in SNK_BIN ({self.bin_dir})")
         return self.bin_dir / name
 
     def check_for_snakemake_min_version(self, workflow_path: Path, snakefile: Path = None):
@@ -669,7 +687,7 @@ class Nest:
           str: The minimum version of Snakemake.
 
         Examples:
-          >>> nest.check_for_snakemake_min_version(Path('/path/to/workflow'))
+          >>> nest.check_for_snakemake_min_version(Path("/path/to/workflow"))
         """
         import re
 
@@ -684,12 +702,11 @@ class Nest:
                 return min_version
         with open(snakefile, "r") as f:
             for line in f:
-                match = re.search(r'min_version\((.*)\)', line)
+                match = re.search(r"min_version\((.*)\)", line)
                 if match:
                     min_version = match.group(1).strip().strip('"').strip("'")
                     break
         return min_version
-        
 
     @property
     def _current_snakemake_version(self):
@@ -703,6 +720,7 @@ class Nest:
           >>> nest.get_current_current_snakemake_version()
         """
         from snakemake.common import __version__
+
         return __version__
 
     def validate_Snakemake_repo(self, repo: Repo):
@@ -716,6 +734,6 @@ class Nest:
           bool: True if the repository is valid, False otherwise.
 
         Examples:
-          >>> nest.validate_Snakemake_repo(Repo('/path/to/repo'))
+          >>> nest.validate_Snakemake_repo(Repo("/path/to/repo"))
         """
         pass

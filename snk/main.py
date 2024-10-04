@@ -1,22 +1,26 @@
-from types import SimpleNamespace
-import typer
 from pathlib import Path
-from typing import Optional, List
-from .nest import Nest
-from .errors import WorkflowExistsError, WorkflowNotFoundError
-from .__about__ import __version__
-from snk_cli.config import SnkConfig
+from types import SimpleNamespace
+from typing import List, Optional
+
+import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from snk_cli.config import SnkConfig
+
+from .__about__ import __version__
+from .errors import WorkflowExistsError, WorkflowNotFoundError
+from .nest import Nest
 
 app = typer.Typer()
 
 SNK_HOME = None
 SNK_BIN = None
 
+
 def _print_snk_version(self, ctx: typer.Context, value: bool):
     if value:
         typer.echo(__version__)
         raise typer.Exit()
+
 
 # fmt: off
 @app.callback(context_settings={"help_option_names": ["-h", "--help"]})
@@ -67,6 +71,7 @@ callback.__doc__ += r"""        _            _             _
 """
 callback.__doc__ += f"\b\n\nA Snakemake Workflow Management System ({__version__})"
 
+
 @app.command()
 def install(
     ctx: typer.Context,
@@ -109,9 +114,7 @@ def install(
         "-d",
         help="Additional pip dependencies to install with the workflow.",
     ),
-    config: Optional[Path] = typer.Option(
-        None, help="Specify a non-standard config location."
-    ),
+    config: Optional[Path] = typer.Option(None, help="Specify a non-standard config location."),
     snakefile: Optional[Path] = typer.Option(
         None, help="Specify a non-standard Snakefile location."
     ),
@@ -166,12 +169,16 @@ def install(
                 isolate=isolate,
             )
     except WorkflowExistsError as e:
-        typer.secho(str(e) + ". Use a different name (--name) or overwrite (--force).", fg="red", err=True)
+        typer.secho(
+            str(e) + ". Use a different name (--name) or overwrite (--force).",
+            fg="red",
+            err=True,
+        )
         raise typer.Exit(1)
     except Exception as e:
         typer.secho(e, fg="red", err=True)
         raise typer.Exit(1)
-    
+
     snk_config = SnkConfig.from_workflow_dir(installed_workflow.path, create_if_not_exists=True)
     version = snk_config.version
     version_str = f" ({version})" if version else ""
@@ -202,9 +209,7 @@ def uninstall(
 @app.command()
 def list(
     ctx: typer.Context,
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Show the workflow paths."
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show the workflow paths."),
 ):
     """
     List the installed workflows.
@@ -227,11 +232,16 @@ def list(
         else:
             version_str = f"[blue]{snk_config.version}[/blue]"
         if verbose:
-            table.add_row(workflow.name, version_str, f"[yellow]{str(workflow.path.resolve())}[/yellow]")
+            table.add_row(
+                workflow.name,
+                version_str,
+                f"[yellow]{str(workflow.path.resolve())}[/yellow]",
+            )
         else:
             table.add_row(workflow.name, version_str)
     console = Console()
     console.print(table)
+
 
 # @app.command()
 # def run(

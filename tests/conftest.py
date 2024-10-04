@@ -1,10 +1,14 @@
-from typing import Tuple
-import pytest
 from pathlib import Path
-from snk import Nest
-from .utils import CLIRunner
-from snk_cli.config import SnkConfig
+from typing import Tuple
+
+import pytest
 import yaml
+from snk_cli.config import SnkConfig
+
+from snk import Nest
+
+from .utils import CLIRunner
+
 
 @pytest.fixture()
 def bin_dir(tmp_path_factory: Path):
@@ -61,8 +65,10 @@ def local_runner(tmp_path_factory):
     runner = CLIRunner([local_workflow.executable])
     return runner
 
+
 class Request:
     param: Tuple[dict, SnkConfig]
+
 
 @pytest.fixture
 def dynamic_runner(tmp_path_factory, request: Request) -> CLIRunner:
@@ -83,6 +89,7 @@ def dynamic_runner(tmp_path_factory, request: Request) -> CLIRunner:
     workflow = nest.install(path, editable=True)
     runner = CLIRunner([workflow.executable])
     return runner
+
 
 @pytest.fixture(scope="session")
 def print_config_runner(tmp_path_factory):

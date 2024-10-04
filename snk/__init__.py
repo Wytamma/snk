@@ -1,9 +1,12 @@
 # SPDX-FileCopyrightText: 2022-present wytamma <wytamma.wirth@me.com>
 #
 # SPDX-License-Identifier: MIT
-from .nest import Nest # noqa: F401
 from pathlib import Path
-from snk_cli import CLI, validate_config # noqa: F401
+
+from snk_cli import CLI, validate_config  # noqa: F401
+
+from .nest import Nest  # noqa: F401
+
 
 def create_cli(p):
     """
@@ -17,7 +20,7 @@ def create_cli(p):
       None
 
     Examples:
-      >>> create_cli('/path/to/workflow')
+      >>> create_cli("/path/to/workflow")
       ... # CLI is created and executed
     """
     workflow_dir_path = Path(p)
