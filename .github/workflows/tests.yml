@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: 3.11
           auto-activate-base: false
-          channels: conda-forge,bioconda,defaults
+          channels: conda-forge,bioconda
           channel-priority: strict
           auto-update-conda: true
       - uses: actions/cache@v2
