@@ -39,14 +39,15 @@ To improve their utility Snakemake workflows developers often encapsulate workfl
 
 Here we present Snk, a Snakemake workflow management system that allows users to install Snakemake workflows as dynamically generated Command Line Interfaces. Thus users can create a CLI for theirs (or others') Snakemake workflows with minimal to no changes code required. The Snk generate CLIs follow best practices and include several features out of box that improve user experience. The CLIs can be configured at install time or via a `snk.yaml` configuration file. Snk is readily available for installation via PyPI and Conda, using the commands `pip install snk` and `conda install snk`, respectively.
 
-Snk has two distinct major functions; Managing the installation of workflows and Dynamical generating CLIs from Snakemake configuration files. To install a workflow as a CLI users can specify the file path, URL, or GitHub name (username/repo) of a workflow. Snk copies (clones) workflows into a managed directory structure, creates a CLI entry point, and optionally creates an isolated virtual environment for each workflow. Workflows can be installed from specific commits, tags, or branches ensuring reproducibility. The advent of Snk allows users to utilise the Snakemake workflow catalog (https://snakemake.github.io/snakemake-workflow-catalog) as a searchable package index of Snk installable Snakemake tools. The snk install command is flexible and can be used to install diverse workflows using installation options. For example, the [dna-seq-gatk-variant-calling workflow](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) (release tag v2.1.1) can be installed as a CLI named `variant-calling` with Snakemake v8.10.8 and pandas dependency using the following command:
+Snk has two distinct major functions; Managing the installation of workflows and Dynamical generating CLIs from Snakemake configuration files. To install a workflow as a CLI users can specify the file path, URL, or GitHub name (username/repo) of a workflow. Snk copies (clones) workflows into a managed directory structure, creates a CLI entry point, and optionally creates an isolated virtual environment for each workflow. Workflows can be installed from specific commits, tags, or branches ensuring reproducibility. The advent of Snk allows users to utilise the Snakemake workflow catalog (https://snakemake.github.io/snakemake-workflow-catalog) as a searchable package index of Snk installable Snakemake tools. The snk install command is flexible and can be used to install diverse workflows using installation options. For example, the [dna-seq-gatk-variant-calling workflow](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) (release tag v2.1.1) can be installed as a CLI named `variant-calling` with Snakemake v8.10.8 and Pandas and NumPy dependency using the following command:
 
 ```bash
 snk install \
   snakemake-workflows/dna-seq-gatk-variant-calling \
   --name variant-calling \
   --snakemake 8.10.8 \
-  -d pandas \
+  -d pandas==1.5.3 \
+  -d numpy==1.26.4 \
   -t v2.1.1
 ```
 
