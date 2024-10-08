@@ -33,18 +33,37 @@ The snk install command can be use to install Snakemake workflows as CLIs. Snk c
 ```bash
 snk install wytamma/snk-basic-pipeline
 ```
+Successfully installed snk-basic-pipeline (ff034f1b)!
 
-The snk install command is flexible and can be used to install diverse workflows. For example, the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling` with Snakemake v8.10.8 and pandas dependency.
+The snk install command is flexible and can be used to install diverse workflows. For example, the [dna-seq-gatk-variant-calling](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling) workflow (v2.1.1) as `variant-calling` with Snakemake v8.10.8 and Pandas and NumPy dependency.
 
 ```
 snk install \
   snakemake-workflows/dna-seq-gatk-variant-calling \
   --name variant-calling \
   --snakemake 8.10.8 \
-  -d pandas \
+  -d pandas==1.5.3 \
+  -d numpy==1.26.4 \
   -t v2.1.1
 ```
 Successfully installed variant-calling (v2.1.1)!
+
+### Manage Installed Workflows
+
+You can list installed workflows with `snk list` and uninstall them with `snk uninstall`.
+
+```bash
+snk list
+```
+| Workflow | Version | 
+| --- | --- |
+| snk-basic-pipeline | ff034f1b |
+| variant-calling | v2.1.1 | 
+
+```bash
+snk uninstall snk-basic-pipeline
+```
+Successfully uninstalled snk-basic-pipeline!
 
 ### Inspect the CLI   
 
@@ -59,6 +78,7 @@ variant-calling --help
 ```
 <img width="862" alt="cli help" src="https://github.com/Wytamma/snk/assets/13726005/3e6e4134-efe5-47e1-b6f4-81b60e1c9ea7">
 
+
 ### View run options
 
 Workflow configuration options are automatically generated from the snakemake config file.
@@ -71,7 +91,7 @@ variant-calling run --help
 
 ### Create a DAG
 
-Here we use the `.test` resources included in the workflow to create the DAG.
+Here we use the `.test` resources included in the workflow to create the DAG (requires `graphviz`).
 
 ```bash
 variant-calling run -r .test/config -r .test/data --dag dag.pdf
@@ -93,23 +113,6 @@ variant-calling config --pretty # print the config
 variant-calling config > config.yml # save the config 
 variant-calling run --config config.yml # run with config 
 ```
-
-### Manage Installed Workflows
-
-You can list installed workflows with `snk list` and uninstall them with `snk uninstall`.
-
-```bash
-snk list
-```
-| Workflow | Version | 
-| --- | --- |
-| variant-calling | v2.1.1 | 
-
-
-```bash
-snk uninstall variant-calling
-```
-Successfully uninstalled variant-calling!
 
 ## Documentation
 
