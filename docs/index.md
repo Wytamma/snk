@@ -21,6 +21,10 @@ Snk (pronounced snek) is a Snakemake workflow management system. Snk allows you 
 ## Installation
 
 ```console
+conda install bioconda::snk
+```
+
+```console
 pip install snk
 ```
 
