@@ -349,9 +349,6 @@ class Nest:
             if str(os.readlink(workflow_symlink_executable)) == str(workflow_executable):
                 to_delete.append(workflow_symlink_executable)
 
-        if not to_delete:
-            raise WorkflowNotFoundError(f"Could not find workflow: {workflow_name}")
-
         return to_delete
 
     def delete_paths(self, files: List[Path]):
@@ -404,6 +401,8 @@ class Nest:
         if not isinstance(name, str):
             raise TypeError(f"Name must be a string. Found: {name}")
         to_remove = self.get_paths_to_delete(name)
+        if not to_remove:
+            raise WorkflowNotFoundError(f"Workflow '{name}' not found")
         if force:
             proceed = True
         else:
@@ -510,7 +509,10 @@ class Nest:
                     f"Workflow '{name}' already exists in {self.snk_workflows_dir}"
                 )
             elif f"Remote branch {tag_name}" in e.stderr:
-                raise WorkflowNotFoundError(f"Workflow tag '{tag_name}' not found")
+                did_you_mean = ""
+                if len(tag_name) < 6:
+                    did_you_mean = f". Did you mean 'v{tag_name}'?"
+                raise WorkflowNotFoundError(f"Workflow tag '{tag_name}' not found{did_you_mean}")
             elif f"pathspec '{commit}' did not match" in e.stderr:
                 if tag_name:
                     raise WorkflowNotFoundError(
