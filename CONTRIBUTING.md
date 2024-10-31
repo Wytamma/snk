@@ -6,7 +6,7 @@ This document outlines the process and guidelines for contributing to the projec
 
 ## Code of Conduct
 
-Please note that this project follows a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms. Be respectful to others in all interactions.
+Please note that this project follows a [Code of Conduct](https://github.com/Wytamma/snk?tab=coc-ov-file#readme). By participating in this project, you agree to abide by its terms. Be respectful to others in all interactions.
 
 ## A note on Snk vs Snk-CLI
 
