@@ -80,7 +80,7 @@ git checkout -b feature/your-feature-name
 Before submitting your changes, make sure all tests pass:
 
 ```bash
-hatch runt test
+hatch run test
 ```
 
 To run tests with coverage:
