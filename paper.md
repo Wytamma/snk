@@ -62,3 +62,7 @@ The core functionality of Snk is the dynamic creation of CLIs. Internally snk us
 Developers can also directly use the Snk-CLI package to generate CLIs for their Snakemake workflows. By using the CLI class from Snk-CLI workflow developers can build a fully featured workflow package without having to write a Snakemake wrapper. We provide a guide for using Snk-CLI to build self contained workflow packages at \url{https://snk.wytamma.com/workflow_packages}. The Snk-CLI package is available via PYPI and can be installed using the command `pip install snk-cli`. 
 
 Snk is a powerful tool that simplifies the use of Snakemake workflows by dynamically generating CLIs. Snk is open-source software released under the MIT license. Snk documentation, source code, and issue tracker are available at \url{https://github.com/Wytamma/snk}. We welcome contributions and feedback from the community to improve Snk and make it a valuable tool for the Snakemake community and reproducible research at large.
+
+# Acknowledgements
+
+The authors would like to thank Katherine Eaton (@ktmeaton) for her valuable open-source contributions. Additionally, we acknowledge all users who opened issues and submitted pull requests, as their input has been instrumental in enhancing this project. We also extend our gratitude to the editors and reviewers at the Journal of Open Source Software (JOSS) for their support and constructive feedback.
