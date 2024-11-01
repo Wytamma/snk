@@ -45,8 +45,6 @@ python = "3.12"
 dependencies = [
   "pytest",
   "pytest-cov",
-  "write-the",
-  "openai",
   "ruff"
 ]
 
