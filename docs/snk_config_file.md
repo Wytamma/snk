@@ -6,6 +6,16 @@ title: Snk Config File
 
 The `snk.yaml` file serves as the main interface for configuring the Snk workflow CLI. Users can tailor the workflow's settings, specify required resources, and control the appearance of the command line interface by setting various options in the `snk.yaml` file.
 
+## Modifying the `snk.yaml` File
+
+The `snk.yaml` file should be located in the root directory of the Snakemake workflow. It is used to configure the Snk CLI and provide additional information about the workflow. The `snk.yaml` file is written in YAML format and can be edited with any text editor.
+
+For convenience, you can use the `snk edit [WORKFLOW_NAME]` command to open the `snk.yaml` file in your default text editor. This command will create a new `snk.yaml` file if one does not already exist.
+
+```bash
+snk edit workflow
+```
+
 ## Available Configuration Options
 
 The following options are available for configuration in `snk.yaml`:
