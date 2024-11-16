@@ -9,6 +9,7 @@ from snk_cli.config import SnkConfig
 from .__about__ import __version__
 from .errors import WorkflowExistsError, WorkflowNotFoundError
 from .nest import Nest
+from .utils import open_text_editor
 
 app = typer.Typer()
 
@@ -242,6 +243,38 @@ def list(
     console = Console()
     console.print(table)
 
+@app.command()
+def edit(
+    ctx: typer.Context,
+    workflow_name: str = typer.Argument(
+        ..., help="Name of the workflow to configure."
+    ),
+    path: bool = typer.Option(
+        False, "--path", "-p", help="Show the path to the snk.yaml file."
+    ),
+):
+    """
+    Access the snk.yaml configuration file for a workflow.
+    """
+    nest = Nest(snk_home=ctx.obj.snk_home, bin_dir=ctx.obj.snk_bin)
+    try:
+        workflows = nest.workflows
+    except FileNotFoundError:   
+        workflows = []
+    workflow = next((w for w in workflows if w.name == workflow_name), None) 
+    if not workflow:
+        typer.secho(f"Workflow '{workflow_name}' not found!", fg="red", err=True)
+        raise typer.Exit(1)
+    snk_config = SnkConfig.from_workflow_dir(workflow.path, create_if_not_exists=True)
+    snk_config.save()
+    if path:
+        typer.echo(snk_config._snk_config_path)
+    else:
+        try:
+            open_text_editor(snk_config._snk_config_path)
+        except Exception as e:
+            typer.secho(str(e), fg="red", err=True)
+            raise typer.Exit(1)
 
 # @app.command()
 # def run(
@@ -257,11 +290,6 @@ def list(
 # @app.command()
 # def annotations(config: Path):
 #     """Generate annotations defaults from config file"""
-#     raise NotImplementedError
-
-# @app.command()
-# def create(name: str):
-#     """Create a default project that can be installed with snk"""
 #     raise NotImplementedError
 
 # @app.command()
