@@ -411,7 +411,7 @@ class Nest:
             for p in to_remove:
                 print(f"    {p}{'/*' if p.is_dir() else ''}")
             ans = input("Proceed (Y/n)? ")
-            proceed = ans.lower() in ["y", "yes"]
+            proceed = ans.lower() in ["y", "yes", ""]
         if not proceed:
             return False
         self.delete_paths(to_remove)
