@@ -76,6 +76,12 @@ def test_snk_uninstall(local_workflow: Workflow):
     assert result.exit_code == 0
     assert "Successfully uninstalled" in result.stdout
 
+def test_snk_create(local_workflow: Workflow, tmp_path: Path):
+    result = runner.invoke(app, ["create", str(tmp_path), "--force"])
+    print(result.stdout)
+    assert result.exit_code == 0
+    assert (tmp_path / "snk.yaml").exists()
+    assert (tmp_path / "Snakefile").exists()
 
 def test_import_create_cli(capsys):
     from snk import create_cli
