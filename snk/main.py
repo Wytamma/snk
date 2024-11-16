@@ -244,6 +244,34 @@ def list(
     console.print(table)
 
 @app.command()
+def create(path: Path, force: bool = typer.Option(False, "--force", "-f")):
+    """Create a default snk.yaml project that can be installed with snk"""
+    if path.exists():
+        if not force:
+            typer.secho(f"Directory '{path}' already exists! Use --force to overwrite.", fg="red", err=True)
+            raise typer.Exit(1)
+        else:
+            typer.secho(f"Overwriting existing directory '{path}'.", fg="yellow", err=True)
+            import shutil
+            shutil.rmtree(path)
+    try:
+        path.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        typer.secho(f"Directory '{path}' already exists! Use --force to overwrite.", fg="red", err=True)
+        raise typer.Exit(1)
+    snk_config = SnkConfig.from_workflow_dir(path, create_if_not_exists=True)
+    snk_config.cli["msg"] = {
+        "help": "Print a help message.",
+        "default": "Hello, World!",
+        "required": False,
+        "short": "m",
+    }
+    snk_config.save()
+    typer.echo(f"Created snk.yaml at {snk_config._snk_config_path}")
+    with open(path / "Snakefile", "w") as f:
+        f.write("""rule all:\n    shell: f"echo {config['msg']}"\n""")
+
+@app.command()
 def edit(
     ctx: typer.Context,
     workflow_name: str = typer.Argument(
