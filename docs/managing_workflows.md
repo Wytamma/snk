@@ -163,6 +163,24 @@ Proceed (Y/n)? y
 !!! Note
     Use `--force` to force uninstall without asking.
 
+## Editing workflow CLI configuration
+
+The `snk edit` command is used to edit the CLI configuration of a installed workflow. This will open the configuration file in the default text editor. 
+
+```bash
+snk edit workflow
+```
+
+Use the `--path` flag to print the path to the configuration file instead of opening it.
+```bash 
+snk edit --path workflow
+```
+
+!!! note 
+
+    The configuration file is a YAML file that contains the CLI configuration for the workflow. For more details on the CLI configuration file read the [snk config file docs](https://snk.wytamma.com/snk_config_file).
+    
+
 ## Ejecting workflows
 
 The `cp -r $(workflow-name -p) workflow-name` command is used to eject the workflow from the package. This will copy the workflow files to the current working directory. This will allow you to modify the workflow and run it with the standard `snakemake` command.
