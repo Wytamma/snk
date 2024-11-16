@@ -58,6 +58,12 @@ def test_snk_list(local_workflow: Workflow):
     assert "workflow" in result.stdout
     assert "editable" in result.stdout
 
+def test_config_path_cli(local_workflow: Workflow):
+    snk_home = local_workflow.path.parent.parent
+    bin_dir = local_workflow.path.parent.parent.parent / "bin"
+    result = runner.invoke(app, ["--home", snk_home, "--bin", bin_dir, "edit", "--path", "workflow"])
+    assert result.exit_code == 0
+    assert "/workflows/workflow/snk.yaml" in result.stdout  
 
 def test_snk_uninstall(local_workflow: Workflow):
     snk_home = local_workflow.path.parent.parent
@@ -87,3 +93,4 @@ def test_import_create_cli(capsys):
         pass
     captured = capsys.readouterr()
     assert "Usage" in captured.out
+
