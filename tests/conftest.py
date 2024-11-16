@@ -41,7 +41,7 @@ def basic_runner(tmp_path_factory):
     return runner
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def local_workflow(tmp_path_factory):
     path = Path(tmp_path_factory.mktemp("snk"))
     (path / "home").mkdir()
