@@ -128,7 +128,7 @@ cli:
     required: False
   dict:
     type: dict[str, str]
-    default: ["key1:value1", "key2:value2"]
+    default: [["key1", "value1"], ["key2", value2"]]
     help: "A dictionary"
     required: False
   choice:
@@ -141,7 +141,7 @@ cli:
 
 In this example, the `input` and `count` parameters are required, while the `text`, `flag` and `choice` parameters are optional. the flag `-i` can be used as shorthand for `--input`. The `text` parameter has a default value of "Hello, world!" that will be used if the user does not provide a value. 
 
-The parameter `value_pair` is a pair of a string and an integer, with a default value of `["key", 1]`. The `dict` parameter is a dictionary of strings, with a default value of `["key1:value1", "key2:value2"]` the will be convert to a dict when passed to snakemake. The `choice` parameter can only take one of the values specified in the `choices` list. 
+The parameter `value_pair` is a pair of a string and an integer, with a default value of `["key", 1]`. The `dict` parameter is a dictionary of strings, with a default value of `[["key1", "value1"], ["key2", value2"]]` that will be convert to a dictionary when passed to snakemake. The `choice` parameter can only take one of the values specified in the `choices` list. 
 
 The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
 
