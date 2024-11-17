@@ -32,6 +32,7 @@ The following options are available for configuration in `snk.yaml`:
 | `additional_snakemake_args`| A list of additional arguments to pass to snakemake.                                                                      | List                | `[]`                                                             |
 | `skip_missing`            | Skip any missing CLI options (i.e. those in config but not in the snk file).                                               | Boolean             | `False`                                                          |
 | `commands`                | A list of subcommands to include in the CLI.                                                                               | List                | `["run", "script", "env", "profile", "info", "config"]`           |
+| `min_snk_cli_version`     | The minimum version of the Snk CLI required to run the workflow.                                                          | String or `null`    | `null`                                                           |
 | `cli`                     | Annotations for the workflow CLI parameters (see [CLI section](https://snk.wytamma.com/snk_config_file/#cli) below).       | Object              | None                                                             |
 
 
@@ -60,6 +61,7 @@ conda: True
 additional_snakemake_args:
   - "--reason"
 skip_missing: True
+min_snk_cli_version: "0.6.1"
 cli:
   input:
     type: Path
@@ -81,6 +83,7 @@ In this example:
 - The `conda` flag is enabled (True), indicating that the workflow should utilise Conda environments for executing tasks, provided the conda command is accessible in the system environment.
 - Additional Snakemake arguments are specified under `additional_snakemake_args`, including --reason which will display the reasons for rule execution.
 - The `skip_missing` option is enabled (True), which means that only config defined in the `snk.yaml` file, will be included in the dynamically generate CLI.
+- The `min_snk_cli_version` is set to "0.6.1", indicating that the workflow requires at least version 0.6.1 of the Snk CLI to run.
 - An annotation is provided for the `input` parameter, which is of type `str` and comes with a help message "Path to the input file".
 
 ## CLI

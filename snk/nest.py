@@ -220,11 +220,18 @@ class Nest:
             snakemake_min_version = self.check_for_snakemake_min_version(workflow_path, snakefile)
             if snakemake_version is not None:
                 snakemake_version_to_install_in_venv = snakemake_version
-            elif parse_version(self._current_snakemake_version) < parse_version(
-                snakemake_min_version
-            ):
-                # The current version of Snakemake is less than the minimum version required by the workflow
-                snakemake_version_to_install_in_venv = f">={snakemake_min_version}"
+                if parse_version(self._current_snakemake_version) < parse_version(
+                    snakemake_min_version
+                ):
+                    # The current version of Snakemake is less than the minimum version required by the workflow
+                    snakemake_version_to_install_in_venv = f">={snakemake_min_version}"
+            min_snk_cli_version = self.check_for_snk_cli_min_version(workflow_path)
+            if min_snk_cli_version is not None:
+                if parse_version(self._current_snk_cli_version) < parse_version(
+                    min_snk_cli_version
+                ):
+                    # The current version of Snakemake is less than the minimum version required by the workflow
+                    dependencies.append(f"snk_cli>={min_snk_cli_version}")
             if snakemake_version_to_install_in_venv is not None or dependencies:
                 isolate = True
             if isolate:
@@ -606,8 +613,11 @@ class Nest:
         else:
             snakemake_version = "snakemake"
         try:
+            snk_cli_in_deps = len([dep for dep in dependencies if "snk_cli" in dep]) > 0
+            if not snk_cli_in_deps:
+                dependencies.append("snk_cli")
             subprocess.run(
-                [pip_path, "install", snakemake_version, "snk_cli", "setuptools"] + dependencies,
+                [pip_path, "install", snakemake_version, "setuptools"] + dependencies,
                 check=True,
             )
         except subprocess.CalledProcessError as e:
@@ -722,6 +732,40 @@ class Nest:
           >>> nest.get_current_current_snakemake_version()
         """
         from snakemake.common import __version__
+
+        return __version__
+
+    def check_for_snk_cli_min_version(self, workflow_path: Path):
+        """
+        Check if the workflow has a minimum version of snk_cli.
+
+        Args:
+          workflow_path (Path): The path to the workflow directory.
+
+        Returns:
+          str: The minimum version of snk_cli.
+
+        Examples:
+          >>> nest.check_for_snk_cli_min_version(Path("/path/to/workflow"))
+        """
+        snk_config = SnkConfig.from_workflow_dir(workflow_path, create_if_not_exists=True)
+        try:
+            return snk_config.min_snk_cli_version
+        except AttributeError:
+            return None
+    
+    @property
+    def _current_snk_cli_version(self):
+        """
+        Get the current version of snk_cli.
+
+        Returns:
+          str: The current version of snk_cli.
+
+        Examples:
+          >>> nest.get_current_current_snk_cli_version()
+        """
+        from snk_cli.__about__ import __version__
 
         return __version__
 

@@ -1,5 +1,6 @@
 additional_snakemake_args: []
 art: null
+min_snk_cli_version: 0.6.2
 cli:
   hidden:
     hidden: true
