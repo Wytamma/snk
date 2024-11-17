@@ -87,7 +87,7 @@ In this example:
 
 Annotations play a crucial role in configuring the dynamic Snk CLI. They provide metadata about the configuration parameters used in your Snakemake workflow and can dictate how the CLI will prompt users for these parameters. The `snk.yaml` file supports the following fields under the `cli` option:
 
-- `type`: Determines the datatype of the configuration parameter. It can be one of the following: `int`, `str`, `path`, `bool`, `list`, `list[str]`, `list[path]`, or `list[int]`.
+- `type`: Determines the datatype of the configuration parameter. It can be one of the following: `int`, `str`, `path`, `bool`, `list`, `list[str]`, `list[path]`, `list[int]`, `list[float]`, `pair`, or `dict`.
 - `help`: This is a descriptive text that provides users with information or guidance on what the parameter is used for.
 - `required`: A boolean value (either `True` or `False`) that indicates whether the parameter is mandatory. If a parameter is marked as `required: True`, the Snk CLI will insist that a user provides a value for it.
 - `default`: A default value for the parameter. If a user does not provide a value for the parameter, the Snk CLI will use this default value instead.
@@ -118,6 +118,16 @@ cli:
     type: bool
     help: "A boolean flag to enable or disable a feature"
     required: False
+  value_pair:
+    type: pair[str, int]
+    default: ["key", 1]
+    help: "A key-value pair"
+    required: False
+  dict:
+    type: dict[str, str]
+    default: ["key1:value1", "key2:value2"]
+    help: "A dictionary"
+    required: False
   choice:
     help: "A choice to select"
     choices:
@@ -126,7 +136,11 @@ cli:
     required: False
 ```
 
-In this example, the `input` and `count` parameters are required, while the `text`, `flag` and `choice` parameters are optional. the flag `-i` can be used as shorthand for `--input`. The `text` parameter has a default value of "Hello, world!" that will be used if the user does not provide a value. The `choice` parameter can only take one of the values specified in the `choices` list. The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
+In this example, the `input` and `count` parameters are required, while the `text`, `flag` and `choice` parameters are optional. the flag `-i` can be used as shorthand for `--input`. The `text` parameter has a default value of "Hello, world!" that will be used if the user does not provide a value. 
+
+The parameter `value_pair` is a pair of a string and an integer, with a default value of `["key", 1]`. The `dict` parameter is a dictionary of strings, with a default value of `["key1:value1", "key2:value2"]` the will be convert to a dict when passed to snakemake. The `choice` parameter can only take one of the values specified in the `choices` list. 
+
+The `type` and `help` attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.
 
 ### Nested Annotations in the `snk.yaml` File
 
