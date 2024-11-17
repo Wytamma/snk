@@ -1,7 +1,13 @@
 additional_snakemake_args: []
 art: null
-min_snk_cli_version: 0.6.2
 cli:
+  choice:
+    choices:
+    - a
+    - b
+    - c
+    default: a
+    help: A string to test
   hidden:
     hidden: true
   no_run:
@@ -11,13 +17,6 @@ cli:
     type: bool
   null_annotation:
     default: null
-  choice:
-    choices: 
-    - a
-    - b
-    - c
-    default: a
-    help: A string to test
   test:
     another:
       test:
@@ -64,9 +63,10 @@ conda: true
 configfile: null
 font: cybermedium
 logo: MyWorkflow
+min_snk_cli_version: 0.6.2
 resources: []
 skip_missing: false
 snakefile: null
 symlink_resources: true
-tagline: 'A workflow to test the workflow logo and tagline'
+tagline: A workflow to test the workflow logo and tagline
 version: editable

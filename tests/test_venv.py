@@ -39,7 +39,7 @@ def test_install_snk_cli_in_venv(nest: Nest, args):
                     else:
                         snakemake = f"snakemake=={args['snakemake_version']}"
                     mock_run.assert_called_once_with(
-                        [pip_path, "install", snakemake, "snk_cli", "setuptools"]
+                        [pip_path, "install", snakemake, "setuptools"]
                         + args["dependencies"],
                         check=True,
                     )
