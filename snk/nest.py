@@ -226,7 +226,8 @@ class Nest:
                     # The current version of Snakemake is less than the minimum version required by the workflow
                     snakemake_version_to_install_in_venv = f">={snakemake_min_version}"
             min_snk_cli_version = self.check_for_snk_cli_min_version(workflow_path)
-            if min_snk_cli_version is not None:
+            snk_cli_in_deps = len([dep for dep in dependencies if "snk_cli" in dep]) > 0
+            if min_snk_cli_version is not None and not snk_cli_in_deps:
                 if parse_version(self._current_snk_cli_version) < parse_version(
                     min_snk_cli_version
                 ):
