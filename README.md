@@ -123,3 +123,26 @@ Read the [documentation](https://snk.wytamma.com) for more information.
 ## License
 
 `snk` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+
+## Citation
+
+If you use `snk` in an academic setting then please cite the following article:
+
+- Wirth, Wytamma, Simon Mutch, and Robert Turnbull. “Snk: A Snakemake CLI and Workflow Management System.” *Journal of Open Source Software* 9, no. 103 (2024): 7410. DOI: [10.21105/joss.07410](https://doi.org/10.21105/joss.07410).
+
+In BibTeX format:
+
+```
+@article{Wirth2024, 
+    doi = {10.21105/joss.07410}, 
+    year = {2024}, 
+    publisher = {The Open Journal}, 
+    volume = {9}, 
+    number = {103}, 
+    pages = {7410}, 
+    author = {Wytamma Wirth and Simon Mutch and Robert Turnbull}, 
+    title = {Snk: A Snakemake CLI and Workflow Management System}, 
+    journal = {Journal of Open Source Software}
+}
+```
