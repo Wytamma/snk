@@ -7,6 +7,7 @@ title: Home
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/snk.svg)](https://pypi.org/project/snk)
 [![write-the - docs](https://badgen.net/badge/write-the/docs/blue?icon=https://raw.githubusercontent.com/Wytamma/write-the/master/images/write-the-icon.svg)](https://write-the.wytamma.com/)
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FWytamma%2Fsnk&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://github.com/Wytamma/snk)
+[![status](https://joss.theoj.org/papers/e0b3241a56503fc2cae712d95c9142d8/status.svg)](https://joss.theoj.org/papers/e0b3241a56503fc2cae712d95c9142d8)
 
 ---
 
@@ -126,3 +127,25 @@ Read the [documentation](https://snk.wytamma.com) for more information.
 ## License
 
 `snk` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+## Citation
+
+If you use `snk` in an academic setting then please cite the following article:
+
+- Wirth, Wytamma, Simon Mutch, and Robert Turnbull. “Snk: A Snakemake CLI and Workflow Management System.” *Journal of Open Source Software* 9, no. 103 (2024): 7410. DOI: [10.21105/joss.07410](https://doi.org/10.21105/joss.07410).
+
+In BibTeX format:
+
+```
+@article{Wirth2024, 
+    doi = {10.21105/joss.07410}, 
+    year = {2024}, 
+    publisher = {The Open Journal}, 
+    volume = {9}, 
+    number = {103}, 
+    pages = {7410}, 
+    author = {Wytamma Wirth and Simon Mutch and Robert Turnbull}, 
+    title = {Snk: A Snakemake CLI and Workflow Management System}, 
+    journal = {Journal of Open Source Software}
+}
+```
