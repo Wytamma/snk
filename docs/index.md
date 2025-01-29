@@ -15,7 +15,7 @@ title: Home
 
 **Source Code**: <a href="https://github.com/Wytamma/snk" target="_blank">https://github.com/Wytamma/snk</a>
 
-**Paper**: <a href="[https://github.com/Wytamma/snk](https://joss.theoj.org/papers/10.21105/joss.0741)" target="_blank">https://joss.theoj.org/papers/10.21105/joss.07410</a>
+**Paper**: <a href="https://joss.theoj.org/papers/10.21105/joss.0741" target="_blank">https://joss.theoj.org/papers/10.21105/joss.07410</a>
 
 ---
 
