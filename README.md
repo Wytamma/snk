@@ -32,7 +32,7 @@ pip install snk
 
 ### Install a workflow as a CLI
 
-The snk install command can be use to install Snakemake workflows as CLIs. Snk can install Snakemake workflows from GitHub repos or local paths.
+The `snk install` command can be use to install Snakemake workflows as CLIs. Snk can install Snakemake workflows from GitHub repos or local paths.
 
 ```bash
 snk install wytamma/snk-basic-pipeline
