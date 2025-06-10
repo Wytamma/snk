@@ -1,0 +1,1216 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../managing_workflows/">
+      
+      
+        <link rel="next" href="../workflow_packages/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Snk Config File - snk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#snk-configuration-file" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="snk" class="md-header__button md-logo" aria-label="snk" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            snk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Snk Config File
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Wytamma/snk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="snk" class="md-nav__button md-logo" aria-label="snk" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    snk
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Wytamma/snk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing_workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Managing Workflows
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Snk Config File
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Snk Config File
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#modifying-the-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modifying the snk.yaml File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Configuration Options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example snk.yaml File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-snkyaml-file-with-cli-annotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example snk.yaml File with CLI Annotations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nested-annotations-in-the-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nested Annotations in the snk.yaml File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-snkyaml-without-a-configyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using snk.yaml without a config.yaml file
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-config-with-the-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validating Config with the snk.yaml File
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-snkyaml-file-with-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example snk.yaml File with Resources
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflow_packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Workflow Packages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/nest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Nest
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Snk cli
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Snk cli
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snk-cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    The Snk CLI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snk-cli/config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Config
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snk-cli/env/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Env
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snk-cli/info/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Info
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snk-cli/profile/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Profile
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snk-cli/run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snk-cli/script/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Script
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#modifying-the-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modifying the snk.yaml File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Configuration Options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example snk.yaml File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-snkyaml-file-with-cli-annotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example snk.yaml File with CLI Annotations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nested-annotations-in-the-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nested Annotations in the snk.yaml File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-snkyaml-without-a-configyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using snk.yaml without a config.yaml file
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-config-with-the-snkyaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validating Config with the snk.yaml File
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-snkyaml-file-with-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example snk.yaml File with Resources
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Wytamma/snk/edit/master/docs/snk_config_file.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="snk-configuration-file">Snk Configuration File</h1>
+<p>The <code>snk.yaml</code> file serves as the main interface for configuring the Snk workflow CLI. Users can tailor the workflow's settings, specify required resources, and control the appearance of the command line interface by setting various options in the <code>snk.yaml</code> file.</p>
+<h2 id="modifying-the-snkyaml-file">Modifying the <code>snk.yaml</code> File</h2>
+<p>The <code>snk.yaml</code> file should be located in the root directory of the Snakemake workflow. It is used to configure the Snk CLI and provide additional information about the workflow. The <code>snk.yaml</code> file is written in YAML format and can be edited with any text editor.</p>
+<p>For convenience, you can use the <code>snk edit [WORKFLOW_NAME]</code> command to open the <code>snk.yaml</code> file in your default text editor. This command will create a new <code>snk.yaml</code> file if one does not already exist.</p>
+<pre><code class="language-bash">snk edit workflow
+</code></pre>
+<h2 id="available-configuration-options">Available Configuration Options</h2>
+<p>The following options are available for configuration in <code>snk.yaml</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>logo</code></td>
+<td>The text used to dynamically generate the ASCII art displayed in the CLI.</td>
+<td>String</td>
+<td><code>&lt;name-of-workflow&gt;</code></td>
+</tr>
+<tr>
+<td><code>art</code></td>
+<td>A string representing ASCII art to display in the CLI (overwrites <code>logo</code>).</td>
+<td>String or <code>null</code></td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>tagline</code></td>
+<td>A string representing the tagline displayed in the CLI.</td>
+<td>String</td>
+<td><code>"A Snakemake workflow CLI generated with Snk"</code></td>
+</tr>
+<tr>
+<td><code>font</code></td>
+<td>A string representing the font used in the CLI (see <a href="https://www.ascii-art.site/FontList.html">FontList</a>).</td>
+<td>String</td>
+<td><code>"small"</code></td>
+</tr>
+<tr>
+<td><code>resources</code></td>
+<td>A list of resource files required for the workflow.</td>
+<td>List</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>symlink_resources</code></td>
+<td>A boolean that controls whether symbolic links are created for resources (avoid using this unless you know).</td>
+<td>Boolean</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>conda</code></td>
+<td>A boolean that controls whether the workflow should use conda. The <code>--use-conda</code> flag will only be passed to snakemake if True.</td>
+<td>Boolean</td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>additional_snakemake_args</code></td>
+<td>A list of additional arguments to pass to snakemake.</td>
+<td>List</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>skip_missing</code></td>
+<td>Skip any missing CLI options (i.e. those in config but not in the snk file).</td>
+<td>Boolean</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>commands</code></td>
+<td>A list of subcommands to include in the CLI.</td>
+<td>List</td>
+<td><code>["run", "script", "env", "profile", "info", "config"]</code></td>
+</tr>
+<tr>
+<td><code>min_snk_cli_version</code></td>
+<td>The minimum version of the Snk CLI required to run the workflow.</td>
+<td>String or <code>null</code></td>
+<td><code>null</code></td>
+</tr>
+<tr>
+<td><code>cli</code></td>
+<td>Annotations for the workflow CLI parameters (see <a href="https://snk.wytamma.com/snk_config_file/#cli">CLI section</a> below).</td>
+<td>Object</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<h2 id="example-snkyaml-file">Example <code>snk.yaml</code> File</h2>
+<p>Below is an example of a <code>snk.yaml</code> file illustrating all available options:</p>
+<pre><code class="language-yaml">logo: &quot;MyWorkflow&quot;
+font: &quot;small&quot;
+art: |
+  _______  _______  _______  _______ 
+ (  ____ \(  ___  )(       )(  ____ \
+ | (    \/| (   ) || () () || (    \/
+ | (__    | (___) || || || || (_____ 
+ |  __)   |  ___  || |(_)| |(_____  )
+ | (      | (   ) || |   | |      ) |
+ | (____/\| )   ( || )   ( |/\____) |
+ (_______/|/     \||/     \|\_______)
+tagline: &quot;A comprehensive Snakemake workflow configured with snk.yaml&quot;
+resources:
+  - &quot;data/input1.txt&quot;
+  - &quot;data/input2.txt&quot;
+symlink_resources: False
+conda: True
+additional_snakemake_args:
+  - &quot;--reason&quot;
+skip_missing: True
+min_snk_cli_version: &quot;0.6.1&quot;
+cli:
+  input:
+    type: Path
+    help: &quot;Path to the input file&quot;
+    required: True
+  output:
+    type: Path
+    help: &quot;Path to the output directory&quot;
+    required: True
+</code></pre>
+<p>In this example:</p>
+<ul>
+<li>The workflow dynamically generated <code>logo</code> is set to "MyWorkflow".</li>
+<li>The <code>font</code> used for the logo is "small".</li>
+<li>ASCII art is specified directly in the <code>art</code> configuration, taking precedence over the logo if both are provided.</li>
+<li>The <code>tagline</code> is "A workflow to illustrate the use of snk.yaml". This will be printed in the CLI help under the logo.</li>
+<li>Two resource files, <code>data/input1.txt</code> and <code>data/input2.txt</code>, are required for the workflow. They will be copied to the working directory at runtime.</li>
+<li>The <code>conda</code> flag is enabled (True), indicating that the workflow should utilise Conda environments for executing tasks, provided the conda command is accessible in the system environment.</li>
+<li>Additional Snakemake arguments are specified under <code>additional_snakemake_args</code>, including --reason which will display the reasons for rule execution.</li>
+<li>The <code>skip_missing</code> option is enabled (True), which means that only config defined in the <code>snk.yaml</code> file, will be included in the dynamically generate CLI.</li>
+<li>The <code>min_snk_cli_version</code> is set to "0.6.1", indicating that the workflow requires at least version 0.6.1 of the Snk CLI to run.</li>
+<li>An annotation is provided for the <code>input</code> parameter, which is of type <code>str</code> and comes with a help message "Path to the input file".</li>
+</ul>
+<h2 id="cli">CLI</h2>
+<p>Annotations play a crucial role in configuring the dynamic Snk CLI. They provide metadata about the configuration parameters used in your Snakemake workflow and can dictate how the CLI will prompt users for these parameters. The <code>snk.yaml</code> file supports the following fields under the <code>cli</code> option:</p>
+<ul>
+<li><code>type</code>: Determines the datatype of the configuration parameter. It can be one of the following: <code>int</code>, <code>str</code>, <code>path</code>, <code>bool</code>, <code>list</code>, <code>list[str]</code>, <code>list[path]</code>, <code>list[int]</code>, <code>list[float]</code>, <code>pair</code>, or <code>dict</code>.</li>
+<li><code>help</code>: This is a descriptive text that provides users with information or guidance on what the parameter is used for.</li>
+<li><code>required</code>: A boolean value (either <code>True</code> or <code>False</code>) that indicates whether the parameter is mandatory. If a parameter is marked as <code>required: True</code>, the Snk CLI will insist that a user provides a value for it.</li>
+<li><code>default</code>: A default value for the parameter. If a user does not provide a value for the parameter, the Snk CLI will use this default value instead.</li>
+<li><code>short</code>: A short (-) flag to use with the option.</li>
+<li><code>choices</code>: A list of possible values that the parameter can take. If a user provides a value that is not in this list, the Snk CLI will raise an error.</li>
+</ul>
+<h3 id="example-snkyaml-file-with-cli-annotations">Example <code>snk.yaml</code> File with CLI Annotations</h3>
+<p>Here's an example of a <code>snk.yaml</code> file that includes annotations for several configuration parameters:</p>
+<pre><code class="language-yaml">cli:
+  input:
+    type: path
+    help: &quot;Path to the input file&quot;
+    required: True
+    short: i
+  text:
+    default: &quot;Hello, world!&quot;
+    type: str
+    help: &quot;A string to save to a file&quot;
+    required: False
+  count:
+    type: int
+    help: &quot;Number of times to perform the operation&quot;
+    required: True
+  flag:
+    type: bool
+    help: &quot;A boolean flag to enable or disable a feature&quot;
+    required: False
+  value_pair:
+    type: pair[str, int]
+    default: [&quot;key&quot;, 1]
+    help: &quot;A key-value pair&quot;
+    required: False
+  dict:
+    type: dict[str, str]
+    default: [[&quot;key1&quot;, &quot;value1&quot;], [&quot;key2&quot;, value2&quot;]]
+    help: &quot;A dictionary&quot;
+    required: False
+  choice:
+    help: &quot;A choice to select&quot;
+    choices:
+      - &quot;option1&quot;
+      - &quot;option2&quot;
+    required: False
+</code></pre>
+<p>In this example, the <code>input</code> and <code>count</code> parameters are required, while the <code>text</code>, <code>flag</code> and <code>choice</code> parameters are optional. the flag <code>-i</code> can be used as shorthand for <code>--input</code>. The <code>text</code> parameter has a default value of "Hello, world!" that will be used if the user does not provide a value. </p>
+<p>The parameter <code>value_pair</code> is a pair of a string and an integer, with a default value of <code>["key", 1]</code>. The <code>dict</code> parameter is a dictionary of strings, with a default value of <code>[["key1", "value1"], ["key2", value2"]]</code> that will be convert to a dictionary when passed to snakemake. The <code>choice</code> parameter can only take one of the values specified in the <code>choices</code> list. </p>
+<p>The <code>type</code> and <code>help</code> attributes provide additional information about each parameter, informing the user of the expected datatype and what the parameter is used for, respectively.</p>
+<h3 id="nested-annotations-in-the-snkyaml-file">Nested Annotations in the <code>snk.yaml</code> File</h3>
+<p>Your <code>snk.yaml</code> annotations must match the structure of your <code>config.yaml</code> file. If you have nested options in your <code>config.yaml</code> file, you must specify these in the <code>snk.yaml</code> file as well. Here's an example of how you might specify nested options in a <code>snk.yaml</code> file:</p>
+<pre><code class="language-yaml">cli:
+  nested:
+    input:
+      type: path
+      help: &quot;Path to the input file&quot;
+  option:
+    type: str
+    default: &quot;Hello, world!&quot;
+</code></pre>
+<p>This will produce the following CLI:</p>
+<pre><code class="language-bash">workflow run --nested-input &lt;input&gt; --option &lt;other_option&gt;
+</code></pre>
+<p>The matching <code>config.yaml</code> would look like this:</p>
+<pre><code class="language-yaml">nested:
+  input: &quot;path/to/input&quot;
+option: &quot;Hello, world!&quot;
+</code></pre>
+<h3 id="using-snkyaml-without-a-configyaml-file">Using snk.yaml without a config.yaml file</h3>
+<p>If you don't have a <code>config.yaml</code> file, you can still use the <code>snk.yaml</code> file to specify the parameters and defaults for your workflow. The <code>snk.yaml</code> file will be used to generate the CLI, and the parameters will be available in the <code>config</code> dictionary in your <code>Snakefile</code>. However, you should probably still have a <code>config.yaml</code> file to store your config, as this is the standard way to manage configuration in Snakemake workflows (unless you're creating a <a href="https://snk.wytamma.com/workflow_packages">workflow package</a>).</p>
+<h3 id="validating-config-with-the-snkyaml-file">Validating Config with the <code>snk.yaml</code> File</h3>
+<p>Snk provides a function that can be use to validate snakemake config using the <code>snk.yaml</code> cli annotations. The <code>validate_config</code> function will convert values to the correct type if possible. If the value cannot be converted to the correct type, an error will be raised. This can be added to the start of your <code>Snakefile</code> to ensure that the config is valid before running the workflow.</p>
+<pre><code class="language-python">try:
+  from snk_cli import validate_config
+  validate_config(config, snk_yaml)
+except ImportError:
+  pass
+</code></pre>
+<p>To ensure that the workflow will still run in the absence of the <code>snk</code> package, you can wrap the import statement in a try/except block.</p>
+<h2 id="resources">Resources</h2>
+<p>Resources represent files or folders that are essential for the execution of the workflow. They must be present in the workflow's working directory at runtime. The <code>snk.yaml</code> configuration file allows you to specify these resources.</p>
+<p>When the workflow is invoked with the <code>run</code> command, the Snk CLI will ensure that the specified resources are available in the working directory. It accomplishes this by either copying the resource files or creating symbolic links (symlinks) to them. The method used depends on the value of the <code>symlink_resources</code> option in the <code>snk.yaml</code> file. If <code>symlink_resources</code> is set to <code>true</code>, symlinks will be used. Otherwise, the files will be copied.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You should only set <code>symlink_resources</code> to <code>true</code> if the workflow won't modify these resources. Any modifications to symlinked resources will be system-wide!</p>
+</div>
+<p>Once the workflow has successfully completed, the Snk CLI will clean up the working directory by deleting the copied resources or unlinking the symlinks.</p>
+<h3 id="example-snkyaml-file-with-resources">Example <code>snk.yaml</code> File with Resources</h3>
+<p>Here's an example of how you might specify resources in a <code>snk.yaml</code> file:</p>
+<pre><code class="language-yaml">resources:
+  - &quot;data/input1.txt&quot;
+  - &quot;data/input2.txt&quot;
+symlink_resources: true
+</code></pre>
+<p>In this example, <code>data/input1.txt</code> and <code>data/input2.txt</code> are listed as required resources for the workflow. The <code>symlink_resources</code> option is set to <code>true</code>, meaning that symlinks to these files will be created in the working directory when the workflow is run. The symlinks will be removed once the workflow execution has successfully completed.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Wytamma/write-the" target="_blank" rel="noopener" title="Generated with write-the" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M320 0c17.7 0 32 14.3 32 32v64h120c39.8 0 72 32.2 72 72v272c0 39.8-32.2 72-72 72H168c-39.8 0-72-32.2-72-72V168c0-39.8 32.2-72 72-72h120V32c0-17.7 14.3-32 32-32M208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16zM264 256a40 40 0 1 0-80 0 40 40 0 1 0 80 0m152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80M48 224h16v192H48c-26.5 0-48-21.5-48-48v-96c0-26.5 21.5-48 48-48m544 0c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48h-16V224z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["toc.follow", "content.action.edit"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
