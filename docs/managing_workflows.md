@@ -88,7 +88,7 @@ snk install --name my-workflow Wytamma/snk-basic-pipeline && my-workflow -h
 
 Use `--tag` to specify the tag (version) of the workflow to install. You can specify a branch name, or tag. If not specified, the latest commit will be installed.
 ```bash
-snk install --tag v1.0 Wytamma/snk-basic-pipeline && my-workflow -v
+snk install --tag v1.0 Wytamma/snk-basic-pipeline && snk-basic-pipeline -v
 ```
 
 Use `--commit` to specify the commit (SHA) of the workflow to install. If not specified, the latest commit will be installed.
